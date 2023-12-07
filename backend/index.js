@@ -2,96 +2,50 @@ const express = require("express");
 const app = express();
 const sqlite = require("sqlite3").verbose();
 const cors = require("cors");
-const db = new sqlite.Database(
-  "./db/guesser.db",
-  sqlite.OPEN_READWRITE,
-  (err) => {
-    if (err) return console.error(err);
-  }
-);
+const db = require("./models");
+const { Users } = require("./models");
+const bcrypt = require("bcrypt");
 
 app.use(express.json({ limit: "10mb" }));
 app.use(cors());
 
-//Initialize table
-const sqlInit = `CREATE TABLE IF NOT EXISTS users (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  username TEXT NOT NULL,
-  email TEXT NOT NULL,
-  password TEXT NOT NULL
-  )`;
-
-db.all(sqlInit, [], (err) => {
-  if (err) return console.error(err);
-});
-
-//Get all users
-app.get("/getUsers", (req, res, err) => {
-  db.all("SELECT * FROM users", function (err, rows) {
-    if (err) return console.error(err);
-    else {
-      res.json({
-        status: 200,
-        data: rows,
-      });
-    }
-  });
-});
-
-//Create new user
-app.post("/createUser", (req, res, err) => {
-  const { username, email, password } = req.body;
-  db.run(
-    "INSERT INTO users (username, email, password) VALUES (?,?,?)",
-    [username, email, password],
-    function (err) {
-      if (err) return console.error(err);
-      else {
-        res.json({
-          status: 201,
-          message: "New user created successfully",
-          data: { id: this.lastID, ...req.body },
-        });
-      }
-    }
-  );
+//register user
+app.post("/registerUser", async (req, res) => {
+  const { username, password } = req.body;
+  const hash = await bcrypt.hash(password, 10);
+  try {
+    const newUser = await Users.create({ username, password: hash });
+    res.send({ newUser });
+  } catch (e) {
+    res.status(400).json({ message: e.errors.map((item) => item.message) });
+  }
 });
 
 //login user
-app.post("/loginUser", (req, res, err) => {
+app.post("/loginUser", (req, res) => {
   const { username, password } = req.body;
-  db.get(
-    "SELECT * FROM users WHERE username =? AND password =?",
-    [username, password],
-    function (err, row) {
-      if (err) return console.error(err);
-      else {
-        console.log(row);
-        res.json({
-          status: 200,
-          message: "User logged in successfully",
-          data: row,
-        });
-      }
-    }
-  );
 });
 
-//Delete existing user
-app.delete("/deleteUser/", (req, res, err) => {
+//get user data
+app.get("/getUser", (req, res) => {
   const { id } = req.query;
-  db.run("DELETE FROM users WHERE id =?", [id], function (err) {
-    if (err) return console.error(err);
-    else {
-      this.changes === 1
-        ? res.json({
-            status: 201,
-            message: "User deleted successfully",
-          })
-        : res.json({ status: 403, message: "No user with this ID" });
-    }
-  });
+});
+
+//Get all users
+app.get("/getUsers", (req, res) => {});
+
+//Delete existing user
+app.delete("/deleteUser/", (req, res) => {
+  const { id } = req.query;
 });
 
 const PORT = 3001;
-app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
+
+(async () => {
+  try {
+    await db.sequelize.sync();
+    app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
+  } catch (error) {
+    console.error("Error starting server:", error);
+  }
+})();
