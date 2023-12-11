@@ -1,43 +1,15 @@
 const express = require("express");
 const app = express();
-const sqlite = require("sqlite3").verbose();
 const cors = require("cors");
 const db = require("./models");
-const { Users } = require("./models");
-const bcrypt = require("bcrypt");
+const user = require("./routes/login");
+require("dotenv").config();
+const cookieParser = require("cookie-parser");
 
+app.use("/user", user);
 app.use(express.json({ limit: "10mb" }));
 app.use(cors());
-
-//register user
-app.post("/registerUser", async (req, res) => {
-  const { username, password } = req.body;
-  const hash = await bcrypt.hash(password, 10);
-  try {
-    const newUser = await Users.create({ username, password: hash });
-    res.send({ newUser });
-  } catch (e) {
-    res.status(400).json({ message: e.errors.map((item) => item.message) });
-  }
-});
-
-//login user
-app.post("/loginUser", (req, res) => {
-  const { username, password } = req.body;
-});
-
-//get user data
-app.get("/getUser", (req, res) => {
-  const { id } = req.query;
-});
-
-//Get all users
-app.get("/getUsers", (req, res) => {});
-
-//Delete existing user
-app.delete("/deleteUser/", (req, res) => {
-  const { id } = req.query;
-});
+app.use(cookieParser());
 
 const PORT = 3001;
 

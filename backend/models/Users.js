@@ -1,5 +1,4 @@
-const initUsers = (sequelize, DataTypes) => {
-  console.log("Init");
+module.exports = (sequelize, DataTypes) => {
   const Users = sequelize.define("Users", {
     username: {
       type: DataTypes.STRING,
@@ -11,6 +10,8 @@ const initUsers = (sequelize, DataTypes) => {
       allowNull: false,
     },
   });
+  Users.associate = (models) => {
+    Users.hasMany(models.Guess);
+  };
   return Users;
 };
-module.exports = initUsers;
