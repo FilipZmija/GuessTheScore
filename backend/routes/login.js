@@ -13,12 +13,14 @@ router.use((req, res, next) => {
 //register user
 router.post("/register", async (req, res) => {
   const { username, password } = req.body;
+  console.log(req.body);
   const hash = await bcrypt.hash(password, 10);
 
   try {
     const newUser = await Users.create({ username, password: hash });
     res.json({ newUser });
   } catch (e) {
+    console.log(e);
     res.status(400).json(e);
   }
 });
