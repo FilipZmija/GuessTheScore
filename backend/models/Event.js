@@ -1,24 +1,36 @@
 module.exports = (sequelize, DataTypes) => {
   const Event = sequelize.define("Event", {
-    uri: {
+    competition: {
       type: DataTypes.STRING,
+      allowNull: false,
+    },
+    apiId: {
+      type: DataTypes.INTEGER,
       allowNull: false,
       unique: true,
     },
-    teams: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    league: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    country: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    date: {
+    utcDate: {
       type: DataTypes.DATE,
+      allowNull: false,
+    },
+    status: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    homeTeam: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    homeTeamCrest: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    awayTeam: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    awayTeamCrest: {
+      type: DataTypes.STRING,
       allowNull: false,
     },
     score: {
