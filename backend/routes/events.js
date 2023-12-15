@@ -1,10 +1,33 @@
 const express = require("express");
 const router = express.Router();
 const { Event, Guess } = require("../models");
-
+const { validateToken } = require("../JWT");
 router.use(express.json({ limit: "10mb" }));
 router.use((req, res, next) => {
   next();
+});
+
+router.get("/all", async (req, res) => {
+  const filterBy = req.query.filterBy?.split(",");
+  const filter = {
+    past: "FINISHED",
+    current: "IN_PLAY",
+    upcoming: "TIMED",
+  };
+
+  try {
+    const event = filterBy
+      ? await Promise.all(
+          filterBy.map(
+            async (item) =>
+              await Event.findAll({ where: { status: filter[item] } })
+          )
+        )
+      : await Event.findAll();
+    res.status(200).json(event);
+  } catch (e) {
+    res.status(400).json(e);
+  }
 });
 
 router.get("/info/:EventId", async (req, res) => {
@@ -17,7 +40,7 @@ router.get("/info/:EventId", async (req, res) => {
   }
 });
 
-router.get("/guesses/:EventId", async (req, res) => {
+router.get("/guesses/:EventId", validateToken, async (req, res) => {
   const { EventId } = req.params;
   try {
     const event = await Event.findOne({ where: { id: EventId } });
@@ -28,7 +51,7 @@ router.get("/guesses/:EventId", async (req, res) => {
   }
 });
 
-router.post("/create", async (req, res) => {
+router.post("/create", validateToken, async (req, res) => {
   const { uri, teams, league, country, date, score } = req.body;
   try {
     const event = await Event.create({

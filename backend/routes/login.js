@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-
 const { Users } = require("../models");
 const bcrypt = require("bcrypt");
 const { createTokens, validateToken } = require("../JWT");
@@ -41,17 +40,18 @@ router.post("/login", async (req, res) => {
 });
 
 //Delete existing user
-router.delete("/delete", async (req, res) => {
-  const { id } = req.query;
+router.delete("/delete", validateToken, async (req, res) => {
+  const { id } = req.user;
   try {
     const users = await Users.findOne({ where: { id: id } });
     if (!users) return res.status(404).send({ message: "User not found" });
 
     await Users.destroy({ where: { id: id } });
 
-    res.status(200).send({ message: `User deleted succesfully` });
+    res.status(200).json({ message: `User deleted succesfully` });
   } catch (e) {
-    res.status(500).send({ message: e.errors.map((item) => item.message) });
+    console.log(e);
+    res.status(400).json(e);
   }
 });
 
