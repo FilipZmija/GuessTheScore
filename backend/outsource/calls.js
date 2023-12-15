@@ -1,5 +1,5 @@
 const axios = require("axios");
-const { Event } = require("../models");
+const { Event, PastEvent } = require("../models");
 const { getDate } = require("../date");
 
 const createOrUpdateEvent = async (match) => {
