@@ -8,33 +8,44 @@ router.use((req, res, next) => {
   next();
 });
 
-router.get("/info/:GuessId", validateToken, async (req, res) => {
-  const { GuessId } = req.params;
-  try {
-    const guess = await Guess.findOne({ where: { id: GuessId } });
+router.get("/info/", validateToken, async (req, res) => {
+  const { GuessId, EventId } = req.query;
+  if (GuessId) {
+    try {
+      const guess = await Guess.findOne({ where: { id: GuessId } });
 
-    if (guess) {
-      const user = await Users.findOne({ where: { id: guess.UserId } });
-      const event = await Event.findOne({ where: { id: guess.EventId } });
-      res.status(200).json({ guess: { ...guess.dataValues, event, user } });
-    } else {
-      res.status(404).json(guess);
+      if (guess) {
+        const user = await Users.findOne({ where: { id: guess.UserId } });
+        const event = await Event.findOne({ where: { id: guess.EventId } });
+        res.status(200).json({ guess: { ...guess.dataValues, event, user } });
+      } else {
+        res.status(404).json(guess);
+      }
+    } catch (e) {
+      console.log(e);
+      res.status(400).json(e);
     }
-  } catch (e) {
-    console.log(e);
-    res.status(400).json(e);
+  } else if (EventId) {
+    try {
+      const guesses = await Guess.findAll({ where: { EventId: EventId } });
+      res.status(200).json({ guesses });
+    } catch (e) {
+      res.status(400).json(e);
+    }
   }
 });
 
+//add and create could possibly be one guess
 router.post("/add", validateToken, async (req, res) => {
   const { score, EventId } = req.body;
-  const { UserId } = req.user;
+  const { id } = req.user;
   const event = await Event.findOne({ where: { id: EventId } });
   if (event.status !== "FINISHED") {
     try {
-      const guess = await Guess.create({ score, UserId, EventId });
+      const guess = await Guess.create({ score, UserId: id, EventId });
       res.status(200).json({ guess });
     } catch (e) {
+      console.log(e);
       res.status(400).json(e);
     }
   } else res.status(400).json({ message: "Event is finished" });

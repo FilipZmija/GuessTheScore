@@ -17,8 +17,16 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
   Guess.associate = (models) => {
-    Guess.belongsTo(models.Users);
-    Guess.belongsTo(models.Event);
+    Guess.belongsTo(models.Users, {
+      foreignKey: {
+        allowNull: false,
+      },
+    });
+    Guess.belongsTo(models.Event, {
+      foreignKey: {
+        allowNull: false,
+      },
+    });
   };
   return Guess;
 };
