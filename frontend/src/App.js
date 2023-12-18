@@ -1,11 +1,11 @@
-import "./App.css";
-import { Counter } from "./Login";
-function App() {
-  return (
-    <div className="App">
-      <Counter />
-    </div>
-  );
-}
+import React from "react";
+import { useSelector } from "react-redux";
+import Auth from "./Auth/Auth";
+
+const App = () => {
+  const token = useSelector((state) => state.auth.token);
+  console.log(token);
+  return <>{localStorage.getItem("token") ? "you are logged in" : <Auth />}</>;
+};
 
 export default App;
