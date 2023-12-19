@@ -72,7 +72,7 @@ const Login = () => {
           color: "#4F6F52",
         }}
       >
-        <Typography variant="h5" gutterBottom>
+        <Typography variant="h4" gutterBottom>
           Login
         </Typography>
         <Typography variant="h7">{message}</Typography>
@@ -97,7 +97,12 @@ const Login = () => {
               Login
             </Button>
           </form>
-          <Button type="submit" variant="text" sx={secndaryButtonStyle}>
+          <Button
+            type="submit"
+            variant="text"
+            sx={secndaryButtonStyle}
+            href="auth/register"
+          >
             Register
           </Button>
         </Box>
