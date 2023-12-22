@@ -35,23 +35,28 @@ const getEvents = async () => {
     const matches = response.data.matches.map((match) => {
       const { competition, id, utcDate, status, homeTeam, awayTeam, score } =
         match;
+      const date = utcDate.split("T")[0];
+      const utcTime = utcDate.split("T")[1].split("Z")[0] + "";
       return {
         competition: competition.name,
         apiId: id,
         utcDate,
+        date,
+        utcTime,
         status,
         homeTeam: homeTeam.shortName || homeTeam.name,
         homeTeamCrest: homeTeam.crest,
         awayTeam: awayTeam.shortName || awayTeam,
         awayTeamCrest: awayTeam.crest,
-        score: score.fullTime.home + ";" + score.fullTime.away,
+        score:
+          score.fullTime.home === null
+            ? "-:-"
+            : score.fullTime.home + ":" + score.fullTime.away,
       };
     });
     const events = await Promise.all(
       matches.map(async (match) => await createOrUpdateEvent(match))
     );
-    console.log(new Date().getDate());
-    console.log(events);
   } catch (err) {
     console.log(err);
   }
