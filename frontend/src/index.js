@@ -6,14 +6,21 @@ import store from "./redux/store";
 import { Provider } from "react-redux";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./theme";
-
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import Register from "./Auth/Register";
 const root = ReactDOM.createRoot(document.getElementById("root"));
-
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+  },
+  { path: "auth/register", element: <Register /> },
+]);
 root.render(
   <React.StrictMode>
     <Provider store={store}>
       <ThemeProvider theme={theme}>
-        <App />
+        <RouterProvider router={router} />
       </ThemeProvider>
     </Provider>
   </React.StrictMode>

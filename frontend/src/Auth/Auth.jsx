@@ -5,6 +5,7 @@ import axios from "axios";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { login } from "../redux/authSlice";
+
 export default function Auth() {
   const dispatch = useDispatch();
 
