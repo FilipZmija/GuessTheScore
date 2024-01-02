@@ -11,7 +11,6 @@ import { Box } from "@mui/system";
 
 const gameContainerStyle = {
   marginBottom: "20px",
-  margin: "auto",
   display: "flex",
   flexDirection: "column",
   justifyContent: "center",
@@ -22,6 +21,7 @@ const cardStyle = {
   display: "flex",
   alignItems: "center",
   textAlign: "center",
+  backgroundColor: "#faf8f5",
 };
 
 const teamLogoStyle = {
@@ -47,12 +47,6 @@ const GameCard = ({ game }) => {
     score,
   } = game;
 
-  // const gameDate =
-  //   new Date(utcDate).getDate() +
-  //   "-" +
-  //   new Date(utcDate).getMonth() +
-  //   "-" +
-  //   new Date(utcDate).getFullYear();
   return (
     <Card sx={{ ...cardStyle, flexDirection: "column" }}>
       <CardContent sx={{ padding: "8px !important" }}>
@@ -97,7 +91,12 @@ const GamesList = ({ games }) => {
       {games.map((game) => (
         <Box
           key={game.id}
-          sx={{ padding: "5px", marginTop: "5px", maxWidth: "400px" }}
+          sx={{
+            padding: "5px",
+            marginTop: "5px",
+            minWidth: "315px",
+            maxWidth: "400px",
+          }}
         >
           <GameCard game={game} />
         </Box>

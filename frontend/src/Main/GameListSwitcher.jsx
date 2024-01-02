@@ -2,26 +2,45 @@ import React from "react";
 import { useEffect, useState } from "react";
 import GameList from "./GameList";
 import axios from "axios";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { Box, Button, Grid } from "@mui/material";
 import { getDate } from "../functions/date";
+import {
+  incrementIndex,
+  decrementIndex,
+  updateGames,
+} from "../redux/eventsSlice";
 
 const filters = [];
 
 export default function GameListSwitcher() {
-  const [games, setGames] = useState();
-  const [dateIndex, setDateIndex] = useState(0);
-  const [date, setDate] = useState(getDate(0));
+  const [date, setDate] = useState();
+  const dispatch = useDispatch();
+  const dateIndex = useSelector((state) => state.events.dateIndex);
   const token = useSelector((state) => state.auth.token);
+  const games = useSelector((state) => state.events.gameList);
   const increment = () => {
-    setDateIndex((prev) => ++prev);
-    console.log(date);
+    dispatch(incrementIndex());
   };
   const decrement = () => {
-    setDateIndex((prev) => --prev);
+    dispatch(decrementIndex());
   };
 
   useEffect(() => setDate(getDate(dateIndex)), [dateIndex]);
+  console.log(games);
+  const buttonsContainer = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: "80px",
+    backgroundColor: "#faf8f5",
+    width: "60%",
+    marginLeft: "auto",
+    marginRight: "auto",
+    borderRadius: "5px",
+  };
+
+  const switchContainer = {};
 
   useEffect(() => {
     try {
@@ -48,9 +67,11 @@ export default function GameListSwitcher() {
                 return { [filter]: gamesList[index] };
               })
             : gamesList;
-        setGames(filters.length > 0 ? gamesList.data[0] : gamesList.data);
+        dispatch(
+          updateGames(filters.length > 0 ? gamesList.data[0] : gamesList.data)
+        );
       };
-      getGames(filters, date);
+      date && getGames(filters, date);
     } catch (e) {
       console.error(e);
     }
@@ -58,19 +79,18 @@ export default function GameListSwitcher() {
 
   return (
     <>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "100%",
-        }}
-      >
-        <Button onClick={decrement}>Prev</Button>
-        {date}
-        <Button onClick={increment}>Next</Button>
+      <Box sx={switchContainer}>
+        <Box
+          sx={{
+            ...buttonsContainer,
+          }}
+        >
+          <Button onClick={decrement}>Prev</Button>
+          {date}
+          <Button onClick={increment}>Next</Button>
+        </Box>
+        {games && <GameList games={games} />}
       </Box>
-      {games && <GameList games={games} />}
     </>
   );
 }

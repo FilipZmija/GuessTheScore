@@ -1,113 +1,150 @@
-import * as React from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
+
+import MenuIcon from "@mui/icons-material/Menu";
 import Typography from "@mui/material/Typography";
+import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
+import * as React from "react";
+import Toolbar from "@mui/material/Toolbar";
 import Menu from "@mui/material/Menu";
-import Container from "@mui/material/Container";
+
 import Avatar from "@mui/material/Avatar";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
-import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
 import { logout } from "./redux/authSlice";
 import { useDispatch, useSelector } from "react-redux";
-
+import { openDrawer } from "./redux/eventsSlice";
 const handleLogout = (dispatchFnc) => {
   localStorage.removeItem("token");
   dispatchFnc(logout());
 };
-
 const menuFnc = [handleLogout];
 const settings = ["Logout"];
 
 function ResponsiveAppBar() {
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const token = useSelector((state) => state.auth.token);
-  const dispatch = useDispatch();
 
+  const dispatch = useDispatch();
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
+  };
+  const handleDrawerToggle = () => {
+    console.log("here");
+    dispatch(openDrawer());
+  };
+  const handleClick = (index) => {
+    menuFnc[index](dispatch);
+    console.log(token);
+    handleCloseUserMenu();
   };
 
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
 
-  const handleClick = (index) => {
-    menuFnc[index](dispatch);
-    console.log(token);
-    handleCloseUserMenu();
-  };
   return (
-    <AppBar position="static">
-      <Container maxWidth="xl">
-        <Toolbar disableGutters>
-          <Box
+    <AppBar
+      position="fixed"
+      sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+    >
+      <Toolbar>
+        <IconButton
+          color="inherit"
+          aria-label="open drawer"
+          edge="start"
+          onClick={handleDrawerToggle}
+          sx={{ mr: 2, display: { md: "none" } }}
+        >
+          <MenuIcon />
+        </IconButton>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            flexGrow: 1,
+          }}
+        ></Box>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            flexGrow: 1,
+          }}
+        >
+          <SportsSoccerIcon
+            sx={{ display: { sm: "flex", xs: "none" }, ml: "2%" }}
+          />
+          <SportsSoccerIcon sx={{ display: { sm: "none", xs: "flex" } }} />
+          <Typography
+            variant="h5"
+            noWrap
+            component="a"
+            href="/"
             sx={{
-              display: "flex",
-              alignItems: "center",
+              ml: 2,
+              display: { md: "flex", sm: "none", xs: "none" },
               flexGrow: 1,
-            }}
-          ></Box>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              flexGrow: 1,
+              fontFamily: "monospace",
+              fontWeight: 700,
+              letterSpacing: ".3rem",
+              color: "inherit",
+              textDecoration: "none",
             }}
           >
-            <SportsSoccerIcon sx={{ display: "flex", mr: 1 }} />
-            <Typography
-              variant="h5"
-              noWrap
-              component="a"
-              href="/"
-              sx={{
-                ml: 2,
-                display: "flex",
-                flexGrow: 1,
-                fontFamily: "monospace",
-                fontWeight: 700,
-                letterSpacing: ".3rem",
-                color: "inherit",
-                textDecoration: "none",
-              }}
-            >
-              GUESS THE SCORE
-            </Typography>
-          </Box>
-          <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
-              </IconButton>
-            </Tooltip>
-            <Menu
-              sx={{ mt: "45px" }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-            >
-              {settings.map((setting, index) => (
-                <MenuItem key={setting} onClick={() => handleClick(index)}>
-                  <Typography textAlign="center">{setting}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
-        </Toolbar>
-      </Container>
+            GUESS THE SCORE
+          </Typography>
+          <Typography
+            variant="h5"
+            noWrap
+            component="a"
+            href="/"
+            sx={{
+              ml: 2,
+              mr: 2,
+              display: { md: "none", sm: "flex" },
+              flexGrow: 1,
+              fontFamily: "monospace",
+              fontWeight: 700,
+              letterSpacing: ".3rem",
+              color: "inherit",
+              textDecoration: "none",
+            }}
+          >
+            GTS
+          </Typography>
+        </Box>
+        <Box sx={{ flexGrow: 0 }}>
+          <Tooltip title="Open settings">
+            <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+              <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+            </IconButton>
+          </Tooltip>
+          <Menu
+            sx={{ mt: "45px" }}
+            id="menu-appbar"
+            anchorEl={anchorElUser}
+            anchorOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+            keepMounted
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+            open={Boolean(anchorElUser)}
+            onClose={handleCloseUserMenu}
+          >
+            {settings.map((setting, index) => (
+              <MenuItem key={setting} onClick={() => handleClick(index)}>
+                <Typography textAlign="center">{setting}</Typography>
+              </MenuItem>
+            ))}
+          </Menu>
+        </Box>
+      </Toolbar>
     </AppBar>
   );
 }
