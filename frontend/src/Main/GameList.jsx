@@ -11,7 +11,6 @@ import { Box } from "@mui/system";
 
 const gameContainerStyle = {
   marginBottom: "20px",
-  margin: "auto",
   display: "flex",
   flexDirection: "column",
   justifyContent: "center",
@@ -22,6 +21,8 @@ const cardStyle = {
   display: "flex",
   alignItems: "center",
   textAlign: "center",
+  backgroundColor: "#faf8f5",
+  flexDirection: "column",
 };
 
 const teamLogoStyle = {
@@ -34,6 +35,16 @@ const teamName = {
   flexDirection: "column",
   alignItems: "center",
 };
+const pulsateKeyframes = {
+  "0%": { boxShadow: "0 0 2px rgba(78, 159, 76, 1)" },
+  "50%": { boxShadow: "0 0 15px rgba(78, 159, 76, 1)" },
+  "100%": { boxShadow: "0 0 2px rgba(78, 159, 76, 1)" },
+};
+
+const pulsateStyle = {
+  animation: "pulsate 2s infinite",
+  "@keyframes pulsate": pulsateKeyframes,
+};
 
 const GameCard = ({ game }) => {
   const {
@@ -45,16 +56,20 @@ const GameCard = ({ game }) => {
     awayTeam,
     awayTeamCrest,
     score,
+    status,
   } = game;
 
-  // const gameDate =
-  //   new Date(utcDate).getDate() +
-  //   "-" +
-  //   new Date(utcDate).getMonth() +
-  //   "-" +
-  //   new Date(utcDate).getFullYear();
   return (
-    <Card sx={{ ...cardStyle, flexDirection: "column" }}>
+    <Card
+      sx={
+        status !== "IN_PLAY"
+          ? cardStyle
+          : {
+              ...cardStyle,
+              ...pulsateStyle,
+            }
+      }
+    >
       <CardContent sx={{ padding: "8px !important" }}>
         <Typography variant="h5">{competition}</Typography>
         <Typography variant="h7">{utcTime}</Typography>
@@ -97,7 +112,12 @@ const GamesList = ({ games }) => {
       {games.map((game) => (
         <Box
           key={game.id}
-          sx={{ padding: "5px", marginTop: "5px", maxWidth: "400px" }}
+          sx={{
+            padding: "5px",
+            marginTop: "5px",
+            minWidth: "315px",
+            maxWidth: "400px",
+          }}
         >
           <GameCard game={game} />
         </Box>
