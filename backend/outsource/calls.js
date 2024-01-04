@@ -1,14 +1,19 @@
 const axios = require("axios");
-const { Event, PastEvent } = require("../models");
+const { Event } = require("../models");
 const { getDate } = require("../date");
 
 const createOrUpdateEvent = async (match) => {
   try {
     const event = await Event.findOne({ where: { apiId: match.apiId } });
     if (event) {
-      return await Event.update(match, {
-        where: { apiId: match.apiId },
-      });
+      const { utcDate, date, utcTime, status, score } = match;
+      return await Event.update(
+        { utcDate, date, utcTime, status, score },
+        {
+          where: { apiId: match.apiId },
+          individualHooks: true,
+        }
+      );
     } else {
       return await Event.create(match);
     }
@@ -21,6 +26,7 @@ const getEvents = async () => {
   const compId = "2021,2001,2000,2002,2003,2014,2015,2018,2019";
   const dateFrom = getDate(0);
   const dateTo = getDate(2);
+
   try {
     const response = await axios.get(
       `${process.env.API_URI}/v4/matches/?competitions=${compId}&dateFrom=${dateFrom}&dateTo=${dateTo}`,
