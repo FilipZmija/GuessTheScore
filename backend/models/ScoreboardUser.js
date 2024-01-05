@@ -3,7 +3,7 @@ module.exports = (sequelize) => {
     indexes: [
       {
         unique: true,
-        fields: ["UserId", "ScoreboardId"],
+        fields: ["UsersId", "ScoreboardId"],
       },
     ],
   });

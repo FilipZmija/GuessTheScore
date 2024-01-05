@@ -9,10 +9,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    points: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
   });
   Users.associate = (models) => {
     Users.hasMany(models.Guess, {

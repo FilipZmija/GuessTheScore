@@ -40,6 +40,7 @@ router.post("/add", validateToken, async (req, res) => {
   const { score, EventId } = req.body;
   const { id } = req.user;
   const event = await Event.findOne({ where: { id: EventId } });
+  console.log(event);
   if (event.status !== "FINISHED") {
     try {
       const guess = await Guess.create({ score, UserId: id, EventId });

@@ -21,7 +21,6 @@ const createOrUpdateEvent = async (match) => {
     return err;
   }
 };
-
 const getEvents = async () => {
   const compId = "2021,2001,2000,2002,2003,2014,2015,2018,2019";
   const dateFrom = getDate(0);
@@ -67,4 +66,4 @@ const getEvents = async () => {
     console.log(err);
   }
 };
-module.exports = { getEvents };
+module.exports = { getEvents, createOrUpdateEvent };

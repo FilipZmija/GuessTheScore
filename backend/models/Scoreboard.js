@@ -5,9 +5,14 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       unique: false,
     },
+    maxPoints: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
   });
   Scoreboard.associate = (models) => {
     Scoreboard.belongsToMany(models.Users, { through: models.ScoreboardUser });
+    Scoreboard.belongsToMany(models.Guess, { through: models.GuessScoreboard });
   };
   return Scoreboard;
 };
