@@ -79,12 +79,13 @@ module.exports = (sequelize, DataTypes) => {
           points++;
         if (
           (guessedScore[0] - guessedScore[1]) *
-            (actualScore[0] - actualScore[1]) >=
-          0
+            (actualScore[0] - actualScore[1]) >
+            0 ||
+          (guessedScore[0] - guessedScore[1] === 0 &&
+            actualScore[0] - actualScore[1] === 0)
         ) {
           points += 2;
         }
-        console.log(points + "---------------------------------------");
         guess.points = points;
         const user = await sequelize.models.Users.findOne({
           where: { id: guess.UserId },

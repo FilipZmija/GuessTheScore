@@ -46,6 +46,8 @@ router.get("/:scoreboardId", validateToken, async (req, res) => {
     });
     res.status(200).json({ scoreboard });
   } catch (e) {
+    console.log(e);
+
     res.status(404).json(e);
   }
 });

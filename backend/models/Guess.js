@@ -31,7 +31,6 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
     });
-    Guess.belongsToMany(models.Scoreboard, { through: models.GuessScoreboard });
   };
   return Guess;
 };
