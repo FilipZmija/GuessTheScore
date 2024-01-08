@@ -8,13 +8,24 @@ import {
   Grid,
 } from "@mui/material";
 import { Box } from "@mui/system";
-
+import { useState } from "react";
 const gameContainerStyle = {
   marginBottom: "20px",
   display: "flex",
   flexDirection: "column",
   justifyContent: "center",
   alignItems: "center",
+};
+const press = {
+  "0%": {
+    transform: "scale(1.05)",
+  },
+  "50%": {
+    transform: "scale(0.92)",
+  },
+  to: {
+    transform: "scale(1)",
+  },
 };
 
 const cardStyle = {
@@ -23,6 +34,14 @@ const cardStyle = {
   textAlign: "center",
   backgroundColor: "#faf8f5",
   flexDirection: "column",
+  transition: "transform 0.1s ease-in-out",
+  "&:hover": {
+    transform: "scale(1.05)", // Increase the size by 5% on hover
+  },
+  "&:active": {
+    animation: "press 0.2s 1 linear",
+    "@keyframes press": press,
+  },
 };
 
 const teamLogoStyle = {
@@ -46,10 +65,13 @@ const pulsateStyle = {
   "@keyframes pulsate": pulsateKeyframes,
 };
 
+const clickedCardStyle = {
+  boxShadow: "0px 0px 20px -2px rgba(66, 68, 90, 1) !important",
+};
+
 const GameCard = ({ game }) => {
   const {
     competition,
-    date,
     utcTime,
     homeTeam,
     homeTeamCrest,
@@ -58,17 +80,24 @@ const GameCard = ({ game }) => {
     score,
     status,
   } = game;
+  const [isClicked, setIsClicked] = useState(false);
 
+  const handleClick = ({ onClick }) => {
+    setIsClicked(!isClicked);
+    if (onClick) {
+      onClick(game); // Pass the game data to the parent component if needed
+    }
+  };
   return (
     <Card
-      sx={
-        status !== "IN_PLAY"
-          ? cardStyle
-          : {
-              ...cardStyle,
-              ...pulsateStyle,
-            }
-      }
+      isClicked={isClicked}
+      onClick={handleClick}
+      sx={{
+        ...cardStyle,
+        ...(status === "IN_PLAY" || status === "PAUSED" ? pulsateStyle : {}),
+        ...(isClicked ? clickedCardStyle : {}),
+      }}
+      className={isClicked ? "clicked-card" : ""}
     >
       <CardContent sx={{ padding: "8px !important" }}>
         <Typography variant="h5">{competition}</Typography>

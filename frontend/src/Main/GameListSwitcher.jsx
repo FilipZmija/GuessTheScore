@@ -10,6 +10,7 @@ import {
   decrementIndex,
   updateGames,
 } from "../redux/eventsSlice";
+import Toolbar from "@mui/material/Toolbar";
 
 const filters = [];
 
@@ -32,7 +33,7 @@ export default function GameListSwitcher() {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: "80px",
+    marginTop: "10px",
     backgroundColor: "#faf8f5",
     width: "60%",
     marginLeft: "auto",
@@ -40,7 +41,7 @@ export default function GameListSwitcher() {
     borderRadius: "5px",
   };
 
-  const switchContainer = {};
+  const switchContainer = { overflow: "auto" };
 
   useEffect(() => {
     try {
@@ -79,6 +80,7 @@ export default function GameListSwitcher() {
 
   return (
     <>
+      <Toolbar />
       <Box sx={switchContainer}>
         <Box
           sx={{
