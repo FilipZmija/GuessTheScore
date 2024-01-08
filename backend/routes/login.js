@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 const { Users } = require("../models");
 const bcrypt = require("bcrypt");
-const { createTokens, validateToken } = require("../JWT");
+const { createTokens, validateToken } = require("../auth/JWT");
+const { asignUserToMainScoreboard } = require("../logic/points");
 
 router.use(express.json({ limit: "10mb" }));
 router.use((req, res, next) => {
@@ -17,6 +18,7 @@ router.post("/register", async (req, res) => {
 
   try {
     const newUser = await Users.create({ username, password: hash });
+    asignUserToMainScoreboard(newUser.id);
     res.json({ newUser });
   } catch (e) {
     console.log(e);

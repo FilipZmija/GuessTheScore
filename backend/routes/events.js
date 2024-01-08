@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { Event, Guess } = require("../models");
-const { validateToken } = require("../JWT");
+const { validateToken } = require("../auth/JWT");
 router.use(express.json({ limit: "10mb" }));
 router.use((req, res, next) => {
   next();
@@ -9,6 +9,8 @@ router.use((req, res, next) => {
 
 router.get("/all", async (req, res) => {
   const filterBy = req.query.filterBy?.split(",");
+  const { date } = req.query;
+  console.log(req.query.date);
   const filter = {
     past: "FINISHED",
     current: "IN_PLAY",
@@ -16,15 +18,29 @@ router.get("/all", async (req, res) => {
   };
 
   try {
-    const event = filterBy
-      ? await Promise.all(
-          filterBy.map(
-            async (item) =>
-              await Event.findAll({ where: { status: filter[item] } })
+    let event;
+    if (date) {
+      event = filterBy
+        ? await Promise.all(
+            filterBy.map(
+              async (item) =>
+                await Event.findAll({
+                  where: { status: filter[item], date: date },
+                })
+            )
           )
-        )
-      : await Event.findAll();
-    res.status(200).json(event);
+        : await Event.findAll({ where: { date: date } });
+    } else {
+      event = filterBy
+        ? await Promise.all(
+            filterBy.map(
+              async (item) =>
+                await Event.findAll({ where: { status: filter[item] } })
+            )
+          )
+        : await Event.findAll();
+    }
+    res.status(200).json(event.sort((a, b) => a.utcDate - b.utcDate));
   } catch (e) {
     res.status(400).json(e);
   }
