@@ -3,6 +3,8 @@ const initialState = {
   mobileOpen: false,
   gameList: undefined,
   dateIndex: 0,
+  selection: 0,
+  selectedGameInfo: undefined,
 };
 
 export const eventsSlice = createSlice({
@@ -23,9 +25,17 @@ export const eventsSlice = createSlice({
     decrementIndex: (state) => {
       state.dateIndex--;
     },
+    selectEvent: (state, action) => {
+      state.selection = action.payload;
+    },
   },
 });
 
-export const { openDrawer, updateGames, incrementIndex, decrementIndex } =
-  eventsSlice.actions;
+export const {
+  openDrawer,
+  updateGames,
+  incrementIndex,
+  decrementIndex,
+  selectEvent,
+} = eventsSlice.actions;
 export default eventsSlice.reducer;
