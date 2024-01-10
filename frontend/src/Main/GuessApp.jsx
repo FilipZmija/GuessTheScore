@@ -4,10 +4,11 @@ import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import { useSelector } from "react-redux";
 import { openDrawer } from "../redux/eventsSlice";
-import Scoretable from "../scoretable/Scoretable";
 import NavBar from "../NavBar";
 import CssBaseline from "@mui/material/CssBaseline";
 import Toolbar from "@mui/material/Toolbar";
+import GameGuess from "./GameGuess";
+import Scoretables from "../scoretable/Scoretables";
 const drawerWidth = 400;
 
 function ResponsiveDrawer(props) {
@@ -67,25 +68,17 @@ function ResponsiveDrawer(props) {
             flexGrow: 1,
             p: 3,
             marginLeft: "auto",
+            marginRight: { lg: "4vw", xl: "6vw" },
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             flexWrap: "wrap",
-            marginRight: { lg: "4vw", xl: "6vw" },
           }}
         >
           <Toolbar />
-          <Box
-            sx={{
-              padding: "20px",
-              backgroundColor: "#EEE7DA",
-              width: "100%",
-              borderRadius: "10px",
-              border: "1px solid rgba(0, 0, 0, 0.12)",
-            }}
-          >
-            <Scoretable />
-          </Box>
+          <GameGuess />
+          <Scoretables />
+          {/* </Box> */}
         </Box>
       </Box>
     </>
