@@ -13,7 +13,7 @@ export default function Scoretable({ data }) {
           variant="h5"
           gutterBottom
           sx={{
-            paddingTop: "10px",
+            paddingTop: "0.5rem",
             textAlign: "center",
           }}
         >
@@ -21,7 +21,9 @@ export default function Scoretable({ data }) {
         </Typography>
         <Table
           aria-label="simple table"
-          sx={{ borderTop: "1px solid rgba(0, 0, 0, 0.12);" }}
+          sx={{
+            borderTop: "1px solid rgba(0, 0, 0, 0.12);",
+          }}
         >
           <TableHead>
             <TableRow>

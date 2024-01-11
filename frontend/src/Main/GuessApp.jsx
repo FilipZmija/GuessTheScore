@@ -9,6 +9,9 @@ import CssBaseline from "@mui/material/CssBaseline";
 import Toolbar from "@mui/material/Toolbar";
 import GameGuess from "./GameGuess";
 import Scoretables from "../scoretable/Scoretables";
+import LeagueScoretable from "../league_scoreboard/LeagueScoretable";
+import { Grid } from "@mui/material";
+
 const drawerWidth = 400;
 
 function ResponsiveDrawer(props) {
@@ -76,9 +79,21 @@ function ResponsiveDrawer(props) {
           }}
         >
           <Toolbar />
-          <GameGuess />
-          <Scoretables />
-          {/* </Box> */}
+          <Grid container>
+            <Grid item md={6}>
+              <Box sx={{ display: "flex", justifyContent: "center" }}>
+                <GameGuess />
+              </Box>
+              <Box sx={{ display: "flex", justifyContent: "center" }}>
+                <Scoretables />
+              </Box>
+            </Grid>
+            <Grid item md={6}>
+              <Box sx={{ display: "flex", justifyContent: "center" }}>
+                <LeagueScoretable />
+              </Box>
+            </Grid>
+          </Grid>
         </Box>
       </Box>
     </>

@@ -38,7 +38,7 @@ const cardStyle = {
 };
 
 const teamLogoStyle = {
-  height: "40px",
+  height: "2.5rem",
   objectFit: "contain",
 };
 const teamName = {
@@ -48,9 +48,9 @@ const teamName = {
   alignItems: "center",
 };
 const pulsateKeyframes = {
-  "0%": { boxShadow: "0 0 2px rgba(78, 159, 76, 1)" },
-  "50%": { boxShadow: "0 0 15px rgba(78, 159, 76, 1)" },
-  "100%": { boxShadow: "0 0 2px rgba(78, 159, 76, 1)" },
+  "0%": { boxShadow: "0 0 0.3rem rgba(78, 159, 76, 1)" },
+  "50%": { boxShadow: "0 0 1.5rem rgba(78, 159, 76, 1)" },
+  "100%": { boxShadow: "0 0 0.3rem rgba(78, 159, 76, 1)" },
 };
 
 const pulsateStyle = {
@@ -59,7 +59,7 @@ const pulsateStyle = {
 };
 
 const clickedCardStyle = {
-  boxShadow: "0px 0px 20px -2px rgba(66, 68, 90, 1) !important",
+  boxShadow: "0px 0px 1.50rem -0.075px rgba(66, 68, 90, 1) !important",
 };
 
 const GameCard = ({ game, index }) => {
@@ -95,7 +95,7 @@ const GameCard = ({ game, index }) => {
           <Grid item sx={teamName}>
             <CardMedia
               component="img"
-              width="40"
+              width="2.5rem"
               image={homeTeamCrest}
               alt={`${homeTeam} Crest`}
               sx={teamLogoStyle}
@@ -109,7 +109,7 @@ const GameCard = ({ game, index }) => {
           <Grid item sx={teamName}>
             <CardMedia
               component="img"
-              width="70"
+              width="2.5rem"
               image={awayTeamCrest}
               alt={`${awayTeam} Crest`}
               sx={teamLogoStyle}

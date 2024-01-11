@@ -10,8 +10,8 @@ function Scoretables() {
       <TableContainer
         component={Paper}
         sx={{
-          maxWidth: 650,
-          padding: "20px",
+          maxWidth: "100%",
+          padding: "1.25rem",
           backgroundColor: "#EEE7DA",
           borderRadius: "10px",
           border: "1px solid rgba(0, 0, 0, 0.12)",
@@ -22,7 +22,7 @@ function Scoretables() {
             display: "flex",
             justifyContent: "center",
             wordSpacing: "10",
-            marginBottom: "15px",
+            marginBottom: "1rem",
           }}
         >
           <Button
@@ -30,7 +30,7 @@ function Scoretables() {
             color="primary"
             sx={{
               margin: "0 0.2rem",
-              fontSize: { xs: "12px", md: "14px" },
+              fontSize: { xs: "0.8rem", md: "0.9rem" },
             }}
           >
             Join league
@@ -40,7 +40,7 @@ function Scoretables() {
             color="primary"
             sx={{
               margin: "0 0.2rem",
-              fontSize: { xs: "12px", md: "14px" },
+              fontSize: { xs: "0.8rem", md: "0.9rem" },
             }}
           >
             Create leagues

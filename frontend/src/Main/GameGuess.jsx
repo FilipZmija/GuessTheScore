@@ -4,31 +4,32 @@ import {
   CardContent,
   Typography,
   TextField,
-  Button,
   Grid,
   CardMedia,
 } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 const teamLogoStyle = {
   objectFit: "contain",
-  width: { xs: "60px", sm: "90px", md: "90px", lg: "100px" },
-  height: { xs: "60px", sm: "100px", md: "100px", lg: "110px" },
+  width: "100%",
+  height: "100%",
 };
 const teamName = {
-  width: { xs: "70px", sm: "100px", md: "100px", lg: "120px" },
+  width: { xs: "4rem", sm: "6rem", md: "6rem", lg: "7rem" },
 
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
 };
 const scoreField = {
-  width: { xs: "60px", sm: "65px", md: "70px", lg: "75px" },
-  marginBottom: { xs: "1.8rem", sm: "2rem" },
+  width: { xs: "3.5rem", sm: "4.25rem", md: "4.25rem", lg: "4.25rem" },
+  marginBottom: "50%",
 };
 const guessCard = {
   display: "flex",
   alignItems: "center",
+  backgroundColor: "#faf8f5",
   flexDirection: "column",
+  padding: "0.5rem",
 };
 const GameDetails = () => {
   const [homeTeamGuess, setHomeTeamGuess] = useState("");
@@ -45,7 +46,16 @@ const GameDetails = () => {
 
   return (
     selectedGame && (
-      <Card>
+      <Card
+        sx={{
+          padding: "4%",
+          backgroundColor: "#EEE7DA",
+          borderRadius: "10px",
+          border: "1px solid rgba(0, 0, 0, 0.12)",
+          margin: "0 -10% 3% -10%",
+          display: "inline-block",
+        }}
+      >
         <CardContent sx={guessCard}>
           <Typography variant="h5">{selectedGame.competition}</Typography>
           <Typography variant="h7" gutterBottom>
@@ -63,7 +73,7 @@ const GameDetails = () => {
               />
               <Typography
                 variant="h7"
-                sx={{ minHeight: "48px", textAlign: "center" }}
+                sx={{ minHeight: "3rem", textAlign: "center" }}
               >
                 {selectedGame.homeTeam}
               </Typography>
@@ -78,7 +88,11 @@ const GameDetails = () => {
                 }
                 inputProps={{
                   maxLength: 1,
-                  style: { fontSize: 40, textAlign: "center", padding: "8px" },
+                  style: {
+                    fontSize: "250%",
+                    textAlign: "center",
+                    padding: "8px",
+                  },
                 }}
                 size="normal"
               />
@@ -95,9 +109,9 @@ const GameDetails = () => {
                 inputProps={{
                   maxLength: 1,
                   style: {
-                    fontSize: "40px",
+                    fontSize: "250%",
                     textAlign: "center",
-                    padding: "8px",
+                    padding: "0.5rem",
                   },
                 }} // Limiting the length to 2 characters
               />
@@ -112,7 +126,7 @@ const GameDetails = () => {
               />
               <Typography
                 variant="h7"
-                sx={{ minHeight: "48px", textAlign: "center" }}
+                sx={{ minHeight: "3rem", textAlign: "center" }}
               >
                 {selectedGame.awayTeam}
               </Typography>
@@ -120,14 +134,6 @@ const GameDetails = () => {
 
             <Grid item></Grid>
           </Grid>
-
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleGuessSubmit}
-          >
-            Submit Guess
-          </Button>
         </CardContent>
       </Card>
     )
