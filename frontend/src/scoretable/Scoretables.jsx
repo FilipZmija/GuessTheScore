@@ -1,20 +1,21 @@
 import * as React from "react";
-import TableContainer from "@mui/material/TableContainer";
-import Paper from "@mui/material/Paper";
 import { Box } from "@mui/material";
-import { Button } from "@mui/material";
 import Slides from "./Slides";
+import JoinLeagueDialog from "./JoinLeagueDialog";
+import CreateLeagueDialog from "./CreateLeagueDialog";
+
 function Scoretables() {
   return (
     <>
-      <TableContainer
-        component={Paper}
+      <Box
         sx={{
-          maxWidth: "100%",
-          padding: "1.25rem",
-          backgroundColor: "#EEE7DA",
+          width: "100%",
           borderRadius: "10px",
           border: "1px solid rgba(0, 0, 0, 0.12)",
+          boxShadow:
+            "0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12)",
+          padding: "1.25rem",
+          backgroundColor: "#EEE7DA",
         }}
       >
         <Box
@@ -25,29 +26,11 @@ function Scoretables() {
             marginBottom: "1rem",
           }}
         >
-          <Button
-            variant="outlined"
-            color="primary"
-            sx={{
-              margin: "0 0.2rem",
-              fontSize: { xs: "0.8rem", md: "0.9rem" },
-            }}
-          >
-            Join league
-          </Button>
-          <Button
-            variant="outlined"
-            color="primary"
-            sx={{
-              margin: "0 0.2rem",
-              fontSize: { xs: "0.8rem", md: "0.9rem" },
-            }}
-          >
-            Create leagues
-          </Button>
+          <JoinLeagueDialog />
+          <CreateLeagueDialog />
         </Box>
         <Slides />
-      </TableContainer>
+      </Box>
     </>
   );
 }

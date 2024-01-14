@@ -28,7 +28,7 @@ export default function Slides(props) {
 
   return (
     scoreData && (
-      <Carousel>
+      <Carousel sx={{ maxHeight: "50vh" }}>
         {scoreData.map((item, i) => (
           <Scoretable data={item} />
         ))}
