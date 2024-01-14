@@ -52,7 +52,7 @@ const GameDetails = () => {
           backgroundColor: "#EEE7DA",
           borderRadius: "10px",
           border: "1px solid rgba(0, 0, 0, 0.12)",
-          margin: "0 -10% 3% -10%",
+          margin: "0 0 3% 0",
           display: "inline-block",
         }}
       >

@@ -71,7 +71,7 @@ function ResponsiveDrawer(props) {
             flexGrow: 1,
             p: 3,
             marginLeft: "auto",
-            marginRight: { lg: "4vw", xl: "6vw" },
+            marginRight: { lg: "0vw", xl: "2vw" },
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -79,8 +79,15 @@ function ResponsiveDrawer(props) {
           }}
         >
           <Toolbar />
-          <Grid container>
-            <Grid item md={6}>
+          <Grid
+            container
+            sx={{
+              justifyContent: { xs: "center" },
+              flexDirection: { xs: "column", lg: "row" },
+              width: "100%",
+            }}
+          >
+            <Grid item sm={12} lg={6}>
               <Box sx={{ display: "flex", justifyContent: "center" }}>
                 <GameGuess />
               </Box>
@@ -88,10 +95,17 @@ function ResponsiveDrawer(props) {
                 <Scoretables />
               </Box>
             </Grid>
-            <Grid item md={6}>
-              <Box sx={{ display: "flex", justifyContent: "center" }}>
-                <LeagueScoretable />
-              </Box>
+            <Grid
+              item
+              sm={0}
+              lg={6}
+              sx={{
+                display: { xs: "none", m: "none", lg: "inline-flex" },
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <LeagueScoretable />
             </Grid>
           </Grid>
         </Box>
