@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -7,7 +7,9 @@ import {
   Grid,
   CardMedia,
 } from "@mui/material";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import SucessAlert from "./Alert";
+import axios from "axios";
 const teamLogoStyle = {
   objectFit: "contain",
   width: "100%",
@@ -32,17 +34,65 @@ const guessCard = {
   padding: "0.5rem",
 };
 const GameDetails = () => {
-  const [homeTeamGuess, setHomeTeamGuess] = useState("");
-  const [awayTeamGuess, setAwayTeamGuess] = useState("");
+  const [guess, setGuess] = useState({ home: "", away: "" });
+  const [open, setOpen] = useState(false);
+  const token = useSelector((state) => state.auth.token);
   const selectedGameIndex = useSelector((state) => state.events.selection);
   const selectedGame = useSelector((state) => {
     if (state.events.gameList) return state.events.gameList[selectedGameIndex];
   });
-  const dispatch = useDispatch();
-  const handleGuessSubmit = () => {
-    // Assuming you have an action to update guesses in your Redux store
-    // dispatch(updateGuess(selectedGame.index, homeTeamGuess, awayTeamGuess));
-  };
+
+  const eventId = selectedGame?.id;
+  useEffect(() => {
+    setOpen(false);
+    setGuess({ home: "", away: "" });
+  }, [selectedGame, setOpen, setGuess]);
+
+  useEffect(() => {
+    eventId &&
+      (async () => {
+        try {
+          const guess = await axios.get(
+            `${process.env.REACT_APP_API_URL}/event/guesses/${selectedGame.id}`,
+            {
+              headers: {
+                Authorization: "Bearer " + token,
+              },
+            }
+          );
+          console.log(guess);
+        } catch (e) {
+          console.error(e);
+        }
+      })();
+  }, [eventId, token]);
+
+  useEffect(() => {
+    const { home, away } = guess;
+    if (home.length > 0 && away.length > 0) {
+      eventId &&
+        (async () => {
+          try {
+            const guess = await axios.post(
+              `${process.env.REACT_APP_API_URL}/guess/add`,
+              {
+                score: `${home}:${away}`,
+                EventId: selectedGame.id,
+              },
+              {
+                headers: {
+                  Authorization: "Bearer " + token,
+                },
+              }
+            );
+            console.log(guess, eventId, token);
+            setOpen(true);
+          } catch (e) {
+            console.error(e);
+          }
+        })();
+    }
+  }, [guess]);
 
   return (
     selectedGame && (
@@ -57,6 +107,8 @@ const GameDetails = () => {
         }}
       >
         <CardContent sx={guessCard}>
+          <SucessAlert open={open} setOpen={setOpen} />
+
           <Typography variant="h5">{selectedGame.competition}</Typography>
           <Typography variant="h7" gutterBottom>
             {selectedGame.utcTime}
@@ -82,10 +134,12 @@ const GameDetails = () => {
               <TextField
                 sx={scoreField}
                 variant="outlined"
-                value={homeTeamGuess}
-                onChange={(e) =>
-                  setHomeTeamGuess(e.target.value.replace(/\D/, ""))
-                }
+                value={guess.home}
+                onChange={(e) => {
+                  setGuess((prev) => {
+                    return { ...prev, home: e.target.value.replace(/\D/, "") };
+                  });
+                }}
                 inputProps={{
                   maxLength: 1,
                   style: {
@@ -102,10 +156,12 @@ const GameDetails = () => {
               <TextField
                 sx={scoreField}
                 variant="outlined"
-                value={awayTeamGuess}
-                onChange={(e) =>
-                  setAwayTeamGuess(e.target.value.replace(/\D/, ""))
-                }
+                value={guess.away}
+                onChange={(e) => {
+                  setGuess((prev) => {
+                    return { ...prev, away: e.target.value.replace(/\D/, "") };
+                  });
+                }}
                 inputProps={{
                   maxLength: 1,
                   style: {

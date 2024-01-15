@@ -30,19 +30,23 @@ export default function FormDialog(props) {
     const name = formJson.name;
 
     (async () => {
-      const league = await axios.post(
-        `${process.env.REACT_APP_API_URL}/scoreboards/create`,
-        {
-          name,
-        },
-        {
-          headers: {
-            Authorization: "Bearer " + token,
+      try {
+        const league = await axios.post(
+          `${process.env.REACT_APP_API_URL}/scoreboards/create`,
+          {
+            name,
           },
-        }
-      );
-      console.log(league);
-      setLeagueCode(league.data.id);
+          {
+            headers: {
+              Authorization: "Bearer " + token,
+            },
+          }
+        );
+        console.log(league);
+        setLeagueCode(league.data.id);
+      } catch (e) {
+        console.error(e);
+      }
     })();
   };
 

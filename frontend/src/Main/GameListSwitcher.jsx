@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import GameList from "./GameList";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
-import { Box, Button, Grid } from "@mui/material";
+import { Box, Button, Grid, Typography } from "@mui/material";
 import { getDate } from "../functions/date";
 import {
   incrementIndex,
@@ -11,6 +11,7 @@ import {
   updateGames,
 } from "../redux/eventsSlice";
 import Toolbar from "@mui/material/Toolbar";
+import { Container } from "@mui/system";
 
 const filters = [];
 
@@ -91,7 +92,23 @@ export default function GameListSwitcher() {
           {date}
           <Button onClick={increment}>Next</Button>
         </Box>
-        {games && <GameList games={games} />}
+        {games.length > 0 ? (
+          <GameList games={games} />
+        ) : (
+          <>
+            <Container
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: "35vh",
+              }}
+            >
+              <Typography variant="h4"> No games on this date</Typography>
+            </Container>
+          </>
+        )}
       </Box>
     </>
   );

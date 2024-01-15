@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useEffect } from "react";
 import GameListSwitcher from "./GameListSwitcher";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
@@ -22,6 +23,10 @@ function ResponsiveDrawer(props) {
       <GameListSwitcher />
     </>
   );
+
+  useEffect(() => {
+    console.log("Score changed");
+  }, []);
 
   return (
     <>
