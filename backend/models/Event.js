@@ -62,6 +62,7 @@ module.exports = (sequelize, DataTypes) => {
   );
   Event.associate = (models) => {
     Event.hasMany(models.Guess);
+    Event.belongsToMany(models.Teams, { through: models.EventTeams });
   };
 
   async function evaluatePoints(event) {
