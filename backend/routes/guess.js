@@ -9,29 +9,16 @@ router.use((req, res, next) => {
 });
 
 router.get("/info/", validateToken, async (req, res) => {
-  const { GuessId, EventId } = req.query;
-  if (GuessId) {
-    try {
-      const guess = await Guess.findOne({ where: { id: GuessId } });
+  const { EventId } = req.query;
+  const { id } = req.user;
+  try {
+    const guess = await Guess.findOne({ where: { UserId: id, EventId } });
+    const allGuesses = await Guess.findAll({ where: { EventId } });
 
-      if (guess) {
-        const user = await Users.findOne({ where: { id: guess.UserId } });
-        const event = await Event.findOne({ where: { id: guess.EventId } });
-        res.status(200).json({ guess: { ...guess.dataValues, event, user } });
-      } else {
-        res.status(404).json(guess);
-      }
-    } catch (e) {
-      console.log(e);
-      res.status(400).json(e);
-    }
-  } else if (EventId) {
-    try {
-      const guesses = await Guess.findAll({ where: { EventId: EventId } });
-      res.status(200).json({ guesses });
-    } catch (e) {
-      res.status(400).json(e);
-    }
+    res.status(200).json({ userGuess: guess, allGuesses: allGuesses });
+  } catch (e) {
+    console.log(e);
+    res.status(400).json(e);
   }
 });
 
