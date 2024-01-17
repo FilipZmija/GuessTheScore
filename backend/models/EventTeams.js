@@ -6,15 +6,15 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
-    },
-    {
-      indexes: [
-        {
-          unique: true,
-          fields: ["EventId", "TeamId"],
-        },
-      ],
     }
+    // {
+    //   indexes: [
+    //     {
+    //       unique: true,
+    //       fields: ["EventId", "TeamId"],
+    //     },
+    //   ],
+    // }
   );
 
   return EventTeams;

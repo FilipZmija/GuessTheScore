@@ -3,6 +3,7 @@ module.exports = (sequelize, DataTypes) => {
     ApiId: {
       type: DataTypes.INTEGER,
       allowNull: true,
+      primaryKey: true,
     },
 
     name: {

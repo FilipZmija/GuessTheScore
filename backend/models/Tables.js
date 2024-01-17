@@ -10,8 +10,8 @@ module.exports = (sequelize, DataTypes) => {
     },
   });
   Tables.associate = (models) => {
-    Tables.hasMany(models.Teams);
     Tables.belongsTo(models.Competition);
+    Tables.hasMany(models.TableLogs);
   };
   return Tables;
 };
