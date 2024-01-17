@@ -6,6 +6,7 @@ const {
   Teams,
   TeamsTables,
   EventTeams,
+  TableLogs,
 } = require("../models");
 const { getDate } = require("../date");
 
@@ -20,7 +21,7 @@ const createOrUpdateEvent = async (match) => {
       { id: awayId, homeOrAway: "away" },
     ];
     if (existingEvent) {
-      const { utcDate, date, utcTime, status, score, homeId, awayId } = match;
+      const { utcDate, date, utcTime, status, score } = match;
 
       const [, event] = await Event.update(
         { utcDate, date, utcTime, status, score },
@@ -34,7 +35,7 @@ const createOrUpdateEvent = async (match) => {
         associationData.map(async (item) => {
           await EventTeams.update(
             {
-              TeamId: item.id,
+              TeamApiId: item.id,
             },
             {
               where: {
@@ -54,7 +55,7 @@ const createOrUpdateEvent = async (match) => {
         associationData.map(async (item) => {
           await EventTeams.create({
             homeOrAway: item.homeOrAway,
-            TeamId: item.id,
+            TeamApiId: item.id,
             EventId: event.id,
           });
         })
@@ -64,10 +65,10 @@ const createOrUpdateEvent = async (match) => {
     }
   } catch (err) {}
 };
-const getEvents = async () => {
+const getEvents = async (start = 0, end = 2) => {
   const compId = "2021,2001,2000,2002,2003,2014,2015,2018,2019";
-  const dateFrom = getDate(0);
-  const dateTo = getDate(2);
+  const dateFrom = getDate(start);
+  const dateTo = getDate(end);
 
   try {
     const response = await axios.get(
@@ -104,6 +105,7 @@ const getEvents = async () => {
             : score.fullTime.home + ":" + score.fullTime.away,
         homeId,
         awayId,
+        CompetitionApiId: competition.id,
       };
     });
     const events = await Promise.all(
@@ -129,13 +131,16 @@ const createOrUpdateTeam = async (team, TableId) => {
   } = team;
   const { id, name, shortName, crest } = team.team;
   try {
-    const teamModel = await Teams.findOne({ where: { ApiId: id, TableId } });
+    const teamModel = await Teams.findOne({ where: { ApiId: id } });
     if (!teamModel) {
-      const team = Teams.create({
+      const team = await Teams.create({
         ApiId: id,
         name,
         shortName,
         crest,
+      });
+      console.log(team);
+      const teamLog = await TableLogs.create({
         position,
         playedGames,
         form,
@@ -147,14 +152,15 @@ const createOrUpdateTeam = async (team, TableId) => {
         goalsAgainst,
         goalDifference,
         TableId,
+        TeamApiId: team.ApiId,
       });
       const association = await TeamsTables.create({
         TeamId: id,
         TableId,
       });
-      return [team, association];
+      return [team, teamLog, association];
     } else {
-      const team = await Teams.update(
+      const teamLog = await TableLogs.update(
         {
           position,
           playedGames,
@@ -168,11 +174,11 @@ const createOrUpdateTeam = async (team, TableId) => {
           goalDifference,
         },
         {
-          where: { ApiId: id, TableId },
+          where: { TeamApiId: id, TableId },
           individualHooks: true,
         }
       );
-      return [team, false];
+      return [false, teamLog, false];
     }
   } catch (err) {
     return err;
@@ -181,9 +187,7 @@ const createOrUpdateTeam = async (team, TableId) => {
 
 const getTeamsAndTables = async () => {
   const compId = "2021,2001,2000,2002,2003,2014,2015,2018,2019".split(",");
-  const promisesCompetitions = [];
-  const promisesTables = [];
-  const promisesTeams = [];
+
   try {
     const responses = await Promise.all(
       compId.map(async (item) => {
@@ -196,30 +200,34 @@ const getTeamsAndTables = async () => {
             },
           }
         );
-        const { name, emblem } = response.data.competition;
+        const { name, emblem, id } = response.data.competition;
         let competitionId;
         const competition = await Competition.findOne({
-          where: { name, emblem },
+          where: { ApiId: id },
         });
-        competitionId = competition?.id || undefined;
+        competitionId = competition?.ApiId || undefined;
 
         if (!competition) {
-          const competition = await Competition.create({ name, emblem });
-          competitionId = competition.id;
+          const competition = await Competition.create({
+            name,
+            emblem,
+            ApiId: id,
+          });
+          competitionId = competition.ApiId;
         }
 
         const tables = await Promise.all(
           response.data.standings.map(async (standingItem) => {
             const { group, stage } = standingItem;
             const table = await Tables.findOne({
-              where: { group, stage, CompetitionId: competitionId },
+              where: { CompetitionApiId: competitionId },
             });
             let TableId;
             if (!table) {
               const table = await Tables.create({
                 group,
                 stage,
-                CompetitionId: competitionId,
+                CompetitionApiId: competitionId,
               });
               TableId = table.id;
             } else {
@@ -229,7 +237,7 @@ const getTeamsAndTables = async () => {
                   stage,
                 },
                 {
-                  where: { CompetitionId: competitionId, group },
+                  where: { CompetitionApiId: competitionId, group },
                   individualHooks: true,
                 }
               );
