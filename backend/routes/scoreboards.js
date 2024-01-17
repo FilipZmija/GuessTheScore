@@ -1,6 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const { ScoreboardUser, Users, Scoreboard } = require("../models");
+const {
+  ScoreboardUser,
+  Users,
+  Scoreboard,
+  PopularGuesses,
+} = require("../models");
 const { validateToken } = require("../auth/JWT");
 router.use(express.json({ limit: "10mb" }));
 router.use((req, res, next) => {
@@ -45,6 +50,37 @@ router.get("/:scoreboardId", validateToken, async (req, res) => {
       order: [[Users, "points", "DESC"]],
     });
     res.status(200).json({ scoreboard });
+  } catch (e) {
+    console.log(e);
+
+    res.status(404).json(e);
+  }
+});
+
+router.get("/users/all", validateToken, async (req, res) => {
+  const { id } = req.user;
+  console.log("re");
+  try {
+    const scoreboards = await ScoreboardUser.findAll({
+      where: { UserId: id },
+      attributes: ["ScoreboardId"],
+    });
+    res.status(200).json(scoreboards);
+  } catch (e) {
+    console.log(e);
+
+    res.status(404).json(e);
+  }
+});
+
+router.get("/popular/:id", validateToken, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const scoreboards = await Scoreboard.findAll({
+      where: { id },
+      include: [{ model: PopularGuesses }],
+    });
+    res.status(200).json(scoreboards);
   } catch (e) {
     console.log(e);
 

@@ -30,7 +30,16 @@ router.post("/add", validateToken, async (req, res) => {
   console.log(event);
   if (event.status !== "FINISHED") {
     try {
-      const guess = await Guess.create({ score, UserId: id, EventId });
+      const guess = await Guess.create(
+        {
+          score,
+          UserId: id,
+          EventId,
+        },
+        {
+          individualHooks: true,
+        }
+      );
       res.status(200).json({ guess });
     } catch (e) {
       console.log(e);
