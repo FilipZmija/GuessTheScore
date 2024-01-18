@@ -92,7 +92,7 @@ export default function GameListSwitcher() {
           {date}
           <Button onClick={increment}>Next</Button>
         </Box>
-        {games.length > 0 ? (
+        {games ? (
           <GameList games={games} />
         ) : (
           <>

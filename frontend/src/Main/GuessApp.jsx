@@ -8,11 +8,10 @@ import { openDrawer } from "../redux/eventsSlice";
 import NavBar from "../NavBar";
 import CssBaseline from "@mui/material/CssBaseline";
 import Toolbar from "@mui/material/Toolbar";
-import GameGuess from "./GameGuess";
 import Scoretables from "../scoretable/Scoretables";
 import LeagueScoretable from "../league_scoreboard/LeagueScoretable";
 import { Grid } from "@mui/material";
-
+import GuessContainer from "./GuessContainer";
 const drawerWidth = 400;
 
 function ResponsiveDrawer(props) {
@@ -94,7 +93,7 @@ function ResponsiveDrawer(props) {
           >
             <Grid item sm={12} lg={6}>
               <Box sx={{ display: "flex", justifyContent: "center" }}>
-                <GameGuess />
+                <GuessContainer />
               </Box>
               <Box sx={{ display: "flex", justifyContent: "center" }}>
                 <Scoretables />

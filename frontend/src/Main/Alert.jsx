@@ -11,7 +11,9 @@ export default function SucessAlert({ open, setOpen }) {
     setTimeout(() => setOpen(false), 5000);
   }, [setOpen]);
   return (
-    <Box sx={{ width: "15%", position: "absolute" }}>
+    <Box
+      sx={{ width: { xs: "80%", md: "25%", lg: "15%" }, position: "absolute" }}
+    >
       <Collapse in={open}>
         <Alert
           action={
