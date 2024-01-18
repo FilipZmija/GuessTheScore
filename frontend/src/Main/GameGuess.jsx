@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Card,
   CardContent,
@@ -9,22 +9,27 @@ import {
 } from "@mui/material";
 import { useSelector } from "react-redux";
 import SucessAlert from "./Alert";
+import Skeleton from "@mui/material/Skeleton";
 import axios from "axios";
 const teamLogoStyle = {
   objectFit: "contain",
-  width: "100%",
-  height: "100%",
+  width: "150%",
+  height: "10vh",
 };
 const teamName = {
   width: { xs: "4rem", sm: "6rem", md: "6rem", lg: "7rem" },
-
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
 };
 const scoreField = {
-  width: { xs: "3.5rem", sm: "4.25rem", md: "4.25rem", lg: "4.25rem" },
-  marginBottom: "50%",
+  width: { xs: "3rem", sm: "4.25rem", md: "4.25rem", lg: "4.25rem" },
+  marginBottom: { xs: "40%", md: "50%" },
+  borderRadius: "4px",
+};
+const scoreFieldSkeletons = {
+  width: { xs: "3rem", sm: "4.25rem", md: "4.25rem", lg: "4.25rem" },
+  borderRadius: "4px",
 };
 const guessCard = {
   display: "flex",
@@ -34,50 +39,72 @@ const guessCard = {
   padding: "0.5rem",
 };
 const GameDetails = () => {
+  const isInitialMount = useRef(true);
+  const isGuessSet = useRef(false);
   const [guess, setGuess] = useState({ home: "", away: "" });
+  const [guessId, setGuessId] = useState(null);
+  const [points, setPoints] = useState(undefined);
   const [open, setOpen] = useState(false);
+  const [selectedGame, setSelectedGame] = useState(false);
+  const event = useSelector((state) => state.events.selectedGameInfo);
   const token = useSelector((state) => state.auth.token);
-  const selectedGameIndex = useSelector((state) => state.events.selection);
-  const selectedGame = useSelector((state) => {
-    if (state.events.gameList) return state.events.gameList[selectedGameIndex];
-  });
-
-  const eventId = selectedGame?.id;
+  const eventId = event?.id;
   useEffect(() => {
-    setOpen(false);
+    isInitialMount.current = true;
+    isGuessSet.current = false;
+    setSelectedGame();
+    setGuessId(null);
     setGuess({ home: "", away: "" });
-  }, [selectedGame, setOpen, setGuess]);
+    setOpen(false);
+  }, [eventId, setOpen]);
 
   useEffect(() => {
     eventId &&
       (async () => {
         try {
-          const guess = await axios.get(
-            `${process.env.REACT_APP_API_URL}/event/guesses/${selectedGame.id}`,
+          const response = await axios.get(
+            `${process.env.REACT_APP_API_URL}/event/guesses/${eventId}`,
             {
               headers: {
                 Authorization: "Bearer " + token,
               },
             }
           );
-          console.log(guess);
+          isGuessSet.current = true;
+
+          const userGuess = response.data?.event.Guesses[0];
+          setSelectedGame(response.data.event);
+          const [home, away] = userGuess
+            ? userGuess?.score.split(":")
+            : ["", ""];
+          setPoints(userGuess.points);
+
+          setGuessId(userGuess?.id || null);
+          setGuess({
+            home: home,
+            away: away,
+          });
         } catch (e) {
           console.error(e);
         }
       })();
-  }, [eventId, token]);
+  }, [eventId, token, setSelectedGame, setPoints, setGuessId, setGuess]);
 
   useEffect(() => {
-    const { home, away } = guess;
-    if (home.length > 0 && away.length > 0) {
-      eventId &&
+    if (!isGuessSet.current) {
+      return;
+    }
+    if (!isInitialMount.current) {
+      console.log(guess, guessId);
+      const { home, away } = guess;
+      if (home.length > 0 && away.length > 0 && eventId && !guessId) {
         (async () => {
           try {
-            const guess = await axios.post(
+            const newGuess = await axios.post(
               `${process.env.REACT_APP_API_URL}/guess/add`,
               {
                 score: `${home}:${away}`,
-                EventId: selectedGame.id,
+                EventId: eventId,
               },
               {
                 headers: {
@@ -85,38 +112,70 @@ const GameDetails = () => {
                 },
               }
             );
-            console.log(guess, eventId, token);
             setOpen(true);
+            console.log(newGuess);
+            const { id } = newGuess.data.guess;
+            setGuessId(id);
           } catch (e) {
             console.error(e);
           }
         })();
+      } else if (home.length > 0 && away.length > 0 && guessId && eventId) {
+        (async () => {
+          try {
+            const newGuess = await axios.put(
+              `${process.env.REACT_APP_API_URL}/guess/edit/${guessId}`,
+              {
+                score: `${home}:${away}`,
+                EventId: eventId,
+              },
+              {
+                headers: {
+                  Authorization: "Bearer " + token,
+                },
+              }
+            );
+            setOpen(true);
+            const { id } = newGuess.data.guess;
+            setGuessId(id);
+            console.log(newGuess);
+          } catch (e) {
+            console.error(e);
+          }
+        })();
+      }
     }
-  }, [guess]);
+
+    isInitialMount.current = false;
+  }, [guess, eventId, token]);
+  const [homeScore, awayScore] = selectedGame
+    ? selectedGame.score.split(":")
+    : [];
 
   return (
-    selectedGame && (
-      <Card
-        sx={{
-          padding: "4%",
-          backgroundColor: "#EEE7DA",
-          borderRadius: "10px",
-          border: "1px solid rgba(0, 0, 0, 0.12)",
-          margin: "0 0 3% 0",
-          display: "inline-block",
-        }}
-      >
-        <CardContent sx={guessCard}>
-          <SucessAlert open={open} setOpen={setOpen} />
+    <Card
+      sx={{
+        padding: "4%",
+        backgroundColor: "#EEE7DA",
+        borderRadius: "10px",
+        border: "1px solid rgba(0, 0, 0, 0.12)",
+        margin: "0 0 3% 0",
+        display: "inline-block",
+      }}
+    >
+      <CardContent sx={guessCard}>
+        <SucessAlert open={open} setOpen={setOpen} />
 
-          <Typography variant="h5">{selectedGame.competition}</Typography>
-          <Typography variant="h7" gutterBottom>
-            {selectedGame.utcTime}
-          </Typography>
-          <Grid container alignItems="center" spacing={2}>
-            <Grid item></Grid>
+        <Typography variant="h5">{selectedGame.competition}</Typography>
+        <Typography variant="h7" gutterBottom>
+          {selectedGame.utcTime}
+        </Typography>
 
-            <Grid item sx={teamName}>
+        <Grid container alignItems="center" spacing={2}>
+          <Grid item></Grid>
+
+          <Grid item sx={teamName}>
+            <Grid>
               <CardMedia
                 component="img"
                 image={selectedGame.homeTeamCrest}
@@ -125,19 +184,35 @@ const GameDetails = () => {
               />
               <Typography
                 variant="h7"
-                sx={{ minHeight: "3rem", textAlign: "center" }}
+                sx={{
+                  minHeight: { sm: "0", md: "3rem" },
+                  textAlign: "center",
+                }}
               >
                 {selectedGame.homeTeam}
               </Typography>
             </Grid>
             <Grid item>
               <TextField
-                sx={scoreField}
+                disabled={selectedGame.status === "FINISHED"}
+                name="home"
+                sx={{
+                  ...scoreField,
+                  backgroundColor:
+                    selectedGame.status === "FINISHED"
+                      ? homeScore === guess.home
+                        ? "rgba(50,205,50, 0.3)"
+                        : "rgba(255,0,0, 0.2)"
+                      : "",
+                }}
                 variant="outlined"
-                value={guess.home}
+                value={guess?.home || ""}
                 onChange={(e) => {
                   setGuess((prev) => {
-                    return { ...prev, home: e.target.value.replace(/\D/, "") };
+                    return {
+                      ...prev,
+                      home: e.target.value.replace(/\D/, ""),
+                    };
                   });
                 }}
                 inputProps={{
@@ -145,54 +220,88 @@ const GameDetails = () => {
                   style: {
                     fontSize: "250%",
                     textAlign: "center",
-                    padding: "8px",
+                    padding: "15%",
                   },
                 }}
                 size="normal"
               />
             </Grid>
-
-            <Grid item>
-              <TextField
-                sx={scoreField}
-                variant="outlined"
-                value={guess.away}
-                onChange={(e) => {
-                  setGuess((prev) => {
-                    return { ...prev, away: e.target.value.replace(/\D/, "") };
-                  });
-                }}
-                inputProps={{
-                  maxLength: 1,
-                  style: {
-                    fontSize: "250%",
-                    textAlign: "center",
-                    padding: "0.5rem",
-                  },
-                }} // Limiting the length to 2 characters
-              />
-            </Grid>
-
-            <Grid item sx={teamName}>
-              <CardMedia
-                component="img"
-                image={selectedGame.awayTeamCrest}
-                alt={`${selectedGame.awayTeam} Crest`}
-                sx={teamLogoStyle}
-              />
-              <Typography
-                variant="h7"
-                sx={{ minHeight: "3rem", textAlign: "center" }}
-              >
-                {selectedGame.awayTeam}
-              </Typography>
-            </Grid>
-
-            <Grid item></Grid>
           </Grid>
-        </CardContent>
-      </Card>
-    )
+          <Grid
+            item
+            sx={{
+              paddingLeft: { xs: "8px !important" },
+              paddingRight: { xs: "8px !important" },
+            }}
+          >
+            <TextField
+              disabled={selectedGame.status === "FINISHED"}
+              name="away"
+              sx={{
+                ...scoreField,
+                backgroundColor:
+                  selectedGame.status === "FINISHED"
+                    ? guess.home === homeScore
+                      ? "rgba(50,205,50, 0.3)"
+                      : "rgba(255,0,0, 0.2)"
+                    : "",
+              }}
+              variant="outlined"
+              value={guess?.away || ""}
+              onChange={(e) => {
+                setGuess((prev) => {
+                  return {
+                    ...prev,
+                    away: e.target.value.replace(/\D/, ""),
+                  };
+                });
+              }}
+              inputProps={{
+                maxLength: 1,
+                style: {
+                  fontSize: "250%",
+                  textAlign: "center",
+                  padding: "15%",
+                },
+              }}
+            />
+          </Grid>
+
+          <Grid
+            item
+            sx={{ ...teamName, paddingLeft: { xs: "8px !important" } }}
+          >
+            <CardMedia
+              component="img"
+              image={selectedGame.awayTeamCrest}
+              alt={`${selectedGame.awayTeam} Crest`}
+              sx={teamLogoStyle}
+            />
+            <Typography
+              variant="h7"
+              sx={{
+                minHeight: { sm: "0", md: "3rem" },
+                textAlign: "center",
+              }}
+            >
+              {selectedGame.awayTeam}
+            </Typography>
+          </Grid>
+          <Grid item></Grid>
+        </Grid>
+        {points && (
+          <Typography
+            variant="h7"
+            sx={{
+              textAlign: "center",
+              fontWeight: "bold",
+            }}
+          >
+            You scored: {points} points!
+          </Typography>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
