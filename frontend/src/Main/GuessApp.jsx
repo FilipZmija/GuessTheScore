@@ -23,10 +23,6 @@ function ResponsiveDrawer(props) {
     </>
   );
 
-  useEffect(() => {
-    console.log("Score changed");
-  }, []);
-
   return (
     <>
       <Box sx={{ display: "flex" }}>
@@ -104,9 +100,9 @@ function ResponsiveDrawer(props) {
               sm={0}
               lg={6}
               sx={{
-                display: { xs: "none", m: "none", lg: "inline-flex" },
+                display: { xs: "none", m: "none", lg: "flex" },
                 justifyContent: "center",
-                alignItems: "center",
+                alignSelf: "start",
               }}
             >
               <LeagueScoretable />

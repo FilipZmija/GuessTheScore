@@ -36,18 +36,19 @@ const guessCard = {
 };
 const GameDetails = ({
   selectedGame,
-  setSelectedGame,
   guess,
   guessId,
   points,
   setGuess,
   setGuessId,
+  popularGuesses,
 }) => {
   const eventId = selectedGame.id;
   const [open, setOpen] = useState(false);
   const token = useSelector((state) => state.auth.token);
+  const scoreboardId = useSelector((state) => state.scoreboard.scoreboardId);
   const isFirstInit = useRef(true);
-
+  console.log(popularGuesses);
   useEffect(() => {
     if (isFirstInit.current) {
       isFirstInit.current = false;
@@ -70,7 +71,6 @@ const GameDetails = ({
             }
           );
           setOpen(true);
-          console.log(newGuess);
           const { id } = newGuess.data.guess;
           setGuessId(id);
         } catch (e) {
@@ -95,7 +95,6 @@ const GameDetails = ({
           setOpen(true);
           const { id } = newGuess.data.guess;
           setGuessId(id);
-          console.log(newGuess);
         } catch (e) {
           console.error(e);
         }

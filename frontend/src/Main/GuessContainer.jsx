@@ -10,8 +10,10 @@ export default function GuessContainer() {
   const [guessId, setGuessId] = useState(null);
   const [points, setPoints] = useState(undefined);
   const [selectedGame, setSelectedGame] = useState(false);
+  const [popularGuesses, setPopularGuesses] = useState();
   const event = useSelector((state) => state.events.selectedGameInfo);
   const token = useSelector((state) => state.auth.token);
+  const scoreboardId = useSelector((state) => state.scoreboard.scoreboardId);
   const eventId = event?.id;
 
   useEffect(() => {
@@ -20,6 +22,27 @@ export default function GuessContainer() {
     setGuessId();
     setGuess({ home: "", away: "" });
   }, [event]);
+
+  useEffect(() => {
+    scoreboardId &&
+      eventId &&
+      (async () => {
+        console.log(scoreboardId, eventId);
+        const popularGuesses = await axios.get(
+          `${process.env.REACT_APP_API_URL}/scoreboards/popular/${scoreboardId}`,
+          {
+            headers: {
+              Authorization: "Bearer " + token,
+            },
+            params: {
+              EventId: eventId,
+            },
+          }
+        );
+        setPopularGuesses(popularGuesses.data?.PopularGuesses);
+      })();
+  }, [scoreboardId, eventId]);
+
   useEffect(() => {
     eventId &&
       (async () => {
@@ -62,6 +85,7 @@ export default function GuessContainer() {
           setGuessId={setGuessId}
           setGuess={setGuess}
           setSelectedGame={setSelectedGame}
+          popularGuesses={popularGuesses}
         />
       ) : (
         <GuessSkeleton />

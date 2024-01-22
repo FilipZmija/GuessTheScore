@@ -31,12 +31,10 @@ function ResponsiveAppBar() {
     setAnchorElUser(event.currentTarget);
   };
   const handleDrawerToggle = () => {
-    console.log("here");
     dispatch(openDrawer());
   };
   const handleClick = (index) => {
     menuFnc[index](dispatch);
-    console.log(token);
     handleCloseUserMenu();
   };
 
