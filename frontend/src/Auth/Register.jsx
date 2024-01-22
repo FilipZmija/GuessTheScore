@@ -48,7 +48,6 @@ const Register = () => {
         `${process.env.REACT_APP_API_URL}/user/register`,
         { username: credentails.username, password: credentails.password }
       );
-      console.log(userData);
       setSuccess(true);
     } catch (e) {
       console.error(e);

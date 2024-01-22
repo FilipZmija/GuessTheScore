@@ -19,7 +19,8 @@ export default function Auth() {
             headers: { Authorization: "Bearer " + token },
           }
         );
-        const { username } = userData;
+        console.log(userData.data);
+        const { username } = userData.data?.users[0];
         dispatch(login({ username, token }));
       })();
     }
