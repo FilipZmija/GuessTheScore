@@ -20,7 +20,7 @@ export default function FormDialog(props) {
 
   const handleClose = () => {
     setOpen(false);
-    setTimeout(() => setLeagueCode(), 300);
+    setTimeout(() => setLeagueCode(), 100);
   };
 
   const handleSubmit = (event) => {
@@ -42,8 +42,7 @@ export default function FormDialog(props) {
             },
           }
         );
-        console.log(league);
-        setLeagueCode(league.data.id);
+        setLeagueCode(league.data.hash);
       } catch (e) {
         console.error(e);
       }
