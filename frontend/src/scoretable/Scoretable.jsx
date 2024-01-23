@@ -17,19 +17,22 @@ import TableRow from "@mui/material/TableRow";
 import { Typography, Box } from "@mui/material";
 import axios from "axios";
 import { useSelector } from "react-redux";
-let pages = 1;
+
 export default function Scoretable({ scoreboardId }) {
+  const [pages, setPages] = useState(2);
+  const [isMore, setIsMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [distanceBottom, setDistanceBottom] = useState(0);
+
   const [data, setData] = useState();
   const [name, setName] = useState();
-  let isMore = true;
-  let loading = false;
-  const [distanceBottom, setDistanceBottom] = useState(10);
+  const [loggedUser, setLoggedUser] = useState();
   const token = useSelector((state) => state.auth.token);
   const username = useSelector((state) => state.auth.username);
   const tableEl = useRef();
 
   const getScoreData = async () => {
-    loading = true;
+    setLoading(true);
     try {
       const response = await axios.get(
         `${process.env.REACT_APP_API_URL}/scoreboards/${scoreboardId}`,
@@ -42,17 +45,23 @@ export default function Scoretable({ scoreboardId }) {
           },
         }
       );
-      const { users, name: scoreboardName } = response.data.scoreboard;
+      const {
+        users,
+        name: scoreboardName,
+        loggedUser: recivedLoggedUser,
+      } = response.data.scoreboard;
       console.log(users);
       if (users.length === 0) {
-        isMore = false;
+        setIsMore(false);
+        setLoading(false);
         return;
       }
-      console.log(users);
+      console.log(recivedLoggedUser);
+      setLoggedUser(recivedLoggedUser);
       setName(scoreboardName);
       setData((prev) => (prev ? [...prev, ...users] : users));
-      loading = false;
-      pages++;
+      setLoading(false);
+      setPages(pages + 1);
     } catch (e) {
       console.log(e);
     }
@@ -60,15 +69,14 @@ export default function Scoretable({ scoreboardId }) {
 
   const scrollListener = () => {
     let bottom = tableEl.current.scrollHeight - tableEl.current.clientHeight;
-    // if (!distanceBottom) {
-    //   setDistanceBottom(Math.round(bottom * 0.1));
-    // }
+    if (!distanceBottom) {
+      setDistanceBottom(Math.round(bottom * 0.1));
+    }
     if (
       tableEl.current.scrollTop > bottom - distanceBottom &&
       isMore &&
       !loading
     ) {
-      console.log(loading, isMore);
       getScoreData();
     }
   };
@@ -83,22 +91,25 @@ export default function Scoretable({ scoreboardId }) {
               Authorization: "Bearer " + token,
             },
             params: {
-              page: pages,
+              page: 1,
             },
           }
         );
-        const { users, name: scoreboardName } = response.data.scoreboard;
+        const {
+          users,
+          name: scoreboardName,
+          loggedUser: recivedLoggedUser,
+        } = response.data.scoreboard;
         setName(scoreboardName);
-        console.log("here");
-        setData((prev) => (prev ? [...prev, ...users] : users));
+        setLoggedUser(recivedLoggedUser);
+        setData(users);
         if (users.length === 0) isMore = false;
-        pages++;
       } catch (e) {
         console.log(e);
       }
     })();
-  }, []);
-
+  }, [token, setData, setName]);
+  console.log(loggedUser);
   useLayoutEffect(() => {
     if (data) {
       const tableRef = tableEl.current;
@@ -168,26 +179,70 @@ export default function Scoretable({ scoreboardId }) {
                     component="th"
                     scope="row"
                     align="center"
-                    sx={row.username === username ? { fontWeight: "bold" } : {}}
+                    sx={
+                      row.username === username
+                        ? {
+                            fontWeight: "bold",
+                            position: "sticky",
+                            bottom: 0,
+                            top: 0,
+                            background: "white",
+                            zIndex: 800,
+                          }
+                        : {}
+                    }
                   >
-                    {index + 1}
+                    {row.ScoreboardUser.position}
                   </TableCell>
                   <TableCell
                     component="th"
                     scope="row"
-                    sx={row.username === username ? { fontWeight: "bold" } : {}}
+                    sx={
+                      row.username === username
+                        ? {
+                            fontWeight: "bold",
+                            position: "sticky",
+                            bottom: 0,
+                            top: 0,
+                            background: "white",
+                            zIndex: 800,
+                          }
+                        : {}
+                    }
                   >
                     {row.username}
                   </TableCell>
                   <TableCell
                     align="right"
-                    sx={row.username === username ? { fontWeight: "bold" } : {}}
+                    sx={
+                      row.username === username
+                        ? {
+                            fontWeight: "bold",
+                            position: "sticky",
+                            bottom: 0,
+                            top: 0,
+                            background: "white",
+                            zIndex: 800,
+                          }
+                        : {}
+                    }
                   >
                     {row.guesses}
                   </TableCell>
                   <TableCell
                     align="right"
-                    sx={row.username === username ? { fontWeight: "bold" } : {}}
+                    sx={
+                      row.username === username
+                        ? {
+                            fontWeight: "bold",
+                            position: "sticky",
+                            bottom: 0,
+                            top: 0,
+                            background: "white",
+                            zIndex: 800,
+                          }
+                        : {}
+                    }
                   >
                     {row.points === 0 || row.guesses === 0
                       ? 0
@@ -195,6 +250,69 @@ export default function Scoretable({ scoreboardId }) {
                   </TableCell>
                 </TableRow>
               ))}
+              {loggedUser && (
+                <TableRow
+                  sx={{
+                    fontWeight: "bold",
+                    position: "sticky",
+                    bottom: 0,
+                    background: "white",
+                    zIndex: 800,
+                  }}
+                >
+                  <TableCell
+                    component="th"
+                    scope="row"
+                    align="center"
+                    sx={{
+                      fontWeight: "bold",
+                      position: "sticky",
+                      bottom: 0,
+                      background: "white",
+                      zIndex: 800,
+                    }}
+                  >
+                    {loggedUser.ScoreboardUser.position}
+                  </TableCell>
+                  <TableCell
+                    component="th"
+                    scope="row"
+                    sx={{
+                      fontWeight: "bold",
+                      position: "sticky",
+                      bottom: 0,
+                      background: "white",
+                      zIndex: 800,
+                    }}
+                  >
+                    {loggedUser.username}
+                  </TableCell>
+                  <TableCell
+                    align="right"
+                    sx={{
+                      fontWeight: "bold",
+                      position: "sticky",
+                      bottom: 0,
+                      background: "white",
+                      zIndex: 800,
+                    }}
+                  >
+                    {loggedUser.guesses}
+                  </TableCell>
+                  <TableCell
+                    align="right"
+                    sx={{
+                      fontWeight: "bold",
+                      position: "sticky",
+                      bottom: 0,
+                      background: "white",
+                      zIndex: 800,
+                    }}
+                  >
+                    {loggedUser.ratio}
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </Box>

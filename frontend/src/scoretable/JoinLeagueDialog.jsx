@@ -9,7 +9,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import axios from "axios";
 
-export default function FormDialog(props) {
+export default function FormDialog({ setReload }) {
   const [open, setOpen] = React.useState(false);
   const token = useSelector((state) => state.auth.token);
   const [message, setMessage] = React.useState();
@@ -41,6 +41,7 @@ export default function FormDialog(props) {
           }
         );
         setMessage("You have successfully join a league!");
+        setReload((prev) => !prev);
       } catch (e) {
         setMessage("Sorry, league with this code does not exist...");
 

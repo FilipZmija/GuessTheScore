@@ -5,7 +5,7 @@ import { setScoreboardId } from "../redux/scoreboardSlice";
 import axios from "axios";
 import Carousel from "react-material-ui-carousel";
 import Scoretable from "./Scoretable";
-export default function Slides(props) {
+export default function Slides({ reload }) {
   const [scoreIds, setScoreIds] = useState();
   const token = useSelector((state) => state.auth.token);
   const dispatch = useDispatch();
@@ -28,7 +28,7 @@ export default function Slides(props) {
       }
     };
     getScoreData();
-  }, [token]);
+  }, [token, reload]);
 
   return (
     scoreIds && (
@@ -38,6 +38,12 @@ export default function Slides(props) {
           dispatch(setScoreboardId(scoreIds[now].ScoreboardId));
         }}
         autoPlay={false}
+        fullHeightHover={false}
+        navButtonsWrapperProps={{
+          style: {
+            marginRight: "10px",
+          },
+        }}
         animation={"fade"}
       >
         {scoreIds.map((item, i) => (

@@ -1,10 +1,12 @@
 import * as React from "react";
+import { useState } from "react";
 import { Box } from "@mui/material";
 import Slides from "./Slides";
 import JoinLeagueDialog from "./JoinLeagueDialog";
 import CreateLeagueDialog from "./CreateLeagueDialog";
 
 function Scoretables() {
+  const [reload, setReload] = useState(false);
   return (
     <>
       <Box
@@ -26,10 +28,10 @@ function Scoretables() {
             marginBottom: "1rem",
           }}
         >
-          <JoinLeagueDialog />
-          <CreateLeagueDialog />
+          <JoinLeagueDialog setReload={setReload} />
+          <CreateLeagueDialog setReload={setReload} />
         </Box>
-        <Slides />
+        <Slides reload={reload} />
       </Box>
     </>
   );
