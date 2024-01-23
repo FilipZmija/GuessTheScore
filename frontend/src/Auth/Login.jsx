@@ -11,13 +11,14 @@ import {
 import { useDispatch } from "react-redux";
 import { login } from "../redux/authSlice";
 import axios from "axios";
-
+import { Toolbar } from "@mui/material";
 const formContainerStyle = {
   maxWidth: "400px",
   minWidth: "350px",
   margin: "auto",
-  marginTop: "50px",
   textAlign: "center",
+  height: "100%",
+  marginTop: "15vh",
 };
 
 const textFieldStyle = {
@@ -64,50 +65,57 @@ const Login = () => {
   };
 
   return (
-    <Container sx={formContainerStyle} maxWidth="false">
-      <Paper
-        elevation={3}
-        sx={{
-          padding: "20px",
-          color: "#4F6F52",
-        }}
-      >
-        <Typography variant="h4" gutterBottom>
-          Login
-        </Typography>
-        <Typography variant="h7">{message}</Typography>
-        <Box sx={{ mt: "8px" }}>
-          <form onSubmit={(e) => handleLogin(e)}>
-            <TextField
-              label="Username"
-              variant="outlined"
-              sx={textFieldStyle}
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-            <TextField
-              label="Password"
-              type="password"
-              variant="outlined"
-              sx={textFieldStyle}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <Button type="submit" variant="contained" sx={buttonStyle}>
-              Login
+    <>
+      <Toolbar />
+
+      <Container sx={formContainerStyle} maxWidth="false">
+        <Paper
+          elevation={3}
+          sx={{
+            padding: "20px",
+            color: "#4F6F52",
+            backgroundColor: "#faf8f5",
+          }}
+        >
+          <Typography variant="h4" gutterBottom>
+            Login
+          </Typography>
+          <Typography variant="h7" sx={{ color: "rgb(230, 0, 0)" }}>
+            {message}
+          </Typography>
+          <Box sx={{ mt: "8px" }}>
+            <form onSubmit={(e) => handleLogin(e)}>
+              <TextField
+                label="Username"
+                variant="outlined"
+                sx={textFieldStyle}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+              <TextField
+                label="Password"
+                type="password"
+                variant="outlined"
+                sx={textFieldStyle}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <Button type="submit" variant="contained" sx={buttonStyle}>
+                Login
+              </Button>
+            </form>
+            <Button
+              type="submit"
+              variant="text"
+              sx={secndaryButtonStyle}
+              href="auth/register"
+            >
+              Register
             </Button>
-          </form>
-          <Button
-            type="submit"
-            variant="text"
-            sx={secndaryButtonStyle}
-            href="auth/register"
-          >
-            Register
-          </Button>
-        </Box>
-      </Paper>
-    </Container>
+          </Box>
+        </Paper>
+      </Container>
+    </>
   );
 };
 
