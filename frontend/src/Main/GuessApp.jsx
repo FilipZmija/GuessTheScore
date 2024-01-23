@@ -12,11 +12,12 @@ import Scoretables from "../scoretable/Scoretables";
 import LeagueScoretable from "../league_scoreboard/LeagueScoretable";
 import { Grid } from "@mui/material";
 import GuessContainer from "./GuessContainer";
+import { useMediaQuery } from "@mui/material";
 const drawerWidth = 400;
 
 function ResponsiveDrawer(props) {
   const mobileOpen = useSelector((state) => state.events.mobileOpen);
-
+  const isMobile = useMediaQuery((theme) => theme.breakpoints.down("md"));
   const drawer = (
     <>
       <GameListSwitcher />
@@ -28,43 +29,46 @@ function ResponsiveDrawer(props) {
       <Box sx={{ display: "flex" }}>
         <CssBaseline />
         <NavBar />
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={() => openDrawer()}
-          ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
-          }}
-          sx={{
-            display: {
-              xs: "block",
-              sm: "block",
-              md: "none",
-            },
-            "& .MuiDrawer-paper": {
-              boxSizing: "border-box",
+        {isMobile ? (
+          <Drawer
+            variant="temporary"
+            open={mobileOpen}
+            onClose={() => openDrawer()}
+            ModalProps={{
+              keepMounted: true, // Better open performance on mobile.
+            }}
+            sx={{
+              display: {
+                xs: "block",
+                sm: "block",
+                md: "none",
+              },
+              "& .MuiDrawer-paper": {
+                boxSizing: "border-box",
+                width: drawerWidth,
+                backgroundColor: "#EEE7DA",
+              },
+            }}
+          >
+            {drawer}
+          </Drawer>
+        ) : (
+          <Drawer
+            variant="permanent"
+            sx={{
+              display: { xs: "none", sm: "none", md: "block" },
               width: drawerWidth,
-              backgroundColor: "#EEE7DA",
-            },
-          }}
-        >
-          {drawer}
-        </Drawer>
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: "none", sm: "none", md: "block" },
-            width: drawerWidth,
-            flexShrink: 0,
-            "& .MuiDrawer-paper": {
-              boxSizing: "border-box",
-              width: drawerWidth,
-              backgroundColor: "#EEE7DA",
-            },
-          }}
-        >
-          {drawer}
-        </Drawer>
+              flexShrink: 0,
+              "& .MuiDrawer-paper": {
+                boxSizing: "border-box",
+                width: drawerWidth,
+                backgroundColor: "#EEE7DA",
+              },
+            }}
+          >
+            {drawer}
+          </Drawer>
+        )}
         <Box
           component="main"
           sx={{

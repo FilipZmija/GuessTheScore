@@ -75,9 +75,11 @@ const GameCard = ({ game, index }) => {
   } = game;
   const selectedIndex = useSelector((state) => state.events.selection);
   const dispatch = useDispatch();
+
   const handleClick = () => {
     dispatch(selectEvent(index));
   };
+
   return (
     <Card
       onClick={handleClick}

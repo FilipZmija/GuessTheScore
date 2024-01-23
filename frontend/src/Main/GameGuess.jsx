@@ -7,9 +7,11 @@ import {
   Grid,
   CardMedia,
 } from "@mui/material";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import SucessAlert from "./Alert";
 import axios from "axios";
+import PopularGuesses from "./PopularGuesses";
+import { guessScore, setGuessId, setIsClicked } from "../redux/guessSlice";
 const teamLogoStyle = {
   objectFit: "contain",
   width: { xs: "120%", xl: "100%" },
@@ -23,7 +25,7 @@ const teamName = {
 };
 const scoreField = {
   width: { xs: "3rem", sm: "4.25rem", md: "4.25rem", lg: "4.25rem" },
-  marginBottom: { xs: "40%", md: "50%" },
+  marginBottom: { xs: "20%", md: "30%" },
   borderRadius: "4px",
 };
 
@@ -34,21 +36,15 @@ const guessCard = {
   flexDirection: "column",
   padding: "0.5rem",
 };
-const GameDetails = ({
-  selectedGame,
-  guess,
-  guessId,
-  points,
-  setGuess,
-  setGuessId,
-  popularGuesses,
-}) => {
-  const eventId = selectedGame.id;
+const GameDetails = () => {
   const [open, setOpen] = useState(false);
+  const { guess, selectedGame, guessId, points, popularGuesses } = useSelector(
+    (state) => state.guess
+  );
+  const eventId = selectedGame.id;
   const token = useSelector((state) => state.auth.token);
-  const scoreboardId = useSelector((state) => state.scoreboard.scoreboardId);
   const isFirstInit = useRef(true);
-  console.log(popularGuesses);
+  const dispatch = useDispatch();
   useEffect(() => {
     if (isFirstInit.current) {
       isFirstInit.current = false;
@@ -72,7 +68,7 @@ const GameDetails = ({
           );
           setOpen(true);
           const { id } = newGuess.data.guess;
-          setGuessId(id);
+          dispatch(setGuessId(id));
         } catch (e) {
           console.error(e);
         }
@@ -94,7 +90,7 @@ const GameDetails = ({
           );
           setOpen(true);
           const { id } = newGuess.data.guess;
-          setGuessId(id);
+          dispatch(setGuessId(id));
         } catch (e) {
           console.error(e);
         }
@@ -136,7 +132,6 @@ const GameDetails = ({
             <Typography
               variant="h7"
               sx={{
-                minHeight: { sm: "0", md: "3rem" },
                 textAlign: "center",
               }}
             >
@@ -145,7 +140,7 @@ const GameDetails = ({
           </Grid>
           <Grid item>
             <TextField
-              disabled={selectedGame.status === "FINISHED"}
+              disabled={selectedGame.status !== "TIMED"}
               name="home"
               sx={{
                 ...scoreField,
@@ -160,12 +155,13 @@ const GameDetails = ({
               variant="outlined"
               value={guess?.home || ""}
               onChange={(e) => {
-                setGuess((prev) => {
-                  return {
-                    ...prev,
+                dispatch(
+                  guessScore({
                     home: e.target.value.replace(/\D/, ""),
-                  };
-                });
+                    away: guess.away,
+                  })
+                );
+                dispatch(setIsClicked());
               }}
               inputProps={{
                 maxLength: 1,
@@ -181,7 +177,7 @@ const GameDetails = ({
 
           <Grid item>
             <TextField
-              disabled={selectedGame.status === "FINISHED"}
+              disabled={selectedGame.status !== "TIMED"}
               name="away"
               sx={{
                 ...scoreField,
@@ -195,12 +191,13 @@ const GameDetails = ({
               variant="outlined"
               value={guess?.away || ""}
               onChange={(e) => {
-                setGuess((prev) => {
-                  return {
-                    ...prev,
+                dispatch(
+                  guessScore({
+                    home: guess.home,
                     away: e.target.value.replace(/\D/, ""),
-                  };
-                });
+                  })
+                );
+                dispatch(setIsClicked());
               }}
               inputProps={{
                 maxLength: 1,
@@ -222,7 +219,6 @@ const GameDetails = ({
             <Typography
               variant="h7"
               sx={{
-                minHeight: { sm: "0", md: "3rem" },
                 textAlign: "center",
               }}
             >
@@ -232,7 +228,7 @@ const GameDetails = ({
 
           <Grid item></Grid>
         </Grid>
-        {points && (
+        {points ? (
           <Typography
             variant="h7"
             sx={{
@@ -242,6 +238,8 @@ const GameDetails = ({
           >
             You scored: {points} points!
           </Typography>
+        ) : (
+          <PopularGuesses popularGuesses={popularGuesses} />
         )}
       </CardContent>
     </Card>
