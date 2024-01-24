@@ -8,10 +8,10 @@ import { openDrawer } from "../redux/eventsSlice";
 import NavBar from "../NavBar";
 import CssBaseline from "@mui/material/CssBaseline";
 import Toolbar from "@mui/material/Toolbar";
-import Scoretables from "../scoretable/Scoretables";
-import LeagueScoretable from "../league_scoreboard/LeagueScoretable";
+import Scoretables from "./scoretable/Scoretables";
+import LeagueScoretable from "./league_scoreboard/LeagueScoretable";
 import { Grid } from "@mui/material";
-import GuessContainer from "./GuessContainer";
+import GuessContainer from "./Guess/GuessContainer";
 import { useMediaQuery } from "@mui/material";
 const drawerWidth = 400;
 

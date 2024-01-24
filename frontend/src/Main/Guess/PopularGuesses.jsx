@@ -6,13 +6,14 @@ import {
   guessScore,
   setIsClicked,
   setPopularGuesses,
-} from "../redux/guessSlice";
+} from "../../redux/guessSlice";
 export default function PopularGuesses() {
-  const { isClicked, popularGuesses, selectedGame } = useSelector(
+  const { isClicked, popularGuesses, selectedGame, guess } = useSelector(
     (state) => state.guess
   );
+  const scoreboardId = useSelector((state) => state.scoreboard.scoreboardId);
   useEffect(() => {
-    if (!popularGuesses?.length) {
+    if (!popularGuesses) {
       const generateGuesses = () => {
         const guesses = [
           "1:0",
@@ -38,16 +39,25 @@ export default function PopularGuesses() {
         }
         return popular;
       };
+      console.log("here");
+
       dispatch(setPopularGuesses(generateGuesses()));
+    } else {
+      popularGuesses.forEach((item, index) => {
+        item.score === guess.home + ":" + guess.away &&
+          dispatch(setIsClicked(index));
+      });
     }
-  }, []);
+  }, [scoreboardId, popularGuesses]);
+
+  console.log(popularGuesses);
+
   const dispatch = useDispatch();
   const handleToggle = (index, score) => {
     dispatch(setIsClicked(index));
     const [home, away] = score.split(":");
     dispatch(guessScore({ home, away }));
   };
-  console.log(popularGuesses);
   return (
     <Box
       sx={{

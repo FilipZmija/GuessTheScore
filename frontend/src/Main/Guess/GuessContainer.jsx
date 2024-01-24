@@ -10,7 +10,8 @@ import {
   setPoints,
   setPopularGuesses,
   setSelectedGame,
-} from "../redux/guessSlice";
+  setIsClicked,
+} from "../../redux/guessSlice";
 
 export default function GuessContainer() {
   const event = useSelector((state) => state.events.selectedGameInfo);
@@ -25,6 +26,7 @@ export default function GuessContainer() {
     dispatch(setPoints());
     dispatch(setPopularGuesses());
     dispatch(setGuessId());
+    dispatch(setIsClicked());
     dispatch(guessScore({ home: "", away: "" }));
   }, [event]);
 

@@ -11,7 +11,7 @@ import { useSelector, useDispatch } from "react-redux";
 import SucessAlert from "./Alert";
 import axios from "axios";
 import PopularGuesses from "./PopularGuesses";
-import { guessScore, setGuessId, setIsClicked } from "../redux/guessSlice";
+import { guessScore, setGuessId, setIsClicked } from "../../redux/guessSlice";
 const teamLogoStyle = {
   objectFit: "contain",
   width: { xs: "120%", xl: "100%" },
@@ -229,16 +229,30 @@ const GameDetails = () => {
 
           <Grid item></Grid>
         </Grid>
-        {points ? (
-          <Typography
-            variant="h7"
-            sx={{
-              textAlign: "center",
-              fontWeight: "bold",
-            }}
-          >
-            You scored: {points} points!
-          </Typography>
+        {selectedGame.status !== "TIMED" ? (
+          points ? (
+            <Typography
+              variant="h7"
+              sx={{
+                textAlign: "center",
+                fontWeight: "bold",
+                padding: "12px 0",
+              }}
+            >
+              You scored: {points} points!
+            </Typography>
+          ) : (
+            <Typography
+              variant="h7"
+              sx={{
+                textAlign: "center",
+                fontWeight: "bold",
+                padding: "12px 0",
+              }}
+            >
+              You have not guessed this game :(
+            </Typography>
+          )
         ) : (
           <PopularGuesses popularGuesses={popularGuesses} />
         )}

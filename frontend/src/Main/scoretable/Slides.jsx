@@ -1,7 +1,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { setScoreboardId } from "../redux/scoreboardSlice";
+import { setScoreboardId } from "../../redux/scoreboardSlice";
 import axios from "axios";
 import Carousel from "react-material-ui-carousel";
 import Scoretable from "./Scoretable";
