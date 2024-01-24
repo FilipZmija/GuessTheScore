@@ -18,6 +18,7 @@ export const eventsSlice = createSlice({
     updateGames: (state, action) => {
       console.log(action);
       state.gameList = action.payload;
+      state.selectedGameInfo = state.gameList[state.selection];
     },
     incrementIndex: (state) => {
       state.dateIndex++;
@@ -27,6 +28,7 @@ export const eventsSlice = createSlice({
     },
     selectEvent: (state, action) => {
       state.selection = action.payload;
+      state.selectedGameInfo = state.gameList[state.selection];
     },
   },
 });

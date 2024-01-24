@@ -10,7 +10,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import axios from "axios";
 
-export default function FormDialog(props) {
+export default function FormDialog({ setReload }) {
   const [open, setOpen] = useState(false);
   const [leagueCode, setLeagueCode] = useState();
   const token = useSelector((state) => state.auth.token);
@@ -20,7 +20,7 @@ export default function FormDialog(props) {
 
   const handleClose = () => {
     setOpen(false);
-    setTimeout(() => setLeagueCode(), 300);
+    setTimeout(() => setLeagueCode(), 100);
   };
 
   const handleSubmit = (event) => {
@@ -42,8 +42,8 @@ export default function FormDialog(props) {
             },
           }
         );
-        console.log(league);
-        setLeagueCode(league.data.id);
+        setLeagueCode(league.data.hash);
+        setReload((prev) => !prev);
       } catch (e) {
         console.error(e);
       }

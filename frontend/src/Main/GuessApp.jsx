@@ -8,68 +8,67 @@ import { openDrawer } from "../redux/eventsSlice";
 import NavBar from "../NavBar";
 import CssBaseline from "@mui/material/CssBaseline";
 import Toolbar from "@mui/material/Toolbar";
-import GameGuess from "./GameGuess";
 import Scoretables from "../scoretable/Scoretables";
 import LeagueScoretable from "../league_scoreboard/LeagueScoretable";
 import { Grid } from "@mui/material";
-
+import GuessContainer from "./GuessContainer";
+import { useMediaQuery } from "@mui/material";
 const drawerWidth = 400;
 
 function ResponsiveDrawer(props) {
   const mobileOpen = useSelector((state) => state.events.mobileOpen);
-
+  const isMobile = useMediaQuery((theme) => theme.breakpoints.down("md"));
   const drawer = (
     <>
       <GameListSwitcher />
     </>
   );
 
-  useEffect(() => {
-    console.log("Score changed");
-  }, []);
-
   return (
     <>
       <Box sx={{ display: "flex" }}>
         <CssBaseline />
         <NavBar />
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={() => openDrawer()}
-          ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
-          }}
-          sx={{
-            display: {
-              xs: "block",
-              sm: "block",
-              md: "none",
-            },
-            "& .MuiDrawer-paper": {
-              boxSizing: "border-box",
+        {isMobile ? (
+          <Drawer
+            variant="temporary"
+            open={mobileOpen}
+            onClose={() => openDrawer()}
+            ModalProps={{
+              keepMounted: true, // Better open performance on mobile.
+            }}
+            sx={{
+              display: {
+                xs: "block",
+                sm: "block",
+                md: "none",
+              },
+              "& .MuiDrawer-paper": {
+                boxSizing: "border-box",
+                width: drawerWidth,
+                backgroundColor: "#EEE7DA",
+              },
+            }}
+          >
+            {drawer}
+          </Drawer>
+        ) : (
+          <Drawer
+            variant="permanent"
+            sx={{
+              display: { xs: "none", sm: "none", md: "block" },
               width: drawerWidth,
-              backgroundColor: "#EEE7DA",
-            },
-          }}
-        >
-          {drawer}
-        </Drawer>
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: "none", sm: "none", md: "block" },
-            width: drawerWidth,
-            flexShrink: 0,
-            "& .MuiDrawer-paper": {
-              boxSizing: "border-box",
-              width: drawerWidth,
-              backgroundColor: "#EEE7DA",
-            },
-          }}
-        >
-          {drawer}
-        </Drawer>
+              flexShrink: 0,
+              "& .MuiDrawer-paper": {
+                boxSizing: "border-box",
+                width: drawerWidth,
+                backgroundColor: "#EEE7DA",
+              },
+            }}
+          >
+            {drawer}
+          </Drawer>
+        )}
         <Box
           component="main"
           sx={{
@@ -94,7 +93,7 @@ function ResponsiveDrawer(props) {
           >
             <Grid item sm={12} lg={6}>
               <Box sx={{ display: "flex", justifyContent: "center" }}>
-                <GameGuess />
+                <GuessContainer />
               </Box>
               <Box sx={{ display: "flex", justifyContent: "center" }}>
                 <Scoretables />
@@ -105,9 +104,9 @@ function ResponsiveDrawer(props) {
               sm={0}
               lg={6}
               sx={{
-                display: { xs: "none", m: "none", lg: "inline-flex" },
+                display: { xs: "none", m: "none", lg: "flex" },
                 justifyContent: "center",
-                alignItems: "center",
+                alignSelf: "start",
               }}
             >
               <LeagueScoretable />
