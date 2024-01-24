@@ -1,18 +1,20 @@
-import * as React from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
+import {
+  Button,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from "@mui/material";
 import axios from "axios";
 
 export default function FormDialog({ setReload }) {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const token = useSelector((state) => state.auth.token);
-  const [message, setMessage] = React.useState();
+  const [message, setMessage] = useState();
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -29,7 +31,7 @@ export default function FormDialog({ setReload }) {
     const code = formJson.code;
     (async () => {
       try {
-        const league = await axios.post(
+        await axios.post(
           `${process.env.REACT_APP_API_URL}/scoreboards/assign`,
           {
             hash: code,
@@ -44,7 +46,6 @@ export default function FormDialog({ setReload }) {
         setReload((prev) => !prev);
       } catch (e) {
         setMessage("Sorry, league with this code does not exist...");
-
         console.error(e);
       }
     })();
