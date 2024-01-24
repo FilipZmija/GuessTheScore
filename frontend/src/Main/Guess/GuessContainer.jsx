@@ -1,5 +1,5 @@
 import React from "react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import GuessSkeleton from "./GuessSkeleton";
 import GameGuess from "./GameGuess";
@@ -28,7 +28,7 @@ export default function GuessContainer() {
     dispatch(setGuessId());
     dispatch(setIsClicked());
     dispatch(guessScore({ home: "", away: "" }));
-  }, [event]);
+  }, [event, dispatch]);
 
   useEffect(() => {
     scoreboardId &&
@@ -49,7 +49,7 @@ export default function GuessContainer() {
         console.log(popularGuesses.data?.PopularGuesses);
         dispatch(setPopularGuesses(popularGuesses.data?.PopularGuesses));
       })();
-  }, [scoreboardId, eventId]);
+  }, [scoreboardId, eventId, dispatch, token]);
 
   useEffect(() => {
     eventId &&
@@ -82,6 +82,6 @@ export default function GuessContainer() {
           console.error(e);
         }
       })();
-  }, [eventId, token, setSelectedGame, setPoints]);
+  }, [eventId, token, dispatch]);
   return <>{selectedGame ? <GameGuess /> : <GuessSkeleton />}</>;
 }

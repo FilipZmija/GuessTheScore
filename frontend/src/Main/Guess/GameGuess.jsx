@@ -8,8 +8,8 @@ import {
   CardMedia,
 } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
-import SucessAlert from "./Alert";
 import axios from "axios";
+import SucessAlert from "./Alert";
 import PopularGuesses from "./PopularGuesses";
 import { guessScore, setGuessId, setIsClicked } from "../../redux/guessSlice";
 const teamLogoStyle = {
@@ -29,13 +29,21 @@ const scoreField = {
   borderRadius: "4px",
 };
 
-const guessCard = {
+const guessCardStyle = {
   display: "flex",
   alignItems: "center",
   backgroundColor: "#faf8f5",
   flexDirection: "column",
   padding: "0.5rem",
   "&:last-child": { paddingBottom: "0.5rem" },
+};
+const cardStyle = {
+  padding: "4%",
+  backgroundColor: "#EEE7DA",
+  borderRadius: "10px",
+  border: "1px solid rgba(0, 0, 0, 0.12)",
+  margin: "0 0 3% 0",
+  display: "inline-block",
 };
 const GameDetails = () => {
   const [open, setOpen] = useState(false);
@@ -97,32 +105,21 @@ const GameDetails = () => {
         }
       })();
     }
-  }, [guess, eventId, token]);
+  }, [guess, eventId, token, dispatch, guessId]);
   const [homeScore, awayScore] = selectedGame
     ? selectedGame.score.split(":")
     : [];
 
   return (
-    <Card
-      sx={{
-        padding: "4%",
-        backgroundColor: "#EEE7DA",
-        borderRadius: "10px",
-        border: "1px solid rgba(0, 0, 0, 0.12)",
-        margin: "0 0 3% 0",
-        display: "inline-block",
-      }}
-    >
-      <CardContent sx={guessCard}>
+    <Card sx={cardStyle}>
+      <CardContent sx={guessCardStyle}>
         <SucessAlert open={open} setOpen={setOpen} />
         <Typography variant="h5">{selectedGame.competition}</Typography>
         <Typography variant="h7" gutterBottom>
           {selectedGame.utcTime}
         </Typography>
-
         <Grid container alignItems="center" spacing={{ xs: 1, lg: 2 }}>
           <Grid item></Grid>
-
           <Grid item sx={teamName}>
             <CardMedia
               component="img"
@@ -175,7 +172,6 @@ const GameDetails = () => {
               size="normal"
             />
           </Grid>
-
           <Grid item>
             <TextField
               disabled={selectedGame.status !== "TIMED"}
@@ -207,7 +203,7 @@ const GameDetails = () => {
                   textAlign: "center",
                   padding: "15%",
                 },
-              }} // Limiting the length to 2 characters
+              }}
             />
           </Grid>
           <Grid item sx={teamName}>
@@ -226,7 +222,6 @@ const GameDetails = () => {
               {selectedGame.awayTeam}
             </Typography>
           </Grid>
-
           <Grid item></Grid>
         </Grid>
         {selectedGame.status !== "TIMED" ? (
