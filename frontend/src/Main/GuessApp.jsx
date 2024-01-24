@@ -1,5 +1,4 @@
 import * as React from "react";
-import { useEffect } from "react";
 import GameListSwitcher from "./GameListSwitcher";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
@@ -15,7 +14,18 @@ import GuessContainer from "./Guess/GuessContainer";
 import { useMediaQuery } from "@mui/material";
 const drawerWidth = 400;
 
-function ResponsiveDrawer(props) {
+const mainStyle = {
+  flexGrow: 1,
+  p: 3,
+  marginLeft: "auto",
+  marginRight: { lg: "0vw", xl: "2vw" },
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  flexWrap: "wrap",
+};
+
+function ResponsiveDrawer() {
   const mobileOpen = useSelector((state) => state.events.mobileOpen);
   const isMobile = useMediaQuery((theme) => theme.breakpoints.down("md"));
   const drawer = (
@@ -35,7 +45,7 @@ function ResponsiveDrawer(props) {
             open={mobileOpen}
             onClose={() => openDrawer()}
             ModalProps={{
-              keepMounted: true, // Better open performance on mobile.
+              keepMounted: true,
             }}
             sx={{
               display: {
@@ -69,19 +79,7 @@ function ResponsiveDrawer(props) {
             {drawer}
           </Drawer>
         )}
-        <Box
-          component="main"
-          sx={{
-            flexGrow: 1,
-            p: 3,
-            marginLeft: "auto",
-            marginRight: { lg: "0vw", xl: "2vw" },
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            flexWrap: "wrap",
-          }}
-        >
+        <Box component="main" sx={mainStyle}>
           <Toolbar />
           <Grid
             container
