@@ -18,7 +18,7 @@ router.get("/:ApiId", validateToken, async (req, res) => {
         include: [
           {
             model: TableLogs,
-            order: [[TableLogs, "position", "ASC"]],
+
             include: [
               {
                 model: Teams,
@@ -28,6 +28,7 @@ router.get("/:ApiId", validateToken, async (req, res) => {
         ],
       },
     ],
+    order: [[Tables, TableLogs, "position", "ASC"]],
   });
   res.status(200).json({ competitionTable });
 });

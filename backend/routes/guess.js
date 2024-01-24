@@ -48,21 +48,21 @@ router.post("/add", validateToken, async (req, res) => {
   } else res.status(400).json({ message: "Event is finished" });
 });
 
-router.put("/edit", validateToken, async (req, res) => {
+router.put("/edit/:GuessId", validateToken, async (req, res) => {
+  const { GuessId } = req.params;
   const { score, EventId } = req.body;
   const { id } = req.user;
   console.log(id, EventId);
   try {
     const guess = await Guess.findOne({
-      where: { EventId: EventId, UserId: id },
+      where: { EventId, UserId: id, id: GuessId },
+      include: [{ model: Event }],
     });
-
     if (!guess) {
       return res.status(404).json({ message: "No such a guess" });
     }
-
-    const event = await Event.findOne({ where: { id: EventId } });
-    if (event.status === "TIMED") {
+    if (guess.dataValues.Event.dataValues.status === "TIMED") {
+      console.log("here");
       await guess.update({ score });
       res.status(200).json({ guess });
     } else {

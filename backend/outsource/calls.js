@@ -132,6 +132,11 @@ const createOrUpdateTeam = async (team, TableId) => {
   const { id, name, shortName, crest } = team.team;
   try {
     const teamModel = await Teams.findOne({ where: { ApiId: id } });
+
+    const tableLogModel = await TableLogs.findOne({
+      where: { TeamApiId: id, TableId },
+    });
+
     if (!teamModel) {
       const team = await Teams.create({
         ApiId: id,
@@ -139,8 +144,10 @@ const createOrUpdateTeam = async (team, TableId) => {
         shortName,
         crest,
       });
-      console.log(team);
-      const teamLog = await TableLogs.create({
+    }
+
+    if (!tableLogModel) {
+      const tableLog = await TableLogs.create({
         position,
         playedGames,
         form,
@@ -152,15 +159,10 @@ const createOrUpdateTeam = async (team, TableId) => {
         goalsAgainst,
         goalDifference,
         TableId,
-        TeamApiId: team.ApiId,
+        TeamApiId: id,
       });
-      const association = await TeamsTables.create({
-        TeamId: id,
-        TableId,
-      });
-      return [team, teamLog, association];
     } else {
-      const teamLog = await TableLogs.update(
+      const tableLog = await TableLogs.update(
         {
           position,
           playedGames,
@@ -178,7 +180,6 @@ const createOrUpdateTeam = async (team, TableId) => {
           individualHooks: true,
         }
       );
-      return [false, teamLog, false];
     }
   } catch (err) {
     return err;

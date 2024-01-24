@@ -16,8 +16,13 @@ module.exports = (sequelize, DataTypes) => {
     this.number++;
     await this.save();
   };
+  PopularGuesses.prototype.decrement = async function () {
+    this.number--;
+    await this.save();
+  };
   PopularGuesses.associate = (models) => {
     PopularGuesses.belongsTo(models.Scoreboard);
+    PopularGuesses.belongsTo(models.Event);
   };
   return PopularGuesses;
 };

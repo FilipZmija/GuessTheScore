@@ -98,12 +98,16 @@ router.get("/info/:EventId", async (req, res) => {
 
 router.get("/guesses/:EventId", validateToken, async (req, res) => {
   const { EventId } = req.params;
+  const { id } = req.user;
+  console.log(id);
   try {
     const event = await Event.findOne({
       where: { id: EventId },
       include: [
         {
           model: Guess,
+          where: { UserId: id },
+          required: false,
         },
       ],
     });
@@ -117,7 +121,6 @@ router.get("/guesses/:EventId", validateToken, async (req, res) => {
 router.get("/guess/user/:EventId", validateToken, async (req, res) => {
   const { EventId } = req.params;
   const { id } = req.user;
-  // const id = 2;
   try {
     const event = await Event.findOne({
       where: { id: EventId },
