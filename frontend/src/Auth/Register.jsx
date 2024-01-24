@@ -99,6 +99,18 @@ const Register = () => {
                     label="Username"
                     variant="outlined"
                     sx={textFieldStyle}
+                    error={
+                      credentails.username &&
+                      (credentails.username.length > 12 ||
+                        credentails.username.length < 4)
+                    }
+                    helperText={
+                      credentails.username &&
+                      (credentails.username.length > 12 ||
+                        credentails.username.length < 4)
+                        ? "Username must be 4-12 characters"
+                        : ""
+                    }
                     onChange={(e) =>
                       setCredentials((prev) => {
                         return { ...prev, username: e.target.value };
@@ -116,6 +128,18 @@ const Register = () => {
                         return { ...prev, password: e.target.value };
                       })
                     }
+                    error={
+                      credentails.password &&
+                      (credentails.password.length > 12 ||
+                        credentails.password.length < 4)
+                    }
+                    helperText={
+                      credentails.password &&
+                      (credentails.password.length > 12 ||
+                        credentails.password.length < 4)
+                        ? "Password must be at least 4 characters"
+                        : ""
+                    }
                   />
                   <TextField
                     required
@@ -131,13 +155,20 @@ const Register = () => {
                     error={
                       credentails.password !== credentails.confirmedPassword
                     }
+                    helperText={
+                      credentails.password !== credentails.confirmedPassword
+                        ? "Passwords do not match"
+                        : ""
+                    }
                   />
                   <Button
                     type="submit"
                     variant="contained"
                     sx={buttonStyle}
                     disabled={
-                      credentails.password !== credentails.confirmedPassword
+                      credentails.password !== credentails.confirmedPassword ||
+                      credentails.username.length > 12 ||
+                      credentails.username.length < 4
                     }
                   >
                     Register

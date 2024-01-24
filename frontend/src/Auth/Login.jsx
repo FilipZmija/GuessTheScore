@@ -86,6 +86,7 @@ const Login = () => {
           <Box sx={{ mt: "8px" }}>
             <form onSubmit={(e) => handleLogin(e)}>
               <TextField
+                required
                 label="Username"
                 variant="outlined"
                 sx={textFieldStyle}
@@ -93,6 +94,7 @@ const Login = () => {
                 onChange={(e) => setUsername(e.target.value)}
               />
               <TextField
+                required
                 label="Password"
                 type="password"
                 variant="outlined"
