@@ -35,6 +35,7 @@ const guessCard = {
   backgroundColor: "#faf8f5",
   flexDirection: "column",
   padding: "0.5rem",
+  "&:last-child": { paddingBottom: "0.5rem" },
 };
 const GameDetails = () => {
   const [open, setOpen] = useState(false);

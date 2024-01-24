@@ -127,7 +127,7 @@ export default function Scoretable({ scoreboardId }) {
         sx={{
           borderRadius: "10px",
           border: "1px solid rgba(0, 0, 0, 0.12)",
-          maxHeight: { xs: "100vh", md: "35.5vh" },
+          maxHeight: { xs: "50vh", md: "35.5vh" },
         }}
         ref={tableEl}
       >
@@ -157,10 +157,18 @@ export default function Scoretable({ scoreboardId }) {
               <TableRow>
                 <TableCell align="center">Rank</TableCell>
                 <TableCell>Name</TableCell>
-                <TableCell align="right">Guesses</TableCell>
                 <TableCell
                   align="right"
-                  sx={{ display: { xs: "none", md: "block" } }}
+                  sx={{ display: { xs: "none", md: "table-cell" } }}
+                >
+                  Guesses
+                </TableCell>
+                <TableCell align="right" sx={{ display: { md: "none" } }}>
+                  Guesses
+                </TableCell>
+                <TableCell
+                  align="right"
+                  sx={{ display: { xs: "none", md: "table-cell" } }}
                 >
                   Ratio [%]
                 </TableCell>
@@ -223,8 +231,11 @@ export default function Scoretable({ scoreboardId }) {
                             top: 0,
                             background: "white",
                             zIndex: 800,
+                            display: { xs: "none", md: "table-cell" },
                           }
-                        : {}
+                        : {
+                            display: { xs: "none", md: "table-cell" },
+                          }
                     }
                   >
                     {row.guesses}
@@ -246,7 +257,7 @@ export default function Scoretable({ scoreboardId }) {
                   >
                     {row.points === 0 || row.guesses === 0
                       ? 0
-                      : row.ratio * 100}
+                      : (row.ratio * 100).toFixed(2)}
                   </TableCell>
                 </TableRow>
               ))}
@@ -295,6 +306,7 @@ export default function Scoretable({ scoreboardId }) {
                       bottom: 0,
                       background: "white",
                       zIndex: 800,
+                      display: { xs: "none", md: "block" },
                     }}
                   >
                     {loggedUser.guesses}
