@@ -8,7 +8,7 @@ const guess = require("./routes/guess");
 const scoreboards = require("./routes/scoreboards");
 const leaguetable = require("./routes/leaguetable");
 
-const { initTable, revaluateScoreboardPositions } = require("./logic/points");
+const { initTable, getHundredGames } = require("./init/functions");
 
 const { getTeamsAndTables, createOrUpdateEvent } = require("./outsource/calls");
 require("dotenv").config();
@@ -38,12 +38,14 @@ app.use("/guess", guess);
 app.use("/scoreboards", scoreboards);
 app.use("/leaguetable", leaguetable);
 
-setInterval(() => getEvents(), 1000 * 60);
-setInterval(() => getTeamsAndTables(), 5000 * 60);
-
+//init D data
+// getHundredGames();
 getTeamsAndTables();
 createOrUpdateEvent(match);
 initTable();
+
+setInterval(() => getEvents(), 1000 * 60);
+setInterval(() => getTeamsAndTables(), 5000 * 60);
 
 const PORT = 3001;
 (async () => {
