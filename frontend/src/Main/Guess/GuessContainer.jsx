@@ -1,5 +1,5 @@
 import React from "react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import GuessSkeleton from "./GuessSkeleton";
 import GameGuess from "./GameGuess";
@@ -10,7 +10,8 @@ import {
   setPoints,
   setPopularGuesses,
   setSelectedGame,
-} from "../redux/guessSlice";
+  resetData,
+} from "../../redux/guessSlice";
 
 export default function GuessContainer() {
   const event = useSelector((state) => state.events.selectedGameInfo);
@@ -21,12 +22,8 @@ export default function GuessContainer() {
   const eventId = event?.id;
 
   useEffect(() => {
-    dispatch(setSelectedGame());
-    dispatch(setPoints());
-    dispatch(setPopularGuesses());
-    dispatch(setGuessId());
-    dispatch(guessScore({ home: "", away: "" }));
-  }, [event]);
+    dispatch(resetData());
+  }, [event, dispatch]);
 
   useEffect(() => {
     scoreboardId &&
@@ -47,7 +44,7 @@ export default function GuessContainer() {
         console.log(popularGuesses.data?.PopularGuesses);
         dispatch(setPopularGuesses(popularGuesses.data?.PopularGuesses));
       })();
-  }, [scoreboardId, eventId]);
+  }, [scoreboardId, eventId, dispatch, token]);
 
   useEffect(() => {
     eventId &&
@@ -67,8 +64,13 @@ export default function GuessContainer() {
           const [home, away] = userGuess
             ? userGuess?.score.split(":")
             : ["", ""];
-          dispatch(setPoints(userGuess.points));
-
+          console.log(userGuess);
+          dispatch(
+            setPoints({
+              currentPoints: userGuess.currentPoints,
+              points: userGuess.points,
+            })
+          );
           dispatch(setGuessId(userGuess?.id || null));
           dispatch(
             guessScore({
@@ -80,6 +82,6 @@ export default function GuessContainer() {
           console.error(e);
         }
       })();
-  }, [eventId, token, setSelectedGame, setPoints]);
+  }, [eventId, token, dispatch]);
   return <>{selectedGame ? <GameGuess /> : <GuessSkeleton />}</>;
 }

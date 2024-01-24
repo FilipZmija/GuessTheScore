@@ -17,9 +17,11 @@ const router = createBrowserRouter([
   { path: "auth/register", element: <Register /> },
 ]);
 root.render(
-  <Provider store={store}>
-    <ThemeProvider theme={theme}>
-      <RouterProvider router={router} />
-    </ThemeProvider>
-  </Provider>
+  <React.StrictMode>
+    <Provider store={store}>
+      <ThemeProvider theme={theme}>
+        <RouterProvider router={router} />
+      </ThemeProvider>
+    </Provider>
+  </React.StrictMode>
 );

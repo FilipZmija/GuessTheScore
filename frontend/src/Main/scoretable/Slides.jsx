@@ -1,10 +1,10 @@
-import React from "react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { setScoreboardId } from "../redux/scoreboardSlice";
+import { setScoreboardId } from "../../redux/scoreboardSlice";
 import axios from "axios";
 import Carousel from "react-material-ui-carousel";
 import Scoretable from "./Scoretable";
+
 export default function Slides({ reload }) {
   const [scoreIds, setScoreIds] = useState();
   const token = useSelector((state) => state.auth.token);
@@ -24,17 +24,17 @@ export default function Slides({ reload }) {
         setScoreIds(response.data);
         dispatch(setScoreboardId(response?.data[0].ScoreboardId));
       } catch (e) {
-        console.log(e);
+        console.error(e);
       }
     };
     getScoreData();
-  }, [token, reload]);
+  }, [token, reload, dispatch]);
 
   return (
     scoreIds && (
       <Carousel
         sx={{ maxHeight: { xs: "100vh", md: "50vh" } }}
-        onChange={(now, prev) => {
+        onChange={(now) => {
           dispatch(setScoreboardId(scoreIds[now].ScoreboardId));
         }}
         autoPlay={false}

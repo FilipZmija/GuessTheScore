@@ -1,19 +1,18 @@
-import * as React from "react";
-import { useEffect } from "react";
-import Box from "@mui/material/Box";
-import Alert from "@mui/material/Alert";
-import IconButton from "@mui/material/IconButton";
-import Collapse from "@mui/material/Collapse";
+import React, { useEffect } from "react";
+import { Box, Alert, IconButton, Collapse } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
+const alertStyle = {
+  width: { xs: "80%", md: "25%", lg: "15%" },
+  position: "absolute",
+};
 export default function SucessAlert({ open, setOpen }) {
   useEffect(() => {
     setTimeout(() => setOpen(false), 5000);
   }, [setOpen]);
+
   return (
-    <Box
-      sx={{ width: { xs: "80%", md: "25%", lg: "15%" }, position: "absolute" }}
-    >
+    <Box sx={alertStyle}>
       <Collapse in={open}>
         <Alert
           action={

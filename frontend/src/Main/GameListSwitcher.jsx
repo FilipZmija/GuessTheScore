@@ -1,9 +1,9 @@
 import React from "react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import GameList from "./GameList";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
-import { Box, Button, Grid, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { getDate } from "../functions/date";
 import {
   incrementIndex,
@@ -29,71 +29,66 @@ const buttonsContainer = {
 
 const switchContainer = { overflow: "auto" };
 
+const noGameContainer = {
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  alignItems: "center",
+  marginTop: "35vh",
+};
+
 export default function GameListSwitcher() {
   const dispatch = useDispatch();
   const dateIndex = useSelector((state) => state.events.dateIndex);
-  const [date, setDate] = useState(getDate(0));
   const token = useSelector((state) => state.auth.token);
   const games = useSelector((state) => state.events.gameList);
+  const date = getDate(dateIndex);
   const increment = () => {
     dispatch(incrementIndex());
   };
   const decrement = () => {
     dispatch(decrementIndex());
   };
-  useEffect(() => setDate(getDate(dateIndex)), [dateIndex]);
 
   useEffect(() => {
     try {
       const getGames = async (filters, date) => {
-        const gamesList = await axios.get(
-          `${process.env.REACT_APP_API_URL}/event/all`,
-          filters.length > 0
-            ? {
-                headers: {
-                  Authorization: "Bearer " + token,
-                },
-                params: { filterBy: `${filters.join(",")}`, date: date },
-              }
-            : {
-                headers: {
-                  Authorization: "Bearer " + token,
-                },
-                params: { date: date },
-              }
-        );
-        const games =
-          filters.length > 0
-            ? filters.map((filter, index) => {
-                return { [filter]: gamesList[index] };
-              })
-            : gamesList;
+        try {
+          const gamesList = await axios.get(
+            `${process.env.REACT_APP_API_URL}/event/all`,
+            filters.length > 0
+              ? {
+                  headers: {
+                    Authorization: "Bearer " + token,
+                  },
+                  params: { filterBy: `${filters.join(",")}`, date: date },
+                }
+              : {
+                  headers: {
+                    Authorization: "Bearer " + token,
+                  },
+                  params: { date: date },
+                }
+          );
 
-        dispatch(
-          updateGames(filters.length > 0 ? gamesList.data[0] : gamesList.data)
-        );
+          dispatch(
+            updateGames(filters.length > 0 ? gamesList.data[0] : gamesList.data)
+          );
+        } catch (e) {
+          console.error(e);
+        }
       };
       date && getGames(filters, date);
     } catch (e) {
       console.error(e);
     }
-  }, [date, token, filters]);
-
-  // useEffect(() => {
-  //   date === getDate(0) &&
-  //     (games === undefined || games?.length === 0) &&
-  //     increment();
-  // }, [getDate, incrementIndex, dispatch]);
+  }, [date, token, dispatch]);
 
   return (
     <>
       <Toolbar />
       <Box sx={switchContainer}>
-        <Box
-          sx={{
-            ...buttonsContainer,
-          }}
-        >
+        <Box sx={buttonsContainer}>
           <Button onClick={decrement}>Prev</Button>
           {date}
           <Button onClick={increment}>Next</Button>
@@ -102,15 +97,7 @@ export default function GameListSwitcher() {
           <GameList games={games} />
         ) : (
           <>
-            <Container
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                marginTop: "35vh",
-              }}
-            >
+            <Container sx={noGameContainer}>
               <Typography variant="h4">No games on this date</Typography>
             </Container>
           </>

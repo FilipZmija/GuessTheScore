@@ -8,10 +8,10 @@ import {
   CardMedia,
 } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
-import SucessAlert from "./Alert";
 import axios from "axios";
+import SucessAlert from "./Alert";
 import PopularGuesses from "./PopularGuesses";
-import { guessScore, setGuessId, setIsClicked } from "../redux/guessSlice";
+import { guessScore, setGuessId, setIsClicked } from "../../redux/guessSlice";
 const teamLogoStyle = {
   objectFit: "contain",
   width: { xs: "120%", xl: "100%" },
@@ -29,7 +29,7 @@ const scoreField = {
   borderRadius: "4px",
 };
 
-const guessCard = {
+const guessCardStyle = {
   display: "flex",
   alignItems: "center",
   backgroundColor: "#faf8f5",
@@ -37,92 +37,96 @@ const guessCard = {
   padding: "0.5rem",
   "&:last-child": { paddingBottom: "0.5rem" },
 };
+const cardStyle = {
+  padding: "4%",
+  backgroundColor: "#EEE7DA",
+  borderRadius: "10px",
+  border: "1px solid rgba(0, 0, 0, 0.12)",
+  margin: "0 0 3% 0",
+  display: "inline-block",
+};
 const GameDetails = () => {
   const [open, setOpen] = useState(false);
-  const { guess, selectedGame, guessId, points, popularGuesses } = useSelector(
-    (state) => state.guess
-  );
+  const {
+    guess,
+    selectedGame,
+    guessId,
+    points,
+    popularGuesses,
+    currentPoints,
+  } = useSelector((state) => state.guess);
   const eventId = selectedGame.id;
   const token = useSelector((state) => state.auth.token);
-  const isFirstInit = useRef(true);
+  const hasChanged = useRef(true);
   const dispatch = useDispatch();
+
   useEffect(() => {
-    if (isFirstInit.current) {
-      isFirstInit.current = false;
+    if (hasChanged.current) {
       return;
-    }
-    const { home, away } = guess;
-    if (home.length > 0 && away.length > 0 && eventId && !guessId) {
-      (async () => {
-        try {
-          const newGuess = await axios.post(
-            `${process.env.REACT_APP_API_URL}/guess/add`,
-            {
-              score: `${home}:${away}`,
-              EventId: eventId,
-            },
-            {
-              headers: {
-                Authorization: "Bearer " + token,
+    } else {
+      const { home, away } = guess;
+      if (home.length > 0 && away.length > 0 && eventId && !guessId) {
+        (async () => {
+          try {
+            const newGuess = await axios.post(
+              `${process.env.REACT_APP_API_URL}/guess/add`,
+              {
+                score: `${home}:${away}`,
+                EventId: eventId,
               },
-            }
-          );
-          setOpen(true);
-          const { id } = newGuess.data.guess;
-          dispatch(setGuessId(id));
-        } catch (e) {
-          console.error(e);
-        }
-      })();
-    } else if (home.length > 0 && away.length > 0 && guessId && eventId) {
-      (async () => {
-        try {
-          const newGuess = await axios.put(
-            `${process.env.REACT_APP_API_URL}/guess/edit/${guessId}`,
-            {
-              score: `${home}:${away}`,
-              EventId: eventId,
-            },
-            {
-              headers: {
-                Authorization: "Bearer " + token,
+              {
+                headers: {
+                  Authorization: "Bearer " + token,
+                },
+              }
+            );
+            setOpen(true);
+            const { id } = newGuess.data.guess;
+            dispatch(setGuessId(id));
+          } catch (e) {
+            console.error(e);
+          }
+        })();
+      } else if (home.length > 0 && away.length > 0 && guessId && eventId) {
+        (async () => {
+          try {
+            const newGuess = await axios.put(
+              `${process.env.REACT_APP_API_URL}/guess/edit/${guessId}`,
+              {
+                score: `${home}:${away}`,
+                EventId: eventId,
               },
-            }
-          );
-          setOpen(true);
-          const { id } = newGuess.data.guess;
-          dispatch(setGuessId(id));
-        } catch (e) {
-          console.error(e);
-        }
-      })();
+              {
+                headers: {
+                  Authorization: "Bearer " + token,
+                },
+              }
+            );
+            setOpen(true);
+            const { id } = newGuess.data.guess;
+            dispatch(setGuessId(id));
+          } catch (e) {
+            console.error(e);
+          }
+        })();
+      }
     }
-  }, [guess, eventId, token]);
+  }, [guess, eventId, token, dispatch, guessId]);
+
   const [homeScore, awayScore] = selectedGame
     ? selectedGame.score.split(":")
     : [];
 
   return (
-    <Card
-      sx={{
-        padding: "4%",
-        backgroundColor: "#EEE7DA",
-        borderRadius: "10px",
-        border: "1px solid rgba(0, 0, 0, 0.12)",
-        margin: "0 0 3% 0",
-        display: "inline-block",
-      }}
-    >
-      <CardContent sx={guessCard}>
+    <Card sx={cardStyle}>
+      <CardContent sx={guessCardStyle}>
         <SucessAlert open={open} setOpen={setOpen} />
         <Typography variant="h5">{selectedGame.competition}</Typography>
         <Typography variant="h7" gutterBottom>
           {selectedGame.utcTime}
         </Typography>
-
         <Grid container alignItems="center" spacing={{ xs: 1, lg: 2 }}>
           <Grid item></Grid>
-
           <Grid item sx={teamName}>
             <CardMedia
               component="img"
@@ -156,6 +160,7 @@ const GameDetails = () => {
               variant="outlined"
               value={guess?.home || ""}
               onChange={(e) => {
+                hasChanged.current = false;
                 dispatch(
                   guessScore({
                     home: e.target.value.replace(/\D/, ""),
@@ -175,7 +180,6 @@ const GameDetails = () => {
               size="normal"
             />
           </Grid>
-
           <Grid item>
             <TextField
               disabled={selectedGame.status !== "TIMED"}
@@ -192,6 +196,7 @@ const GameDetails = () => {
               variant="outlined"
               value={guess?.away || ""}
               onChange={(e) => {
+                hasChanged.current = false;
                 dispatch(
                   guessScore({
                     home: guess.home,
@@ -207,7 +212,7 @@ const GameDetails = () => {
                   textAlign: "center",
                   padding: "15%",
                 },
-              }} // Limiting the length to 2 characters
+              }}
             />
           </Grid>
           <Grid item sx={teamName}>
@@ -226,21 +231,48 @@ const GameDetails = () => {
               {selectedGame.awayTeam}
             </Typography>
           </Grid>
-
           <Grid item></Grid>
         </Grid>
-        {points ? (
-          <Typography
-            variant="h7"
-            sx={{
-              textAlign: "center",
-              fontWeight: "bold",
-            }}
-          >
-            You scored: {points} points!
-          </Typography>
+        {selectedGame.status !== "TIMED" ? (
+          points ? (
+            <Typography
+              variant="h7"
+              sx={{
+                textAlign: "center",
+                fontWeight: "bold",
+                padding: "12px 0",
+              }}
+            >
+              You scored: {points} points!
+            </Typography>
+          ) : selectedGame.status === "IN_PLAY" ? (
+            <Typography
+              variant="h7"
+              sx={{
+                textAlign: "center",
+                fontWeight: "bold",
+                padding: "12px 0",
+              }}
+            >
+              Game in progress! Your possible points {currentPoints}!
+            </Typography>
+          ) : (
+            <Typography
+              variant="h7"
+              sx={{
+                textAlign: "center",
+                fontWeight: "bold",
+                padding: "12px 0",
+              }}
+            >
+              You have not guessed this game :(
+            </Typography>
+          )
         ) : (
-          <PopularGuesses popularGuesses={popularGuesses} />
+          <PopularGuesses
+            popularGuesses={popularGuesses}
+            hasChanged={hasChanged}
+          />
         )}
       </CardContent>
     </Card>

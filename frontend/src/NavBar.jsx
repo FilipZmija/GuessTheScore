@@ -1,20 +1,27 @@
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
-
 import MenuIcon from "@mui/icons-material/Menu";
 import Typography from "@mui/material/Typography";
 import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
 import * as React from "react";
 import Toolbar from "@mui/material/Toolbar";
 import Menu from "@mui/material/Menu";
-
 import Avatar from "@mui/material/Avatar";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import { logout } from "./redux/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { openDrawer } from "./redux/eventsSlice";
+
+const titleStyle = {
+  flexGrow: 1,
+  fontFamily: "monospace",
+  fontWeight: 700,
+  letterSpacing: ".3rem",
+  color: "inherit",
+  textDecoration: "none",
+};
 const handleLogout = (dispatchFnc) => {
   localStorage.removeItem("token");
   dispatchFnc(logout());
@@ -83,12 +90,7 @@ function ResponsiveAppBar() {
             sx={{
               ml: 2,
               display: { md: "flex", sm: "none", xs: "none" },
-              flexGrow: 1,
-              fontFamily: "monospace",
-              fontWeight: 700,
-              letterSpacing: ".3rem",
-              color: "inherit",
-              textDecoration: "none",
+              ...titleStyle,
             }}
           >
             GUESS THE SCORE
@@ -102,12 +104,7 @@ function ResponsiveAppBar() {
               ml: 2,
               mr: 2,
               display: { md: "none", sm: "flex" },
-              flexGrow: 1,
-              fontFamily: "monospace",
-              fontWeight: 700,
-              letterSpacing: ".3rem",
-              color: "inherit",
-              textDecoration: "none",
+              ...titleStyle,
             }}
           >
             GTS
