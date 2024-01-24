@@ -53,10 +53,10 @@ const Register = () => {
   const handleSubmit = async (ev) => {
     ev.preventDefault();
     try {
-      const userData = await axios.post(
-        `${process.env.REACT_APP_API_URL}/user/register`,
-        { username: credentails.username, password: credentails.password }
-      );
+      await axios.post(`${process.env.REACT_APP_API_URL}/user/register`, {
+        username: credentails.username,
+        password: credentails.password,
+      });
       setSuccess(true);
     } catch (e) {
       console.error(e);

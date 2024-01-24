@@ -24,7 +24,7 @@ export default function Auth() {
         dispatch(login({ username, token }));
       })();
     }
-  }, []);
+  }, [dispatch]);
 
   return (
     <>
