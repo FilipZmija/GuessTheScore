@@ -47,9 +47,14 @@ const cardStyle = {
 };
 const GameDetails = () => {
   const [open, setOpen] = useState(false);
-  const { guess, selectedGame, guessId, points, popularGuesses } = useSelector(
-    (state) => state.guess
-  );
+  const {
+    guess,
+    selectedGame,
+    guessId,
+    points,
+    popularGuesses,
+    currentPoints,
+  } = useSelector((state) => state.guess);
   const eventId = selectedGame.id;
   const token = useSelector((state) => state.auth.token);
   const hasChanged = useRef(true);
@@ -239,6 +244,17 @@ const GameDetails = () => {
               }}
             >
               You scored: {points} points!
+            </Typography>
+          ) : selectedGame.status === "IN_PLAY" ? (
+            <Typography
+              variant="h7"
+              sx={{
+                textAlign: "center",
+                fontWeight: "bold",
+                padding: "12px 0",
+              }}
+            >
+              Game in progress! Your possible points {currentPoints}!
             </Typography>
           ) : (
             <Typography

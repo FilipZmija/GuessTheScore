@@ -10,7 +10,7 @@ import {
   setPoints,
   setPopularGuesses,
   setSelectedGame,
-  setIsClicked,
+  resetData,
 } from "../../redux/guessSlice";
 
 export default function GuessContainer() {
@@ -22,12 +22,7 @@ export default function GuessContainer() {
   const eventId = event?.id;
 
   useEffect(() => {
-    dispatch(setSelectedGame());
-    dispatch(setPoints());
-    dispatch(setPopularGuesses());
-    dispatch(setGuessId());
-    dispatch(setIsClicked());
-    dispatch(guessScore({ home: "", away: "" }));
+    dispatch(resetData());
   }, [event, dispatch]);
 
   useEffect(() => {
@@ -69,8 +64,13 @@ export default function GuessContainer() {
           const [home, away] = userGuess
             ? userGuess?.score.split(":")
             : ["", ""];
-          dispatch(setPoints(userGuess.points));
-
+          console.log(userGuess);
+          dispatch(
+            setPoints({
+              currentPoints: userGuess.currentPoints,
+              points: userGuess.points,
+            })
+          );
           dispatch(setGuessId(userGuess?.id || null));
           dispatch(
             guessScore({
