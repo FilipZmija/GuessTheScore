@@ -10,7 +10,12 @@ const leaguetable = require("./routes/leaguetable");
 
 const { initTable, getHundredGames } = require("./init/functions");
 
-const { getTeamsAndTables, createOrUpdateEvent } = require("./outsource/calls");
+const {
+  getTeamsAndTables,
+  createOrUpdateEvent,
+  getEvents,
+} = require("./outsource/calls");
+
 require("dotenv").config();
 const cookieParser = require("cookie-parser");
 app.use(express.json({ limit: "10mb" }));
@@ -29,6 +34,7 @@ app.use(cors());
 //   awayTeamCrest: "https://crests.football-data.org/267.png",
 //   score: "1:1",
 // };
+//createOrUpdateEvent(match);
 // setInterval(() => createOrUpdateEvent(match), 1000 * 10);
 //TEST
 
@@ -41,7 +47,6 @@ app.use("/leaguetable", leaguetable);
 //init D data
 // getHundredGames();
 getTeamsAndTables();
-createOrUpdateEvent(match);
 initTable();
 
 setInterval(() => getEvents(), 1000 * 60);

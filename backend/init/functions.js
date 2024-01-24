@@ -1,5 +1,5 @@
 const { Scoreboard, ScoreboardUser, Users } = require("../models");
-const { getEvents } = require("./outsource/calls");
+const { getEvents } = require("../outsource/calls");
 const initTable = async () => {
   const exists = await Scoreboard.findOne({ where: { name: "All players" } });
   if (!exists) {
