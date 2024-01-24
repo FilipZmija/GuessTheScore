@@ -1,19 +1,34 @@
 import * as React from "react";
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { TableContainer } from "@mui/material";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import { Typography, Box, Skeleton } from "@mui/material";
-import Paper from "@mui/material/Paper";
-import { useTheme } from "@mui/material/styles";
+import {
+  TableContainer,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
+  Box,
+  Skeleton,
+  Paper,
+} from "@mui/material";
 import axios from "axios";
 
-const data = undefined;
+const tableContainerStyle = {
+  maxWidth: 650,
+  padding: "3%",
+  backgroundColor: "#EEE7DA",
+  borderRadius: "10px",
+  border: "1px solid rgba(0, 0, 0, 0.12)",
+};
 
+const tableTitleStyle = {
+  paddingTop: "1.6%",
+  textAlign: "center",
+  display: "flex",
+  justifyContent: "center",
+};
 export default function LeagueScoretable() {
   const rowDetails = [
     { head: "", field: "position" },
@@ -25,7 +40,6 @@ export default function LeagueScoretable() {
     { head: "G", field: "goals" },
     { head: "PTS", field: "points" },
   ];
-  const theme = useTheme();
   const token = useSelector((state) => state.auth.token);
   const [scoretable, setScoretable] = useState();
   const game = useSelector((state) => state.events.selectedGameInfo);
@@ -74,27 +88,9 @@ export default function LeagueScoretable() {
   };
 
   return (
-    <TableContainer
-      component={Paper}
-      sx={{
-        maxWidth: 650,
-        padding: "3%",
-        backgroundColor: "#EEE7DA",
-        borderRadius: "10px",
-        border: "1px solid rgba(0, 0, 0, 0.12)",
-      }}
-    >
+    <TableContainer component={Paper} sx={tableContainerStyle}>
       <Box sx={{ backgroundColor: "#faf8f5" }}>
-        <Typography
-          variant="h5"
-          gutterBottom
-          sx={{
-            paddingTop: "1.6%",
-            textAlign: "center",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
+        <Typography variant="h5" gutterBottom sx={tableTitleStyle}>
           {!scoretable ? <Skeleton sx={{ width: "40%" }} /> : scoretable?.name}
         </Typography>
         <Table
