@@ -16,44 +16,35 @@ code {
     monospace;
 }
 
-/* Styling the scrollbar for Webkit browsers (Chrome, Safari) */
 ::-webkit-scrollbar {
-  width: 12px; /* Set the width of the scrollbar */
+  width: 12px;
 }
 
 ::-webkit-scrollbar-track {
-  background-color: #eee7da; /* Set the background color of the track */
+  background-color: #eee7da;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #ddd3be; /* Set the color of the scrollbar thumb */
-  border-radius: 6px; /* Set the border radius of the thumb */
+  background-color: #ddd3be;
+  border-radius: 6px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #a19684; /* Set the color of the scrollbar thumb on hover */
+  background-color: #a19684;
 }
 
-/* Styling the scrollbar for Firefox */
-/* Note: Firefox uses a different syntax for scrollbar styling, and it is more limited */
-/* You may need to test and adjust these styles based on your specific needs */
-
-/* Track */
 * {
-  scrollbar-color: #d4cbb1 #ece3ce;
+  scrollbar-color: #eee7da;
 }
 
-/* Handle on hover */
 * {
-  scrollbar-color: #bfb29d #ece3ce;
+  scrollbar-color: #ddd3be;
 }
 
-/* Handle */
 *::-moz-scrollbar-thumb {
-  background-color: #d4cbb1;
+  background-color: #eee7da;
 }
 
-/* Handle on hover */
 *::-moz-scrollbar-thumb:hover {
   background-color: #bfb29d;
 }
