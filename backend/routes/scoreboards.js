@@ -7,6 +7,7 @@ const {
   PopularGuesses,
 } = require("../models");
 const { validateToken } = require("../auth/JWT");
+const { asignUserToMainScoreboard } = require("../init/functions");
 router.use(express.json({ limit: "10mb" }));
 router.use((req, res, next) => {
   next();
@@ -14,8 +15,19 @@ router.use((req, res, next) => {
 
 router.post("/create", validateToken, async (req, res) => {
   const { name } = req.body;
+  const { id } = req.user;
+  let hash = "";
+  const alphanumericSymbols =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  for (let i = 0; i < 8; i++) {
+    hash +=
+      alphanumericSymbols[
+        Math.floor(Math.random() * alphanumericSymbols.length)
+      ];
+  }
   try {
-    const scoreboard = await Scoreboard.create({ name });
+    const scoreboard = await Scoreboard.create({ name, hash });
+    await asignUserToMainScoreboard(id, scoreboard.id);
     res.status(200).json(scoreboard);
   } catch (e) {
     res.status(404).send(e);
@@ -24,11 +36,13 @@ router.post("/create", validateToken, async (req, res) => {
 
 router.post("/assign", validateToken, async (req, res) => {
   const userId = req.user.id;
-  const { scoreboardId } = req.body;
+  const { hash } = req.body;
   try {
+    const scoreboard = await Scoreboard.findOne({ where: { hash } });
+    console.log(scoreboard);
     const association = await ScoreboardUser.create({
       UserId: userId,
-      ScoreboardId: scoreboardId,
+      ScoreboardId: scoreboard.id,
     });
     console.log(association);
     res.status(200).json(association);
@@ -39,17 +53,31 @@ router.post("/assign", validateToken, async (req, res) => {
 
 router.get("/:scoreboardId", validateToken, async (req, res) => {
   const { scoreboardId } = req.params;
+  const { page } = req.query;
+  const { id } = req.user;
+  const limit = 10;
   try {
-    const scoreboard = await Scoreboard.findByPk(scoreboardId, {
-      include: [
-        {
-          model: Users,
-          through: { model: ScoreboardUser },
-        },
-      ],
-      order: [[Users, "points", "DESC"]],
+    const offset = (page - 1) * limit || 0;
+    const scoreboard = await Scoreboard.findByPk(scoreboardId);
+    const users = await scoreboard.getUsers({
+      limit,
+      offset,
+      order: [["ratio", "DESC"]],
     });
-    res.status(200).json({ scoreboard });
+    let loggedUser;
+    if (users.findIndex((user) => user.id === id) === -1) {
+      [loggedUser] = await scoreboard.getUsers({
+        where: { id },
+      });
+      if (loggedUser?.id < users[0]?.id) {
+        loggedUser = null;
+      }
+      console.log("HERE");
+    } else {
+      loggedUser = null;
+    }
+    const response = { ...scoreboard.dataValues, loggedUser, users };
+    res.status(200).json({ scoreboard: response });
   } catch (e) {
     console.log(e);
 
@@ -75,11 +103,20 @@ router.get("/users/all", validateToken, async (req, res) => {
 
 router.get("/popular/:id", validateToken, async (req, res) => {
   const { id } = req.params;
+  const { EventId } = req.query;
   try {
-    const scoreboards = await Scoreboard.findAll({
+    const scoreboards = await Scoreboard.findOne({
       where: { id },
-      include: [{ model: PopularGuesses }],
+      include: [
+        {
+          model: PopularGuesses,
+          where: { EventId },
+        },
+      ],
+      order: [[PopularGuesses, "number", "DESC"]],
     });
+    console.log(scoreboards?.PopularGuesses.map((item) => item.number));
+    scoreboards?.PopularGuesses.splice(3);
     res.status(200).json(scoreboards);
   } catch (e) {
     console.log(e);
