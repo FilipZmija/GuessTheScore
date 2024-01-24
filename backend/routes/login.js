@@ -3,7 +3,7 @@ const router = express.Router();
 const { Users } = require("../models");
 const bcrypt = require("bcrypt");
 const { createTokens, validateToken } = require("../auth/JWT");
-const { asignUserToMainScoreboard } = require("../logic/points");
+const { asignUserToMainScoreboard } = require("../init/functions");
 
 router.use(express.json({ limit: "10mb" }));
 router.use((req, res, next) => {
@@ -13,12 +13,15 @@ router.use((req, res, next) => {
 //register user
 router.post("/register", async (req, res) => {
   const { username, password } = req.body;
-  console.log(req.body);
+  if (username.length > 12 || username.length < 4 || password.length < 4)
+    return res
+      .status(400)
+      .json({ message: "Username or password with invalid length" });
+
   const hash = await bcrypt.hash(password, 10);
 
   try {
     const newUser = await Users.create({ username, password: hash });
-    asignUserToMainScoreboard(newUser.id);
     res.json({ newUser });
   } catch (e) {
     console.log(e);

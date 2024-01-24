@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { Event, Guess } = require("../models");
+const { Event, Guess, Teams, EventTeams } = require("../models");
 const { validateToken } = require("../auth/JWT");
 router.use(express.json({ limit: "10mb" }));
 router.use((req, res, next) => {
@@ -24,21 +24,53 @@ router.get("/all", async (req, res) => {
         ? await Promise.all(
             filterBy.map(
               async (item) =>
-                await Event.findAll({
-                  where: { status: filter[item], date: date },
-                })
+                await Event.findAll(
+                  {
+                    where: { status: filter[item], date: date },
+                    include: [
+                      {
+                        model: Teams,
+                        through: { model: EventTeams },
+                      },
+                    ],
+                  },
+                  {}
+                )
             )
           )
-        : await Event.findAll({ where: { date: date } });
+        : await Event.findAll({
+            where: { date: date },
+            include: [
+              {
+                model: Teams,
+                through: { model: EventTeams },
+              },
+            ],
+          });
     } else {
       event = filterBy
         ? await Promise.all(
             filterBy.map(
               async (item) =>
-                await Event.findAll({ where: { status: filter[item] } })
+                await Event.findAll({
+                  where: { status: filter[item] },
+                  include: [
+                    {
+                      model: Teams,
+                      through: { model: EventTeams },
+                    },
+                  ],
+                })
             )
           )
-        : await Event.findAll();
+        : await Event.findAll({
+            include: [
+              {
+                model: Teams,
+                through: { model: EventTeams },
+              },
+            ],
+          });
     }
     res.status(200).json(event.sort((a, b) => a.utcDate - b.utcDate));
   } catch (e) {
@@ -49,7 +81,15 @@ router.get("/all", async (req, res) => {
 router.get("/info/:EventId", async (req, res) => {
   const { EventId } = req.params;
   try {
-    const event = await Event.findAll({ where: { id: EventId } });
+    const event = await Event.findAll({
+      where: { id: EventId },
+      include: [
+        {
+          model: Teams,
+          through: { model: EventTeams },
+        },
+      ],
+    });
     res.status(200).json({ event });
   } catch (e) {
     res.status(400).json(e);
@@ -58,12 +98,43 @@ router.get("/info/:EventId", async (req, res) => {
 
 router.get("/guesses/:EventId", validateToken, async (req, res) => {
   const { EventId } = req.params;
+  const { id } = req.user;
+  console.log(id);
   try {
-    const event = await Event.findOne({ where: { id: EventId } });
-    const guesses = await Guess.findAll({ where: { EventId } });
-    res.status(200).json({ event: { ...event.dataValues, guesses } });
+    const event = await Event.findOne({
+      where: { id: EventId },
+      include: [
+        {
+          model: Guess,
+          where: { UserId: id },
+          required: false,
+        },
+      ],
+    });
+    res.status(200).json({ event });
   } catch (e) {
     res.status(400).json(e);
+    console.log(e);
+  }
+});
+
+router.get("/guess/user/:EventId", validateToken, async (req, res) => {
+  const { EventId } = req.params;
+  const { id } = req.user;
+  try {
+    const event = await Event.findOne({
+      where: { id: EventId },
+      include: [
+        {
+          model: Guess,
+          where: { UserId: id },
+        },
+      ],
+    });
+    res.status(200).json({ event });
+  } catch (e) {
+    res.status(400).json(e);
+    console.log(e);
   }
 });
 

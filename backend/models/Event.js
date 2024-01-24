@@ -47,6 +47,11 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      guesses: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
     },
     {
       hooks: {
@@ -55,6 +60,7 @@ module.exports = (sequelize, DataTypes) => {
           if (event.changed("status") && event.status === "FINISHED") {
             console.log("FINISHING and CALCU");
             evaluatePoints(event);
+            setTimeout(() => revaluateScoreboardPositions(), 10000);
           }
         },
       },
@@ -62,6 +68,32 @@ module.exports = (sequelize, DataTypes) => {
   );
   Event.associate = (models) => {
     Event.hasMany(models.Guess);
+    Event.belongsToMany(models.Teams, { through: models.EventTeams });
+    Event.belongsTo(models.Competition);
+    Event.hasMany(models.PopularGuesses);
+  };
+
+  Event.prototype.increment = async function () {
+    this.guesses++;
+    await this.save();
+  };
+
+  Event.prototype.decrement = async function () {
+    console.log("DECREMENT");
+    this.guesses--;
+    await this.save();
+  };
+  const revaluateScoreboardPositions = async () => {
+    const allScoreboards = await sequelize.models.Scoreboard.findAll();
+
+    await Promise.all(
+      allScoreboards.map(async (scoreboard) => {
+        const users = await scoreboard.getUsers({ order: [["ratio", "DESC"]] });
+        users.map(async (user, index) => {
+          user.ScoreboardUser.update({ position: index + 1 });
+        });
+      })
+    );
   };
 
   async function evaluatePoints(event) {
@@ -86,14 +118,22 @@ module.exports = (sequelize, DataTypes) => {
         ) {
           points += 2;
         }
+
         guess.points = points;
         const user = await sequelize.models.Users.findOne({
           where: { id: guess.UserId },
         });
-        user.maxPoints += 5;
-        user.points += guess.points;
-        await guess.save();
-        await user.save();
+        if (!guess.points) {
+          user.guesses += 1;
+          user.points += guess.points;
+          await guess.save();
+          await user.save();
+        } else if (guess.points && points !== guess.points) {
+          guess.points = points;
+          user.poinst += guess.points - points;
+          await user.save();
+          await guess.save();
+        }
       })
     );
   }

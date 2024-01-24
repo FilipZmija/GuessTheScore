@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import GameList from "./GameList";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
-import { Box, Button, Grid } from "@mui/material";
+import { Box, Button, Grid, Typography } from "@mui/material";
 import { getDate } from "../functions/date";
 import {
   incrementIndex,
@@ -11,13 +11,28 @@ import {
   updateGames,
 } from "../redux/eventsSlice";
 import Toolbar from "@mui/material/Toolbar";
+import { Container } from "@mui/system";
 
 const filters = [];
 
+const buttonsContainer = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  marginTop: "10px",
+  backgroundColor: "#faf8f5",
+  width: "60%",
+  marginLeft: "auto",
+  marginRight: "auto",
+  borderRadius: "5px",
+};
+
+const switchContainer = { overflow: "auto" };
+
 export default function GameListSwitcher() {
-  const [date, setDate] = useState();
   const dispatch = useDispatch();
   const dateIndex = useSelector((state) => state.events.dateIndex);
+  const [date, setDate] = useState(getDate(0));
   const token = useSelector((state) => state.auth.token);
   const games = useSelector((state) => state.events.gameList);
   const increment = () => {
@@ -26,22 +41,7 @@ export default function GameListSwitcher() {
   const decrement = () => {
     dispatch(decrementIndex());
   };
-
   useEffect(() => setDate(getDate(dateIndex)), [dateIndex]);
-  console.log(games);
-  const buttonsContainer = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: "10px",
-    backgroundColor: "#faf8f5",
-    width: "60%",
-    marginLeft: "auto",
-    marginRight: "auto",
-    borderRadius: "5px",
-  };
-
-  const switchContainer = { overflow: "auto" };
 
   useEffect(() => {
     try {
@@ -68,6 +68,7 @@ export default function GameListSwitcher() {
                 return { [filter]: gamesList[index] };
               })
             : gamesList;
+
         dispatch(
           updateGames(filters.length > 0 ? gamesList.data[0] : gamesList.data)
         );
@@ -77,6 +78,12 @@ export default function GameListSwitcher() {
       console.error(e);
     }
   }, [date, token, filters]);
+
+  // useEffect(() => {
+  //   date === getDate(0) &&
+  //     (games === undefined || games?.length === 0) &&
+  //     increment();
+  // }, [getDate, incrementIndex, dispatch]);
 
   return (
     <>
@@ -91,7 +98,23 @@ export default function GameListSwitcher() {
           {date}
           <Button onClick={increment}>Next</Button>
         </Box>
-        {games && <GameList games={games} />}
+        {games?.length ? (
+          <GameList games={games} />
+        ) : (
+          <>
+            <Container
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: "35vh",
+              }}
+            >
+              <Typography variant="h4">No games on this date</Typography>
+            </Container>
+          </>
+        )}
       </Box>
     </>
   );
