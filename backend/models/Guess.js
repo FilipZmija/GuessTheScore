@@ -19,8 +19,12 @@ module.exports = (sequelize, DataTypes) => {
         },
       ],
       hooks: {
-        afterCreate: (event, options) => {
-          evaluateScoreboardStats(event);
+        beforeUpdate: async (event) => {
+          await editEvaluateScoreboardStat(event);
+          await evaluateScoreboardStats(event);
+        },
+        afterCreate: async (event, options) => {
+          await evaluateScoreboardStats(event);
         },
       },
     }
@@ -42,7 +46,6 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   async function evaluateScoreboardStats(event) {
-    console.log(event.dataValues);
     const { UserId, score } = event.dataValues;
     const userScoretables = (
       await sequelize.models.ScoreboardUser.findAll({
@@ -50,28 +53,56 @@ module.exports = (sequelize, DataTypes) => {
         attributes: ["ScoreboardId"],
       })
     ).map((item) => item.ScoreboardId);
-    console.log(userScoretables);
-    let doesExist = false;
+    const eventObj = await sequelize.models.Event.findOne({
+      where: { id: event.EventId },
+    });
+    await eventObj.increment();
+    await eventObj.save();
     for (const item of userScoretables) {
       const guess = await sequelize.models.PopularGuesses.findOne({
-        where: { ScoreboardId: item, score },
+        where: { ScoreboardId: item, score, EventId: event.EventId },
       });
-      const scoreboard = await sequelize.models.Scoreboard.findOne({
-        where: { id: item },
-      });
-      await scoreboard.increment();
+
       if (!Object.is(guess, null)) {
-        doesExist = true;
         await guess.increment();
+        await guess.save();
         break;
       } else {
         await sequelize.models.PopularGuesses.create({
           ScoreboardId: item,
           score,
+          EventId: event.EventId,
         });
       }
     }
   }
+  const editEvaluateScoreboardStat = async (event) => {
+    const { score } = event._previousDataValues;
+    const { UserId, EventId } = event.dataValues;
+    const userScoretables = (
+      await sequelize.models.ScoreboardUser.findAll({
+        where: { UserId },
+        attributes: ["ScoreboardId"],
+      })
+    ).map((item) => item.ScoreboardId);
+    for (const item of userScoretables) {
+      const eventObj = await sequelize.models.Event.findOne({
+        where: { id: event.EventId },
+      });
+      const guess = await sequelize.models.PopularGuesses.findOne({
+        where: { ScoreboardId: item, score, EventId },
+      });
+      await eventObj.decrement();
+      await eventObj.save();
+
+      if (!Object.is(guess, null)) {
+        doesExist = true;
+        await guess.decrement();
+        await guess.save();
+        break;
+      }
+    }
+  };
 
   return Guess;
 };
