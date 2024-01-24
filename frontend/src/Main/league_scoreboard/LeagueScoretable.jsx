@@ -61,7 +61,7 @@ export default function LeagueScoretable() {
           setScoretable({ name, tables });
         })()
       : setScoretable();
-  }, [CompetitionApiId]);
+  }, [CompetitionApiId, token]);
 
   const generateLoadingSkeletons = (rows, cell) => {
     const skeletons = [];

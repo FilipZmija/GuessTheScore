@@ -52,60 +52,62 @@ const GameDetails = () => {
   );
   const eventId = selectedGame.id;
   const token = useSelector((state) => state.auth.token);
-  const isFirstInit = useRef(true);
+  const hasChanged = useRef(true);
   const dispatch = useDispatch();
+
   useEffect(() => {
-    if (isFirstInit.current) {
-      isFirstInit.current = false;
+    if (hasChanged.current) {
       return;
-    }
-    const { home, away } = guess;
-    if (home.length > 0 && away.length > 0 && eventId && !guessId) {
-      (async () => {
-        try {
-          const newGuess = await axios.post(
-            `${process.env.REACT_APP_API_URL}/guess/add`,
-            {
-              score: `${home}:${away}`,
-              EventId: eventId,
-            },
-            {
-              headers: {
-                Authorization: "Bearer " + token,
+    } else {
+      const { home, away } = guess;
+      if (home.length > 0 && away.length > 0 && eventId && !guessId) {
+        (async () => {
+          try {
+            const newGuess = await axios.post(
+              `${process.env.REACT_APP_API_URL}/guess/add`,
+              {
+                score: `${home}:${away}`,
+                EventId: eventId,
               },
-            }
-          );
-          setOpen(true);
-          const { id } = newGuess.data.guess;
-          dispatch(setGuessId(id));
-        } catch (e) {
-          console.error(e);
-        }
-      })();
-    } else if (home.length > 0 && away.length > 0 && guessId && eventId) {
-      (async () => {
-        try {
-          const newGuess = await axios.put(
-            `${process.env.REACT_APP_API_URL}/guess/edit/${guessId}`,
-            {
-              score: `${home}:${away}`,
-              EventId: eventId,
-            },
-            {
-              headers: {
-                Authorization: "Bearer " + token,
+              {
+                headers: {
+                  Authorization: "Bearer " + token,
+                },
+              }
+            );
+            setOpen(true);
+            const { id } = newGuess.data.guess;
+            dispatch(setGuessId(id));
+          } catch (e) {
+            console.error(e);
+          }
+        })();
+      } else if (home.length > 0 && away.length > 0 && guessId && eventId) {
+        (async () => {
+          try {
+            const newGuess = await axios.put(
+              `${process.env.REACT_APP_API_URL}/guess/edit/${guessId}`,
+              {
+                score: `${home}:${away}`,
+                EventId: eventId,
               },
-            }
-          );
-          setOpen(true);
-          const { id } = newGuess.data.guess;
-          dispatch(setGuessId(id));
-        } catch (e) {
-          console.error(e);
-        }
-      })();
+              {
+                headers: {
+                  Authorization: "Bearer " + token,
+                },
+              }
+            );
+            setOpen(true);
+            const { id } = newGuess.data.guess;
+            dispatch(setGuessId(id));
+          } catch (e) {
+            console.error(e);
+          }
+        })();
+      }
     }
   }, [guess, eventId, token, dispatch, guessId]);
+
   const [homeScore, awayScore] = selectedGame
     ? selectedGame.score.split(":")
     : [];
@@ -153,6 +155,7 @@ const GameDetails = () => {
               variant="outlined"
               value={guess?.home || ""}
               onChange={(e) => {
+                hasChanged.current = false;
                 dispatch(
                   guessScore({
                     home: e.target.value.replace(/\D/, ""),
@@ -188,6 +191,7 @@ const GameDetails = () => {
               variant="outlined"
               value={guess?.away || ""}
               onChange={(e) => {
+                hasChanged.current = false;
                 dispatch(
                   guessScore({
                     home: guess.home,
@@ -249,7 +253,10 @@ const GameDetails = () => {
             </Typography>
           )
         ) : (
-          <PopularGuesses popularGuesses={popularGuesses} />
+          <PopularGuesses
+            popularGuesses={popularGuesses}
+            hasChanged={hasChanged}
+          />
         )}
       </CardContent>
     </Card>

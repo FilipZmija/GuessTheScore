@@ -1,5 +1,11 @@
 import * as React from "react";
-import { useEffect, useState, useLayoutEffect, useRef } from "react";
+import {
+  useEffect,
+  useState,
+  useLayoutEffect,
+  useRef,
+  useCallback,
+} from "react";
 import {
   CircularProgress,
   Paper,
@@ -82,7 +88,7 @@ export default function Scoretable({ scoreboardId }) {
   const username = useSelector((state) => state.auth.username);
   const tableEl = useRef();
 
-  const getScoreData = async () => {
+  const getScoreData = useCallback(async () => {
     setLoading(true);
     try {
       const response = await axios.get(
@@ -114,9 +120,9 @@ export default function Scoretable({ scoreboardId }) {
     } catch (e) {
       console.error(e);
     }
-  };
+  }, [pages, scoreboardId, token]);
 
-  const scrollListener = () => {
+  const scrollListener = useCallback(() => {
     let bottom = tableEl.current.scrollHeight - tableEl.current.clientHeight;
     if (!distanceBottom) {
       setDistanceBottom(Math.round(bottom * 0.1));
@@ -128,7 +134,7 @@ export default function Scoretable({ scoreboardId }) {
     ) {
       getScoreData();
     }
-  };
+  }, [distanceBottom, getScoreData, isMore, loading]);
 
   useEffect(() => {
     (async () => {
@@ -152,12 +158,12 @@ export default function Scoretable({ scoreboardId }) {
         setName(scoreboardName);
         setLoggedUser(recivedLoggedUser);
         setData(users);
-        if (users.length === 0) isMore = false;
+        if (users.length === 0) setIsMore(false);
       } catch (e) {
         console.log(e);
       }
     })();
-  }, [token, setData, setName]);
+  }, [token, setData, setName, scoreboardId]);
 
   useLayoutEffect(() => {
     if (data) {
@@ -167,7 +173,7 @@ export default function Scoretable({ scoreboardId }) {
         tableRef.removeEventListener("scroll", scrollListener);
       };
     }
-  }, [scrollListener]);
+  }, [data, scrollListener]);
 
   return (
     data && (

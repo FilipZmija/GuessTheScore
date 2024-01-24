@@ -1,9 +1,9 @@
 import React from "react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import GameList from "./GameList";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
-import { Box, Button, Grid, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { getDate } from "../functions/date";
 import {
   incrementIndex,
@@ -53,38 +53,36 @@ export default function GameListSwitcher() {
   useEffect(() => {
     try {
       const getGames = async (filters, date) => {
-        const gamesList = await axios.get(
-          `${process.env.REACT_APP_API_URL}/event/all`,
-          filters.length > 0
-            ? {
-                headers: {
-                  Authorization: "Bearer " + token,
-                },
-                params: { filterBy: `${filters.join(",")}`, date: date },
-              }
-            : {
-                headers: {
-                  Authorization: "Bearer " + token,
-                },
-                params: { date: date },
-              }
-        );
-        const games =
-          filters.length > 0
-            ? filters.map((filter, index) => {
-                return { [filter]: gamesList[index] };
-              })
-            : gamesList;
+        try {
+          const gamesList = await axios.get(
+            `${process.env.REACT_APP_API_URL}/event/all`,
+            filters.length > 0
+              ? {
+                  headers: {
+                    Authorization: "Bearer " + token,
+                  },
+                  params: { filterBy: `${filters.join(",")}`, date: date },
+                }
+              : {
+                  headers: {
+                    Authorization: "Bearer " + token,
+                  },
+                  params: { date: date },
+                }
+          );
 
-        dispatch(
-          updateGames(filters.length > 0 ? gamesList.data[0] : gamesList.data)
-        );
+          dispatch(
+            updateGames(filters.length > 0 ? gamesList.data[0] : gamesList.data)
+          );
+        } catch (e) {
+          console.error(e);
+        }
       };
       date && getGames(filters, date);
     } catch (e) {
       console.error(e);
     }
-  }, [date, token, filters]);
+  }, [date, token, dispatch]);
 
   return (
     <>

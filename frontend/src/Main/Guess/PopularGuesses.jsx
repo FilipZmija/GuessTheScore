@@ -30,7 +30,7 @@ const buttonsContainerStyle = {
   alignItems: "center",
   flexDirection: "row",
 };
-export default function PopularGuesses() {
+export default function PopularGuesses({ hasChanged }) {
   const { isClicked, popularGuesses, selectedGame, guess } = useSelector(
     (state) => state.guess
   );
@@ -76,6 +76,7 @@ export default function PopularGuesses() {
   }, [scoreboardId, popularGuesses, dispatch, guess]);
 
   const handleToggle = (index, score) => {
+    hasChanged.current = false;
     dispatch(setIsClicked(index));
     const [home, away] = score.split(":");
     dispatch(guessScore({ home, away }));

@@ -28,7 +28,7 @@ export default function Slides({ reload }) {
       }
     };
     getScoreData();
-  }, [token, reload]);
+  }, [token, reload, dispatch]);
 
   return (
     scoreIds && (
