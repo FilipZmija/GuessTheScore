@@ -4,7 +4,6 @@ const {
   Tables,
   Competition,
   Teams,
-  TeamsTables,
   EventTeams,
   TableLogs,
 } = require("../models");
@@ -108,7 +107,8 @@ const getEvents = async (start = 0, end = 2) => {
         CompetitionApiId: competition.id,
       };
     });
-    const events = await Promise.all(
+    console.log(matches);
+    await Promise.all(
       matches.map(async (match) => await createOrUpdateEvent(match))
     );
   } catch (err) {
@@ -138,7 +138,7 @@ const createOrUpdateTeam = async (team, TableId) => {
     });
 
     if (!teamModel) {
-      const team = await Teams.create({
+      await Teams.create({
         ApiId: id,
         name,
         shortName,
@@ -147,7 +147,7 @@ const createOrUpdateTeam = async (team, TableId) => {
     }
 
     if (!tableLogModel) {
-      const tableLog = await TableLogs.create({
+      await TableLogs.create({
         position,
         playedGames,
         form,
@@ -162,7 +162,7 @@ const createOrUpdateTeam = async (team, TableId) => {
         TeamApiId: id,
       });
     } else {
-      const tableLog = await TableLogs.update(
+      await TableLogs.update(
         {
           position,
           playedGames,
@@ -190,7 +190,7 @@ const getTeamsAndTables = async () => {
   const compId = "2021,2001,2000,2002,2003,2014,2015,2018,2019".split(",");
 
   try {
-    const responses = await Promise.all(
+    await Promise.all(
       compId.map(async (item) => {
         const response = await axios.get(
           `${process.env.API_URI}/v4/competitions/${item}/standings`,
@@ -232,7 +232,7 @@ const getTeamsAndTables = async () => {
               });
               TableId = table.id;
             } else {
-              const [numberOfChanges, table] = await Tables.update(
+              const [_, table] = await Tables.update(
                 {
                   group,
                   stage,
@@ -244,7 +244,7 @@ const getTeamsAndTables = async () => {
               );
               TableId = table[0].id;
             }
-            const teams = await Promise.all(
+            await Promise.all(
               standingItem.table.map(async (tableItem) => {
                 await createOrUpdateTeam(tableItem, TableId);
               })

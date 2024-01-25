@@ -3,7 +3,6 @@ const router = express.Router();
 const { Users } = require("../models");
 const bcrypt = require("bcrypt");
 const { createTokens, validateToken } = require("../auth/JWT");
-const { asignUserToMainScoreboard } = require("../init/functions");
 
 router.use(express.json({ limit: "10mb" }));
 router.use((req, res, next) => {
