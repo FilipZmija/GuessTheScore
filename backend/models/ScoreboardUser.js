@@ -16,7 +16,6 @@ module.exports = (sequelize, DataTypes) => {
       ],
       hooks: {
         afterCreate: async (event) => {
-          console.log(event.ScoreboardId);
           const { ScoreboardId } = event;
           const scoreboard = await sequelize.models.Scoreboard.findOne({
             where: { id: ScoreboardId },
@@ -25,7 +24,6 @@ module.exports = (sequelize, DataTypes) => {
           const users = await scoreboard.getUsers({
             order: [["ratio", "DESC"]],
           });
-          console.log(users);
 
           users.map(async (user, index) => {
             await user.ScoreboardUser.update({ position: index + 1 });

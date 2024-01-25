@@ -10,7 +10,6 @@ router.use((req, res, next) => {
 router.get("/all", async (req, res) => {
   const filterBy = req.query.filterBy?.split(",");
   const { date } = req.query;
-  console.log(req.query.date);
   const filter = {
     past: "FINISHED",
     current: "IN_PLAY",
@@ -99,7 +98,6 @@ router.get("/info/:EventId", async (req, res) => {
 router.get("/guesses/:EventId", validateToken, async (req, res) => {
   const { EventId } = req.params;
   const { id } = req.user;
-  console.log(id);
   try {
     const event = await Event.findOne({
       where: { id: EventId },
@@ -114,7 +112,7 @@ router.get("/guesses/:EventId", validateToken, async (req, res) => {
     res.status(200).json({ event });
   } catch (e) {
     res.status(400).json(e);
-    console.log(e);
+    console.error(e);
   }
 });
 
@@ -134,7 +132,7 @@ router.get("/guess/user/:EventId", validateToken, async (req, res) => {
     res.status(200).json({ event });
   } catch (e) {
     res.status(400).json(e);
-    console.log(e);
+    console.error(e);
   }
 });
 
@@ -151,7 +149,7 @@ router.post("/create", validateToken, async (req, res) => {
     });
     res.status(200).json({ event });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.status(400).json(e);
   }
 });

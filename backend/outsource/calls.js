@@ -59,7 +59,6 @@ const createOrUpdateEvent = async (match) => {
           });
         })
       );
-      console.log(association);
       return [event, association];
     }
   } catch (err) {}
@@ -107,12 +106,11 @@ const getEvents = async (start = 0, end = 2) => {
         CompetitionApiId: competition.id,
       };
     });
-    console.log(matches);
     await Promise.all(
       matches.map(async (match) => await createOrUpdateEvent(match))
     );
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 };
 

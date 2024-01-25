@@ -23,7 +23,7 @@ router.post("/register", async (req, res) => {
     const newUser = await Users.create({ username, password: hash });
     res.json({ newUser });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.status(400).json(e);
   }
 });
@@ -54,7 +54,7 @@ router.delete("/delete", validateToken, async (req, res) => {
 
     res.status(200).json({ message: `User deleted succesfully` });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.status(400).json(e);
   }
 });
