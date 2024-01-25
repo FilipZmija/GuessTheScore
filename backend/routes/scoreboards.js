@@ -1,11 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const {
-  ScoreboardUser,
-  Users,
-  Scoreboard,
-  PopularGuesses,
-} = require("../models");
+const { ScoreboardUser, Scoreboard, PopularGuesses } = require("../models");
 const { validateToken } = require("../auth/JWT");
 const { asignUserToMainScoreboard } = require("../init/functions");
 router.use(express.json({ limit: "10mb" }));
