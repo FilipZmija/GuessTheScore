@@ -23,8 +23,8 @@ app.use("/scoreboards", scoreboards);
 app.use("/leaguetable", leaguetable);
 
 //init DB data
-// initOutsourcedData();
-testLiveGame();
+initOutsourcedData();
+// testLiveGame();
 
 const PORT = 3001;
 (async () => {
