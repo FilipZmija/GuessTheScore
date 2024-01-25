@@ -56,13 +56,10 @@ module.exports = (sequelize, DataTypes) => {
     {
       hooks: {
         beforeUpdate: (event, options) => {
-          console.log("beforeUpdate");
           if (event.changed("status") && event.status === "FINISHED") {
             evaluatePoints(event, true);
             setTimeout(() => revaluateScoreboardPositions(), 10000);
           } else if (event.changed("score") && event.status === "IN_PLAY") {
-            console.log("CALCULATED 2", event.status);
-
             evaluatePoints(event, false);
           }
         },
@@ -82,7 +79,6 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   Event.prototype.decrement = async function () {
-    console.log("DECREMENT");
     this.guesses--;
     await this.save();
   };
@@ -121,11 +117,9 @@ module.exports = (sequelize, DataTypes) => {
         ) {
           points += 2;
         }
-        console.log("EVALUATED POINTSA:", points);
 
         if (finished) {
           await guess.save();
-          console.log("Earned points:", guess);
           const user = await sequelize.models.Users.findOne({
             where: { id: guess.UserId },
           });
@@ -142,7 +136,6 @@ module.exports = (sequelize, DataTypes) => {
             await guess.save();
           }
         } else {
-          console.log("CURRENT POINTSA:", points);
           guess.currentPoints = points;
           await guess.save();
         }

@@ -34,12 +34,10 @@ router.post("/assign", validateToken, async (req, res) => {
   const { hash } = req.body;
   try {
     const scoreboard = await Scoreboard.findOne({ where: { hash } });
-    console.log(scoreboard);
     const association = await ScoreboardUser.create({
       UserId: userId,
       ScoreboardId: scoreboard.id,
     });
-    console.log(association);
     res.status(200).json(association);
   } catch (e) {
     res.status(404).json(e);
@@ -64,17 +62,16 @@ router.get("/:scoreboardId", validateToken, async (req, res) => {
       [loggedUser] = await scoreboard.getUsers({
         where: { id },
       });
-      if (loggedUser?.id < users[0]?.id) {
+      if (loggedUser?.ScoreboardUser.position < page * 10) {
         loggedUser = null;
       }
-      console.log("HERE");
     } else {
       loggedUser = null;
     }
     const response = { ...scoreboard.dataValues, loggedUser, users };
     res.status(200).json({ scoreboard: response });
   } catch (e) {
-    console.log(e);
+    console.error(e);
 
     res.status(404).json(e);
   }
@@ -82,7 +79,6 @@ router.get("/:scoreboardId", validateToken, async (req, res) => {
 
 router.get("/users/all", validateToken, async (req, res) => {
   const { id } = req.user;
-  console.log("re");
   try {
     const scoreboards = await ScoreboardUser.findAll({
       where: { UserId: id },
@@ -90,7 +86,7 @@ router.get("/users/all", validateToken, async (req, res) => {
     });
     res.status(200).json(scoreboards);
   } catch (e) {
-    console.log(e);
+    console.error(e);
 
     res.status(404).json(e);
   }
@@ -110,11 +106,10 @@ router.get("/popular/:id", validateToken, async (req, res) => {
       ],
       order: [[PopularGuesses, "number", "DESC"]],
     });
-    console.log(scoreboards?.PopularGuesses.map((item) => item.number));
     scoreboards?.PopularGuesses.splice(3);
     res.status(200).json(scoreboards);
   } catch (e) {
-    console.log(e);
+    console.error(e);
 
     res.status(404).json(e);
   }

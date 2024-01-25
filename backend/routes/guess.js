@@ -17,7 +17,7 @@ router.get("/info/", validateToken, async (req, res) => {
 
     res.status(200).json({ userGuess: guess, allGuesses: allGuesses });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.status(400).json(e);
   }
 });
@@ -27,7 +27,6 @@ router.post("/add", validateToken, async (req, res) => {
   const { score, EventId } = req.body;
   const { id } = req.user;
   const event = await Event.findOne({ where: { id: EventId } });
-  console.log(event);
   if (event.status !== "FINISHED") {
     try {
       const guess = await Guess.create(
@@ -42,7 +41,7 @@ router.post("/add", validateToken, async (req, res) => {
       );
       res.status(200).json({ guess });
     } catch (e) {
-      console.log(e);
+      console.error(e);
       res.status(400).json(e);
     }
   } else res.status(400).json({ message: "Event is finished" });
@@ -52,7 +51,6 @@ router.put("/edit/:GuessId", validateToken, async (req, res) => {
   const { GuessId } = req.params;
   const { score, EventId } = req.body;
   const { id } = req.user;
-  console.log(id, EventId);
   try {
     const guess = await Guess.findOne({
       where: { EventId, UserId: id, id: GuessId },
@@ -61,8 +59,7 @@ router.put("/edit/:GuessId", validateToken, async (req, res) => {
     if (!guess) {
       return res.status(404).json({ message: "No such a guess" });
     }
-    if (guess.dataValues.Event.dataValues.status === "TIMED") {
-      console.log("here");
+    if (guess.dataValues.Event.dataValues.status !== "FINISHED") {
       await guess.update({ score });
       res.status(200).json({ guess });
     } else {
