@@ -128,7 +128,6 @@ const GameDetails = () => {
       }
     }
   }, [guess, eventId, token, dispatch, guessId]);
-  console.log(guess, points);
   const [homeScore, awayScore] = selectedGame
     ? selectedGame.score.split(":")
     : [];
