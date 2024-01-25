@@ -3,17 +3,17 @@ import { Box, Alert, IconButton, Collapse } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
 const alertStyle = {
-  width: { xs: "80%", md: "25%", lg: "15%" },
+  width: { xs: "80%", md: "25%", lg: "20%" },
   position: "absolute",
 };
-export default function SucessAlert({ open, setOpen }) {
+export default function SucessAlert({ alertOpen, setAlertOpen }) {
   useEffect(() => {
-    setTimeout(() => setOpen(false), 5000);
-  }, [setOpen]);
+    setTimeout(() => setAlertOpen(false), 5000);
+  }, [setAlertOpen]);
 
   return (
     <Box sx={alertStyle}>
-      <Collapse in={open}>
+      <Collapse in={alertOpen}>
         <Alert
           action={
             <IconButton
@@ -21,7 +21,7 @@ export default function SucessAlert({ open, setOpen }) {
               color="inherit"
               size="small"
               onClick={() => {
-                setOpen(false);
+                setAlertOpen(false);
               }}
             >
               <CloseIcon fontSize="inherit" />

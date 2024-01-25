@@ -60,6 +60,7 @@ export default function FormDialog({ setReload }) {
         sx={{
           margin: "0 0.2rem",
           fontSize: { xs: "0.8rem", md: "0.9rem" },
+          fontWeight: "bold",
         }}
       >
         Join league

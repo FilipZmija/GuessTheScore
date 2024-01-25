@@ -10,6 +10,7 @@ import {
   decrementIndex,
   updateGames,
 } from "../redux/eventsSlice";
+import { setOpen } from "../redux/errorSlice";
 import Toolbar from "@mui/material/Toolbar";
 import { Container } from "@mui/system";
 
@@ -53,34 +54,31 @@ export default function GameListSwitcher() {
   useEffect(() => {
     try {
       const getGames = async (filters, date) => {
-        try {
-          const gamesList = await axios.get(
-            `${process.env.REACT_APP_API_URL}/event/all`,
-            filters.length > 0
-              ? {
-                  headers: {
-                    Authorization: "Bearer " + token,
-                  },
-                  params: { filterBy: `${filters.join(",")}`, date: date },
-                }
-              : {
-                  headers: {
-                    Authorization: "Bearer " + token,
-                  },
-                  params: { date: date },
-                }
-          );
+        const gamesList = await axios.get(
+          `${process.env.REACT_APP_API_URL}/event/all`,
+          filters.length > 0
+            ? {
+                headers: {
+                  Authorization: "Bearer " + token,
+                },
+                params: { filterBy: `${filters.join(",")}`, date: date },
+              }
+            : {
+                headers: {
+                  Authorization: "Bearer " + token,
+                },
+                params: { date: date },
+              }
+        );
 
-          dispatch(
-            updateGames(filters.length > 0 ? gamesList.data[0] : gamesList.data)
-          );
-        } catch (e) {
-          console.error(e);
-        }
+        dispatch(
+          updateGames(filters.length > 0 ? gamesList.data[0] : gamesList.data)
+        );
       };
       date && getGames(filters, date);
     } catch (e) {
       console.error(e);
+      dispatch(setOpen(true));
     }
   }, [date, token, dispatch]);
 

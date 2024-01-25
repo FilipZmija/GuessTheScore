@@ -5,24 +5,28 @@ import axios from "axios";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { login } from "../redux/authSlice";
-
+import { setOpen } from "../redux/errorSlice";
 export default function Auth() {
   const dispatch = useDispatch();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      (async () => {
-        const userData = await axios.get(
-          `${process.env.REACT_APP_API_URL}/user/profile`,
-          {
-            headers: { Authorization: "Bearer " + token },
-          }
-        );
-        console.log(userData.data);
-        const { username } = userData.data?.users[0];
-        dispatch(login({ username, token }));
-      })();
+      try {
+        (async () => {
+          const userData = await axios.get(
+            `${process.env.REACT_APP_API_URL}/user/profile`,
+            {
+              headers: { Authorization: "Bearer " + token },
+            }
+          );
+          const { username } = userData.data?.users[0];
+          dispatch(login({ username, token }));
+        })();
+      } catch (e) {
+        dispatch(setOpen(true));
+        console.error(e);
+      }
     }
   }, [dispatch]);
 

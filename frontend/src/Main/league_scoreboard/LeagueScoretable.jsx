@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import {
   TableContainer,
   Table,
@@ -13,6 +13,7 @@ import {
   Skeleton,
   Paper,
 } from "@mui/material";
+import { setOpen } from "../../redux/errorSlice";
 import axios from "axios";
 
 const tableContainerStyle = {
@@ -24,6 +25,7 @@ const tableContainerStyle = {
 };
 
 const tableTitleStyle = {
+  fontWeight: "bold",
   paddingTop: "1.6%",
   textAlign: "center",
   display: "flex",
@@ -44,45 +46,61 @@ export default function LeagueScoretable() {
   const [scoretable, setScoretable] = useState();
   const game = useSelector((state) => state.events.selectedGameInfo);
   const CompetitionApiId = game?.CompetitionApiId;
-
+  const teams = game?.Teams;
+  const [homeId, awayId] =
+    teams?.length > 0 ? teams.map((item) => item.ApiId) : [null, null];
+  const dispatch = useDispatch();
   React.useEffect(() => {
-    CompetitionApiId
-      ? (async () => {
-          const table = await axios.get(
-            `${process.env.REACT_APP_API_URL}/leaguetable/${CompetitionApiId}`,
-            {
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + token,
-              },
-            }
-          );
-          const { name, Tables: tables } = table.data.competitionTable;
-          setScoretable({ name, tables });
-        })()
-      : setScoretable();
-  }, [CompetitionApiId, token]);
+    setScoretable();
+    try {
+      CompetitionApiId
+        ? (async () => {
+            const table = await axios.get(
+              `${process.env.REACT_APP_API_URL}/leaguetable/${CompetitionApiId}`,
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: "Bearer " + token,
+                },
+              }
+            );
+            const { name, Tables: tables } = table.data.competitionTable;
+            setScoretable({ name, tables });
+          })()
+        : setScoretable();
+    } catch (e) {
+      dispatch(setOpen(true));
+      console.error(e);
+    }
+  }, [CompetitionApiId, token, dispatch]);
 
   const generateLoadingSkeletons = (rows, cell) => {
     const skeletons = [];
-    const cells = [];
-    for (let i = 0; i < cell; i++) {
-      cells.push(
-        <TableCell
-          component="th"
-          scope="row"
-          align="center"
-          sx={{
-            padding: "0.97%",
-            height: "5%",
-          }}
-        >
-          <Skeleton />
-        </TableCell>
-      );
-    }
+    const generateCells = (rowIndex) => {
+      const cells = [];
+      for (let i = 0; i < cell; i++) {
+        cells.push(
+          <TableCell
+            key={rowIndex + i + ""}
+            component="th"
+            scope="row"
+            align="center"
+            sx={{
+              padding: "0.97%",
+              height: "5%",
+            }}
+          >
+            <Skeleton />
+          </TableCell>
+        );
+      }
+      return cells;
+    };
+
     for (let i = 0; i < rows; i++) {
-      skeletons.push(<TableRow key={`skeleton-${i}`}>{cells}</TableRow>);
+      skeletons.push(
+        <TableRow key={`skeleton-${i}`}>{generateCells(i)}</TableRow>
+      );
     }
     return skeletons;
   };
@@ -98,10 +116,14 @@ export default function LeagueScoretable() {
           sx={{ borderTop: "1px solid rgba(0, 0, 0, 0.12);" }}
         >
           <TableHead>
-            <TableRow>
-              {rowDetails.map((item) => {
+            <TableRow key="top-row">
+              {rowDetails.map((item, index) => {
                 return (
-                  <TableCell align="center" sx={{ padding: "1.1%" }}>
+                  <TableCell
+                    key={item.head + index}
+                    align="center"
+                    sx={{ padding: "1.1%", fontWeight: "bold" }}
+                  >
                     {item.head}
                   </TableCell>
                 );
@@ -111,14 +133,20 @@ export default function LeagueScoretable() {
           <TableBody>
             {!scoretable
               ? generateLoadingSkeletons(19, 8)
-              : scoretable.tables[0].TableLogs.map((row, index) => (
+              : scoretable.tables[0].TableLogs.map((row) => (
                   <TableRow
-                    key={row.name}
-                    sx={{
-                      "&:last-child td, &:last-child th": { border: 0 },
-                    }}
+                    key={row.Team.shortName}
+                    sx={
+                      row.TeamApiId === homeId || row.TeamApiId === awayId
+                        ? {
+                            backgroundColor: "#fdfdfd",
+                            fontWeight: "bold",
+                            "&:last-child td, &:last-child th": { border: 0 },
+                          }
+                        : { "&:last-child td, &:last-child th": { border: 0 } }
+                    }
                   >
-                    {rowDetails.map((item) => {
+                    {rowDetails.map((item, index) => {
                       const { field } = item;
                       let text = "";
                       if (field === "team") {
@@ -133,10 +161,26 @@ export default function LeagueScoretable() {
                           component="th"
                           scope="row"
                           align="center"
-                          sx={{
-                            padding: "0.97%",
-                            height: "5%",
-                          }}
+                          key={field + index}
+                          sx={
+                            row.TeamApiId === homeId || row.TeamApiId === awayId
+                              ? {
+                                  backgroundColor: "#fdfdfd",
+                                  fontWeight: "bold",
+                                  padding: "0.97%",
+                                  height: "5%",
+                                  "&:last-child td, &:last-child th": {
+                                    border: 0,
+                                  },
+                                }
+                              : {
+                                  "&:last-child td, &:last-child th": {
+                                    border: 0,
+                                  },
+                                  padding: "0.97%",
+                                  height: "5%",
+                                }
+                          }
                         >
                           {text}
                         </TableCell>

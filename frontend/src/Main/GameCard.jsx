@@ -95,7 +95,9 @@ const GameCard = ({ game, index }) => {
               alt={`${homeTeam} Crest`}
               sx={teamLogoStyle}
             />
-            <Typography variant="body2">{homeTeam}</Typography>
+            <Typography sx={{ fontWeight: "bold" }} variant="body2">
+              {homeTeam}
+            </Typography>
           </Grid>
           <Grid item sx={{ marginBottom: "15px" }}>
             <Typography variant="h3">{score}</Typography>
@@ -109,7 +111,9 @@ const GameCard = ({ game, index }) => {
               alt={`${awayTeam} Crest`}
               sx={teamLogoStyle}
             />
-            <Typography variant="body2">{awayTeam}</Typography>
+            <Typography sx={{ fontWeight: "bold" }} variant="body2">
+              {awayTeam}
+            </Typography>
           </Grid>
           <Grid item></Grid>
         </Grid>
