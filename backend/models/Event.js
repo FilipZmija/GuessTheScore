@@ -56,11 +56,11 @@ module.exports = (sequelize, DataTypes) => {
     {
       hooks: {
         beforeUpdate: (event, options) => {
-          console.log("beforeUpdate");
           if (event.changed("status") && event.status === "FINISHED") {
-            console.log("FINISHING and CALCU");
-            evaluatePoints(event);
+            evaluatePoints(event, true);
             setTimeout(() => revaluateScoreboardPositions(), 10000);
+          } else if (event.changed("score") && event.status === "IN_PLAY") {
+            evaluatePoints(event, false);
           }
         },
       },
@@ -79,7 +79,6 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   Event.prototype.decrement = async function () {
-    console.log("DECREMENT");
     this.guesses--;
     await this.save();
   };
@@ -96,7 +95,7 @@ module.exports = (sequelize, DataTypes) => {
     );
   };
 
-  async function evaluatePoints(event) {
+  async function evaluatePoints(event, finished) {
     const eventGuesses = await sequelize.models.Guess.findAll({
       where: { EventId: event.id },
     });
@@ -119,19 +118,25 @@ module.exports = (sequelize, DataTypes) => {
           points += 2;
         }
 
-        guess.points = points;
-        const user = await sequelize.models.Users.findOne({
-          where: { id: guess.UserId },
-        });
-        if (!guess.points) {
-          user.guesses += 1;
-          user.points += guess.points;
+        if (finished) {
           await guess.save();
-          await user.save();
-        } else if (guess.points && points !== guess.points) {
-          guess.points = points;
-          user.poinst += guess.points - points;
-          await user.save();
+          const user = await sequelize.models.Users.findOne({
+            where: { id: guess.UserId },
+          });
+          if (!guess.points) {
+            guess.points = points;
+            user.guesses += 1;
+            user.points += guess.points;
+            await guess.save();
+            await user.save();
+          } else if (guess.points && points !== guess.points) {
+            guess.points = points;
+            user.points += guess.points - points;
+            await user.save();
+            await guess.save();
+          }
+        } else {
+          guess.currentPoints = points;
           await guess.save();
         }
       })

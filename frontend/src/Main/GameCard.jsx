@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  Container,
-  Typography,
-  Card,
-  CardContent,
-  CardMedia,
-  Grid,
-} from "@mui/material";
+import { Typography, Card, CardContent, CardMedia, Grid } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 import { selectEvent } from "../redux/eventsSlice";
 const press = {
@@ -29,7 +22,7 @@ const cardStyle = {
   flexDirection: "column",
   transition: "transform 0.1s ease-in-out",
   "&:hover": {
-    transform: "scale(1.05)", // Increase the size by 5% on hover
+    transform: "scale(1.05)",
   },
   "&:active": {
     animation: "press 0.2s 1 linear",
@@ -41,7 +34,7 @@ const teamLogoStyle = {
   height: "2.5rem",
   objectFit: "contain",
 };
-const teamName = {
+const teamNameStyle = {
   width: "100px",
   display: "flex",
   flexDirection: "column",
@@ -94,7 +87,7 @@ const GameCard = ({ game, index }) => {
         <Typography variant="h7">{utcTime}</Typography>
         <Grid container alignItems="center" spacing={2}>
           <Grid item></Grid>
-          <Grid item sx={teamName}>
+          <Grid item sx={teamNameStyle}>
             <CardMedia
               component="img"
               width="2.5rem"
@@ -102,13 +95,15 @@ const GameCard = ({ game, index }) => {
               alt={`${homeTeam} Crest`}
               sx={teamLogoStyle}
             />
-            <Typography variant="body2">{homeTeam}</Typography>
+            <Typography sx={{ fontWeight: "bold" }} variant="body2">
+              {homeTeam}
+            </Typography>
           </Grid>
           <Grid item sx={{ marginBottom: "15px" }}>
             <Typography variant="h3">{score}</Typography>
           </Grid>
 
-          <Grid item sx={teamName}>
+          <Grid item sx={teamNameStyle}>
             <CardMedia
               component="img"
               width="2.5rem"
@@ -116,7 +111,9 @@ const GameCard = ({ game, index }) => {
               alt={`${awayTeam} Crest`}
               sx={teamLogoStyle}
             />
-            <Typography variant="body2">{awayTeam}</Typography>
+            <Typography sx={{ fontWeight: "bold" }} variant="body2">
+              {awayTeam}
+            </Typography>
           </Grid>
           <Grid item></Grid>
         </Grid>

@@ -8,10 +8,11 @@ import {
   CardMedia,
 } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
-import SucessAlert from "./Alert";
 import axios from "axios";
+import SucessAlert from "./Alert";
 import PopularGuesses from "./PopularGuesses";
-import { guessScore, setGuessId, setIsClicked } from "../redux/guessSlice";
+import { guessScore, setGuessId, setIsClicked } from "../../redux/guessSlice";
+import { setOpen } from "../../redux/errorSlice";
 const teamLogoStyle = {
   objectFit: "contain",
   width: { xs: "120%", xl: "100%" },
@@ -22,6 +23,7 @@ const teamName = {
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
+  fontWeight: "bold",
 };
 const scoreField = {
   width: { xs: "3rem", sm: "4.25rem", md: "4.25rem", lg: "4.25rem" },
@@ -29,7 +31,7 @@ const scoreField = {
   borderRadius: "4px",
 };
 
-const guessCard = {
+const guessCardStyle = {
   display: "flex",
   alignItems: "center",
   backgroundColor: "#faf8f5",
@@ -37,67 +39,96 @@ const guessCard = {
   padding: "0.5rem",
   "&:last-child": { paddingBottom: "0.5rem" },
 };
+const cardStyle = {
+  padding: "4%",
+  backgroundColor: "#EEE7DA",
+  borderRadius: "10px",
+  border: "1px solid rgba(0, 0, 0, 0.12)",
+  margin: "0 0 3% 0",
+  display: "inline-block",
+};
+
+const pulsateKeyframes = {
+  "0%": { boxShadow: "0 0 0.3rem rgba(78, 159, 76, 1)" },
+  "50%": { boxShadow: "0 0 1.5rem rgba(78, 159, 76, 1)" },
+  "100%": { boxShadow: "0 0 0.3rem rgba(78, 159, 76, 1)" },
+};
+
+const pulsateStyle = {
+  animation: "pulsate 2s infinite",
+  "@keyframes pulsate": pulsateKeyframes,
+};
+
 const GameDetails = () => {
-  const [open, setOpen] = useState(false);
-  const { guess, selectedGame, guessId, points, popularGuesses } = useSelector(
-    (state) => state.guess
-  );
+  const [alertOpen, setAlertOpen] = useState(false);
+  const {
+    guess,
+    selectedGame,
+    guessId,
+    points,
+    popularGuesses,
+    currentPoints,
+  } = useSelector((state) => state.guess);
   const eventId = selectedGame.id;
   const token = useSelector((state) => state.auth.token);
-  const isFirstInit = useRef(true);
+  const hasChanged = useRef(true);
   const dispatch = useDispatch();
+
   useEffect(() => {
-    if (isFirstInit.current) {
-      isFirstInit.current = false;
+    if (hasChanged.current) {
       return;
-    }
-    const { home, away } = guess;
-    if (home.length > 0 && away.length > 0 && eventId && !guessId) {
-      (async () => {
-        try {
-          const newGuess = await axios.post(
-            `${process.env.REACT_APP_API_URL}/guess/add`,
-            {
-              score: `${home}:${away}`,
-              EventId: eventId,
-            },
-            {
-              headers: {
-                Authorization: "Bearer " + token,
+    } else {
+      const { home, away } = guess;
+      if (home.length > 0 && away.length > 0 && eventId && !guessId) {
+        (async () => {
+          try {
+            const newGuess = await axios.post(
+              `${process.env.REACT_APP_API_URL}/guess/add`,
+              {
+                score: `${home}:${away}`,
+                EventId: eventId,
               },
-            }
-          );
-          setOpen(true);
-          const { id } = newGuess.data.guess;
-          dispatch(setGuessId(id));
-        } catch (e) {
-          console.error(e);
-        }
-      })();
-    } else if (home.length > 0 && away.length > 0 && guessId && eventId) {
-      (async () => {
-        try {
-          const newGuess = await axios.put(
-            `${process.env.REACT_APP_API_URL}/guess/edit/${guessId}`,
-            {
-              score: `${home}:${away}`,
-              EventId: eventId,
-            },
-            {
-              headers: {
-                Authorization: "Bearer " + token,
+              {
+                headers: {
+                  Authorization: "Bearer " + token,
+                },
+              }
+            );
+            setAlertOpen(true);
+            const { id } = newGuess.data.guess;
+            dispatch(setGuessId(id));
+          } catch (e) {
+            dispatch(setAlertOpen(true));
+            console.error(e);
+          }
+        })();
+      } else if (home.length > 0 && away.length > 0 && guessId && eventId) {
+        (async () => {
+          try {
+            const newGuess = await axios.put(
+              `${process.env.REACT_APP_API_URL}/guess/edit/${guessId}`,
+              {
+                score: `${home}:${away}`,
+                EventId: eventId,
               },
-            }
-          );
-          setOpen(true);
-          const { id } = newGuess.data.guess;
-          dispatch(setGuessId(id));
-        } catch (e) {
-          console.error(e);
-        }
-      })();
+              {
+                headers: {
+                  Authorization: "Bearer " + token,
+                },
+              }
+            );
+            setAlertOpen(true);
+            const { id } = newGuess.data.guess;
+            dispatch(setGuessId(id));
+          } catch (e) {
+            dispatch(setOpen(true));
+            console.error(e);
+          }
+        })();
+      }
     }
-  }, [guess, eventId, token]);
+  }, [guess, eventId, token, dispatch, guessId]);
+
   const [homeScore, awayScore] = selectedGame
     ? selectedGame.score.split(":")
     : [];
@@ -105,24 +136,23 @@ const GameDetails = () => {
   return (
     <Card
       sx={{
-        padding: "4%",
-        backgroundColor: "#EEE7DA",
-        borderRadius: "10px",
-        border: "1px solid rgba(0, 0, 0, 0.12)",
-        margin: "0 0 3% 0",
-        display: "inline-block",
+        ...cardStyle,
+        ...(selectedGame.status === "IN_PLAY" ||
+        selectedGame.status === "PAUSED"
+          ? pulsateStyle
+          : {}),
       }}
     >
-      <CardContent sx={guessCard}>
-        <SucessAlert open={open} setOpen={setOpen} />
-        <Typography variant="h5">{selectedGame.competition}</Typography>
-        <Typography variant="h7" gutterBottom>
+      <CardContent sx={guessCardStyle}>
+        <SucessAlert alertOpen={alertOpen} setAlertOpen={setAlertOpen} />
+        <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+          {selectedGame.competition}
+        </Typography>
+        <Typography sx={{ fontWeight: "bold" }} variant="h7" gutterBottom>
           {selectedGame.utcTime}
         </Typography>
-
         <Grid container alignItems="center" spacing={{ xs: 1, lg: 2 }}>
           <Grid item></Grid>
-
           <Grid item sx={teamName}>
             <CardMedia
               component="img"
@@ -156,6 +186,7 @@ const GameDetails = () => {
               variant="outlined"
               value={guess?.home || ""}
               onChange={(e) => {
+                hasChanged.current = false;
                 dispatch(
                   guessScore({
                     home: e.target.value.replace(/\D/, ""),
@@ -175,7 +206,6 @@ const GameDetails = () => {
               size="normal"
             />
           </Grid>
-
           <Grid item>
             <TextField
               disabled={selectedGame.status !== "TIMED"}
@@ -192,6 +222,7 @@ const GameDetails = () => {
               variant="outlined"
               value={guess?.away || ""}
               onChange={(e) => {
+                hasChanged.current = false;
                 dispatch(
                   guessScore({
                     home: guess.home,
@@ -207,7 +238,7 @@ const GameDetails = () => {
                   textAlign: "center",
                   padding: "15%",
                 },
-              }} // Limiting the length to 2 characters
+              }}
             />
           </Grid>
           <Grid item sx={teamName}>
@@ -226,21 +257,49 @@ const GameDetails = () => {
               {selectedGame.awayTeam}
             </Typography>
           </Grid>
-
           <Grid item></Grid>
         </Grid>
-        {points ? (
-          <Typography
-            variant="h7"
-            sx={{
-              textAlign: "center",
-              fontWeight: "bold",
-            }}
-          >
-            You scored: {points} points!
-          </Typography>
+        {selectedGame.status !== "TIMED" ? (
+          !Object.is(points, null) ? (
+            <Typography
+              variant="h7"
+              sx={{
+                textAlign: "center",
+                fontWeight: "bold",
+                padding: "12px 0",
+              }}
+            >
+              You scored: {points} points!
+            </Typography>
+          ) : selectedGame.status === "IN_PLAY" ||
+            selectedGame.status === "PAUSED" ? (
+            <Typography
+              variant="h7"
+              sx={{
+                textAlign: "center",
+                fontWeight: "bold",
+                padding: "12px 0",
+              }}
+            >
+              Game in progress! Your possible points {currentPoints}!
+            </Typography>
+          ) : (
+            <Typography
+              variant="h7"
+              sx={{
+                textAlign: "center",
+                fontWeight: "bold",
+                padding: "12px 0",
+              }}
+            >
+              You have not guessed this game :(
+            </Typography>
+          )
         ) : (
-          <PopularGuesses popularGuesses={popularGuesses} />
+          <PopularGuesses
+            popularGuesses={popularGuesses}
+            hasChanged={hasChanged}
+          />
         )}
       </CardContent>
     </Card>

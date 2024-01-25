@@ -10,6 +10,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: true,
       },
+      currentPoints: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
     },
     {
       indexes: [

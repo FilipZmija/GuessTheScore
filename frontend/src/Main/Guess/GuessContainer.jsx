@@ -1,6 +1,7 @@
 import React from "react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { setOpen } from "../../redux/errorSlice";
 import GuessSkeleton from "./GuessSkeleton";
 import GameGuess from "./GameGuess";
 import axios from "axios";
@@ -10,7 +11,8 @@ import {
   setPoints,
   setPopularGuesses,
   setSelectedGame,
-} from "../redux/guessSlice";
+  resetData,
+} from "../../redux/guessSlice";
 
 export default function GuessContainer() {
   const event = useSelector((state) => state.events.selectedGameInfo);
@@ -21,33 +23,32 @@ export default function GuessContainer() {
   const eventId = event?.id;
 
   useEffect(() => {
-    dispatch(setSelectedGame());
-    dispatch(setPoints());
-    dispatch(setPopularGuesses());
-    dispatch(setGuessId());
-    dispatch(guessScore({ home: "", away: "" }));
-  }, [event]);
+    dispatch(resetData());
+  }, [event, dispatch]);
 
   useEffect(() => {
-    scoreboardId &&
-      eventId &&
-      (async () => {
-        console.log(scoreboardId, eventId);
-        const popularGuesses = await axios.get(
-          `${process.env.REACT_APP_API_URL}/scoreboards/popular/${scoreboardId}`,
-          {
-            headers: {
-              Authorization: "Bearer " + token,
-            },
-            params: {
-              EventId: eventId,
-            },
-          }
-        );
-        console.log(popularGuesses.data?.PopularGuesses);
-        dispatch(setPopularGuesses(popularGuesses.data?.PopularGuesses));
-      })();
-  }, [scoreboardId, eventId]);
+    try {
+      scoreboardId &&
+        eventId &&
+        (async () => {
+          const popularGuesses = await axios.get(
+            `${process.env.REACT_APP_API_URL}/scoreboards/popular/${scoreboardId}`,
+            {
+              headers: {
+                Authorization: "Bearer " + token,
+              },
+              params: {
+                EventId: eventId,
+              },
+            }
+          );
+          dispatch(setPopularGuesses(popularGuesses.data?.PopularGuesses));
+        })();
+    } catch (e) {
+      dispatch(setOpen(true));
+      console.error(e);
+    }
+  }, [scoreboardId, eventId, dispatch, token]);
 
   useEffect(() => {
     eventId &&
@@ -67,8 +68,12 @@ export default function GuessContainer() {
           const [home, away] = userGuess
             ? userGuess?.score.split(":")
             : ["", ""];
-          dispatch(setPoints(userGuess.points));
-
+          dispatch(
+            setPoints({
+              currentPoints: userGuess?.currentPoints,
+              points: userGuess?.points,
+            })
+          );
           dispatch(setGuessId(userGuess?.id || null));
           dispatch(
             guessScore({
@@ -77,9 +82,10 @@ export default function GuessContainer() {
             })
           );
         } catch (e) {
+          dispatch(setOpen(true));
           console.error(e);
         }
       })();
-  }, [eventId, token, setSelectedGame, setPoints]);
+  }, [eventId, token, dispatch]);
   return <>{selectedGame ? <GameGuess /> : <GuessSkeleton />}</>;
 }

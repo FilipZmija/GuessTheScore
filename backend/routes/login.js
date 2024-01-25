@@ -3,7 +3,6 @@ const router = express.Router();
 const { Users } = require("../models");
 const bcrypt = require("bcrypt");
 const { createTokens, validateToken } = require("../auth/JWT");
-const { asignUserToMainScoreboard } = require("../init/functions");
 
 router.use(express.json({ limit: "10mb" }));
 router.use((req, res, next) => {
@@ -24,7 +23,7 @@ router.post("/register", async (req, res) => {
     const newUser = await Users.create({ username, password: hash });
     res.json({ newUser });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.status(400).json(e);
   }
 });
@@ -55,7 +54,7 @@ router.delete("/delete", validateToken, async (req, res) => {
 
     res.status(200).json({ message: `User deleted succesfully` });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.status(400).json(e);
   }
 });

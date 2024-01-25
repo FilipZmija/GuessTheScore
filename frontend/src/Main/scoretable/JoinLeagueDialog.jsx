@@ -1,40 +1,40 @@
-import * as React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
+import {
+  Button,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from "@mui/material";
 import axios from "axios";
 
 export default function FormDialog({ setReload }) {
   const [open, setOpen] = useState(false);
-  const [leagueCode, setLeagueCode] = useState();
   const token = useSelector((state) => state.auth.token);
+  const [message, setMessage] = useState();
   const handleClickOpen = () => {
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
-    setTimeout(() => setLeagueCode(), 100);
+    setTimeout(() => setMessage(), 100);
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const formJson = Object.fromEntries(formData.entries());
-    const name = formJson.name;
-
+    const code = formJson.code;
     (async () => {
       try {
-        const league = await axios.post(
-          `${process.env.REACT_APP_API_URL}/scoreboards/create`,
+        await axios.post(
+          `${process.env.REACT_APP_API_URL}/scoreboards/assign`,
           {
-            name,
+            hash: code,
           },
           {
             headers: {
@@ -42,9 +42,10 @@ export default function FormDialog({ setReload }) {
             },
           }
         );
-        setLeagueCode(league.data.hash);
+        setMessage("You have successfully join a league!");
         setReload((prev) => !prev);
       } catch (e) {
+        setMessage("Sorry, league with this code does not exist...");
         console.error(e);
       }
     })();
@@ -59,9 +60,10 @@ export default function FormDialog({ setReload }) {
         sx={{
           margin: "0 0.2rem",
           fontSize: { xs: "0.8rem", md: "0.9rem" },
+          fontWeight: "bold",
         }}
       >
-        Create league
+        Join league
       </Button>
       <Dialog
         open={open}
@@ -71,40 +73,36 @@ export default function FormDialog({ setReload }) {
           onSubmit: handleSubmit,
         }}
       >
-        {leagueCode ? (
+        <DialogTitle>Join league</DialogTitle>
+
+        {message ? (
           <>
-            <DialogTitle>Create league</DialogTitle>
             <DialogContent sx={{ maxWidth: "20rem" }}>
-              <DialogContentText>
-                You hava created a league succesfully. Share this code with your
-                friends so they can join: {leagueCode}
-              </DialogContentText>
+              <DialogContentText>{message}</DialogContentText>
             </DialogContent>
+
             <DialogActions>
               <Button onClick={handleClose}>Close</Button>
             </DialogActions>
           </>
         ) : (
           <>
-            <DialogTitle>Create league</DialogTitle>
             <DialogContent sx={{ maxWidth: "20rem" }}>
-              <DialogContentText>
-                Please enter your league name.
-              </DialogContentText>
+              <DialogContentText>Please, enter league code.</DialogContentText>
               <TextField
                 autoFocus
                 required
-                name="name"
                 margin="dense"
-                id="name"
-                label="League name"
+                id="code"
+                name="code"
+                label="League code"
                 fullWidth
                 variant="standard"
               />
             </DialogContent>
             <DialogActions>
               <Button onClick={handleClose}>Cancel</Button>
-              <Button type="submit">Create</Button>
+              <Button type="submit">Join</Button>
             </DialogActions>
           </>
         )}

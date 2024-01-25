@@ -10,20 +10,18 @@ const gameContainerStyle = {
   justifyContent: "center",
   alignItems: "center",
 };
+const gameBoxStyle = {
+  padding: "5px",
+  marginTop: "5px",
+  minWidth: "315px",
+  maxWidth: "400px",
+};
 
 const GamesList = ({ games }) => {
   return (
     <Container sx={gameContainerStyle}>
       {games.map((game, index) => (
-        <Box
-          key={game.id}
-          sx={{
-            padding: "5px",
-            marginTop: "5px",
-            minWidth: "315px",
-            maxWidth: "400px",
-          }}
-        >
+        <Box key={game.id} sx={gameBoxStyle}>
           <GameCard game={game} index={index} />
         </Box>
       ))}

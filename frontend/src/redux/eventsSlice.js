@@ -12,11 +12,9 @@ export const eventsSlice = createSlice({
   initialState: initialState,
   reducers: {
     openDrawer: (state) => {
-      console.log(state);
       state.mobileOpen = !state.mobileOpen;
     },
     updateGames: (state, action) => {
-      console.log(action);
       state.gameList = action.payload;
       state.selectedGameInfo = state.gameList[state.selection];
     },
