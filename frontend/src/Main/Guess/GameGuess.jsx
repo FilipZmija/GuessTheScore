@@ -128,11 +128,54 @@ const GameDetails = () => {
       }
     }
   }, [guess, eventId, token, dispatch, guessId]);
-
   const [homeScore, awayScore] = selectedGame
     ? selectedGame.score.split(":")
     : [];
-
+  const displayResultInfo = () => {
+    if (points) {
+      return (
+        <Typography
+          variant="h7"
+          sx={{
+            textAlign: "center",
+            fontWeight: "bold",
+            padding: "12px 0",
+          }}
+        >
+          You scored: {points} points!
+        </Typography>
+      );
+    } else if (
+      (selectedGame.status === "IN_PLAY" || selectedGame.status === "PAUSED") &&
+      currentPoints
+    ) {
+      return (
+        <Typography
+          variant="h7"
+          sx={{
+            textAlign: "center",
+            fontWeight: "bold",
+            padding: "12px 0",
+          }}
+        >
+          Game in progress! Your possible points {currentPoints}!
+        </Typography>
+      );
+    } else {
+      return (
+        <Typography
+          variant="h7"
+          sx={{
+            textAlign: "center",
+            fontWeight: "bold",
+            padding: "12px 0",
+          }}
+        >
+          You have not guessed this game :(
+        </Typography>
+      );
+    }
+  };
   return (
     <Card
       sx={{
@@ -260,41 +303,7 @@ const GameDetails = () => {
           <Grid item></Grid>
         </Grid>
         {selectedGame.status !== "TIMED" ? (
-          !Object.is(points, null) ? (
-            <Typography
-              variant="h7"
-              sx={{
-                textAlign: "center",
-                fontWeight: "bold",
-                padding: "12px 0",
-              }}
-            >
-              You scored: {points} points!
-            </Typography>
-          ) : selectedGame.status === "IN_PLAY" ||
-            selectedGame.status === "PAUSED" ? (
-            <Typography
-              variant="h7"
-              sx={{
-                textAlign: "center",
-                fontWeight: "bold",
-                padding: "12px 0",
-              }}
-            >
-              Game in progress! Your possible points {currentPoints}!
-            </Typography>
-          ) : (
-            <Typography
-              variant="h7"
-              sx={{
-                textAlign: "center",
-                fontWeight: "bold",
-                padding: "12px 0",
-              }}
-            >
-              You have not guessed this game :(
-            </Typography>
-          )
+          <>{displayResultInfo()}</>
         ) : (
           <PopularGuesses
             popularGuesses={popularGuesses}
