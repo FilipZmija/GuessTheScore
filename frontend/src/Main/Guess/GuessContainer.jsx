@@ -1,6 +1,7 @@
 import React from "react";
 import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { setOpen } from "../../redux/errorSlice";
 import GuessSkeleton from "./GuessSkeleton";
 import GameGuess from "./GameGuess";
 import axios from "axios";
@@ -26,24 +27,27 @@ export default function GuessContainer() {
   }, [event, dispatch]);
 
   useEffect(() => {
-    scoreboardId &&
-      eventId &&
-      (async () => {
-        console.log(scoreboardId, eventId);
-        const popularGuesses = await axios.get(
-          `${process.env.REACT_APP_API_URL}/scoreboards/popular/${scoreboardId}`,
-          {
-            headers: {
-              Authorization: "Bearer " + token,
-            },
-            params: {
-              EventId: eventId,
-            },
-          }
-        );
-        console.log(popularGuesses.data?.PopularGuesses);
-        dispatch(setPopularGuesses(popularGuesses.data?.PopularGuesses));
-      })();
+    try {
+      scoreboardId &&
+        eventId &&
+        (async () => {
+          const popularGuesses = await axios.get(
+            `${process.env.REACT_APP_API_URL}/scoreboards/popular/${scoreboardId}`,
+            {
+              headers: {
+                Authorization: "Bearer " + token,
+              },
+              params: {
+                EventId: eventId,
+              },
+            }
+          );
+          dispatch(setPopularGuesses(popularGuesses.data?.PopularGuesses));
+        })();
+    } catch (e) {
+      dispatch(setOpen(true));
+      console.error(e);
+    }
   }, [scoreboardId, eventId, dispatch, token]);
 
   useEffect(() => {
@@ -64,11 +68,10 @@ export default function GuessContainer() {
           const [home, away] = userGuess
             ? userGuess?.score.split(":")
             : ["", ""];
-          console.log(userGuess);
           dispatch(
             setPoints({
-              currentPoints: userGuess.currentPoints,
-              points: userGuess.points,
+              currentPoints: userGuess?.currentPoints,
+              points: userGuess?.points,
             })
           );
           dispatch(setGuessId(userGuess?.id || null));
@@ -79,6 +82,7 @@ export default function GuessContainer() {
             })
           );
         } catch (e) {
+          dispatch(setOpen(true));
           console.error(e);
         }
       })();

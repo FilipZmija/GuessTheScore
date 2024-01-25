@@ -12,6 +12,7 @@ import axios from "axios";
 import SucessAlert from "./Alert";
 import PopularGuesses from "./PopularGuesses";
 import { guessScore, setGuessId, setIsClicked } from "../../redux/guessSlice";
+import { setOpen } from "../../redux/errorSlice";
 const teamLogoStyle = {
   objectFit: "contain",
   width: { xs: "120%", xl: "100%" },
@@ -22,6 +23,7 @@ const teamName = {
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
+  fontWeight: "bold",
 };
 const scoreField = {
   width: { xs: "3rem", sm: "4.25rem", md: "4.25rem", lg: "4.25rem" },
@@ -45,8 +47,20 @@ const cardStyle = {
   margin: "0 0 3% 0",
   display: "inline-block",
 };
+
+const pulsateKeyframes = {
+  "0%": { boxShadow: "0 0 0.3rem rgba(78, 159, 76, 1)" },
+  "50%": { boxShadow: "0 0 1.5rem rgba(78, 159, 76, 1)" },
+  "100%": { boxShadow: "0 0 0.3rem rgba(78, 159, 76, 1)" },
+};
+
+const pulsateStyle = {
+  animation: "pulsate 2s infinite",
+  "@keyframes pulsate": pulsateKeyframes,
+};
+
 const GameDetails = () => {
-  const [open, setOpen] = useState(false);
+  const [alertOpen, setAlertOpen] = useState(false);
   const {
     guess,
     selectedGame,
@@ -80,10 +94,11 @@ const GameDetails = () => {
                 },
               }
             );
-            setOpen(true);
+            setAlertOpen(true);
             const { id } = newGuess.data.guess;
             dispatch(setGuessId(id));
           } catch (e) {
+            dispatch(setAlertOpen(true));
             console.error(e);
           }
         })();
@@ -102,10 +117,11 @@ const GameDetails = () => {
                 },
               }
             );
-            setOpen(true);
+            setAlertOpen(true);
             const { id } = newGuess.data.guess;
             dispatch(setGuessId(id));
           } catch (e) {
+            dispatch(setOpen(true));
             console.error(e);
           }
         })();
@@ -118,11 +134,21 @@ const GameDetails = () => {
     : [];
 
   return (
-    <Card sx={cardStyle}>
+    <Card
+      sx={{
+        ...cardStyle,
+        ...(selectedGame.status === "IN_PLAY" ||
+        selectedGame.status === "PAUSED"
+          ? pulsateStyle
+          : {}),
+      }}
+    >
       <CardContent sx={guessCardStyle}>
-        <SucessAlert open={open} setOpen={setOpen} />
-        <Typography variant="h5">{selectedGame.competition}</Typography>
-        <Typography variant="h7" gutterBottom>
+        <SucessAlert alertOpen={alertOpen} setAlertOpen={setAlertOpen} />
+        <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+          {selectedGame.competition}
+        </Typography>
+        <Typography sx={{ fontWeight: "bold" }} variant="h7" gutterBottom>
           {selectedGame.utcTime}
         </Typography>
         <Grid container alignItems="center" spacing={{ xs: 1, lg: 2 }}>
@@ -234,7 +260,7 @@ const GameDetails = () => {
           <Grid item></Grid>
         </Grid>
         {selectedGame.status !== "TIMED" ? (
-          points ? (
+          !Object.is(points, null) ? (
             <Typography
               variant="h7"
               sx={{
@@ -245,7 +271,8 @@ const GameDetails = () => {
             >
               You scored: {points} points!
             </Typography>
-          ) : selectedGame.status === "IN_PLAY" ? (
+          ) : selectedGame.status === "IN_PLAY" ||
+            selectedGame.status === "PAUSED" ? (
             <Typography
               variant="h7"
               sx={{

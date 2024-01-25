@@ -1,8 +1,10 @@
 import React, { useState } from "react";
-import { Box } from "@mui/material";
+import { useSelector } from "react-redux";
+import { Box, Grid } from "@mui/material";
 import Slides from "./Slides";
 import JoinLeagueDialog from "./JoinLeagueDialog";
 import CreateLeagueDialog from "./CreateLeagueDialog";
+import CopyButton from "./CopyButton";
 const outterButtonContainer = {
   width: "100%",
   borderRadius: "10px",
@@ -20,13 +22,20 @@ const innerButtonContainer = {
 };
 function Scoretables() {
   const [reload, setReload] = useState(false);
+  const scoreboardId = useSelector((state) => state.scoreboard.scoreboardId);
   return (
     <>
       <Box sx={outterButtonContainer}>
-        <Box sx={innerButtonContainer}>
-          <JoinLeagueDialog setReload={setReload} />
-          <CreateLeagueDialog setReload={setReload} />
-        </Box>
+        <Grid container>
+          <Grid item md={1}></Grid>
+          <Grid item md={10} sx={innerButtonContainer}>
+            <JoinLeagueDialog setReload={setReload} />
+            <CreateLeagueDialog setReload={setReload} />
+          </Grid>
+          <Grid item md={1}>
+            {scoreboardId !== 1 && <CopyButton />}
+          </Grid>
+        </Grid>
         <Slides reload={reload} />
       </Box>
     </>

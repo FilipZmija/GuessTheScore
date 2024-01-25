@@ -65,7 +65,6 @@ export default function PopularGuesses({ hasChanged }) {
         }
         return popular;
       };
-      console.log("here");
 
       dispatch(setPopularGuesses(generateGuesses()));
     } else {
@@ -83,20 +82,20 @@ export default function PopularGuesses({ hasChanged }) {
   };
 
   return (
-    <Box sx={buttonsContainerStyle}>
-      {popularGuesses?.map((popularGuess, index) => {
-        const { number } = popularGuess;
-        const { guesses } = selectedGame;
-        const ratio =
-          number && guesses
-            ? Math.floor((number / guesses) * 100) + "%"
-            : 0 + "%";
+    <>
+      <Box key={"main-container"} sx={buttonsContainerStyle}>
+        {popularGuesses?.map((popularGuess, index) => {
+          const { number } = popularGuess;
+          const { guesses } = selectedGame;
+          const ratio =
+            number && guesses
+              ? Math.floor((number / guesses) * 100) + "%"
+              : 0 + "%";
 
-        return (
-          <>
-            <Box sx={buttonContainerStyle}>
+          return (
+            <Box sx={buttonContainerStyle} key={"popular-guess-box-" + index}>
               <Button
-                pill
+                pill="true"
                 onClick={() => handleToggle(index, popularGuess.score)}
                 sx={{
                   ...toggleButtonStyle,
@@ -110,9 +109,9 @@ export default function PopularGuesses({ hasChanged }) {
                 {ratio}
               </Typography>
             </Box>
-          </>
-        );
-      })}
-    </Box>
+          );
+        })}
+      </Box>
+    </>
   );
 }
