@@ -98,10 +98,11 @@ const GameDetails = () => {
             const { id } = newGuess.data.guess;
             dispatch(setGuessId(id));
           } catch (e) {
-            dispatch(setAlertOpen(true));
+            dispatch(setOpen(true));
             console.error(e);
           }
         })();
+        hasChanged.current = true;
       } else if (home.length > 0 && away.length > 0 && guessId && eventId) {
         (async () => {
           try {
@@ -125,14 +126,16 @@ const GameDetails = () => {
             console.error(e);
           }
         })();
+        hasChanged.current = true;
       }
     }
   }, [guess, eventId, token, dispatch, guessId]);
+
   const [homeScore, awayScore] = selectedGame
     ? selectedGame.score.split(":")
     : [];
   const displayResultInfo = () => {
-    if (points) {
+    if (points != null) {
       return (
         <Typography
           variant="h7"
@@ -147,7 +150,7 @@ const GameDetails = () => {
       );
     } else if (
       (selectedGame.status === "IN_PLAY" || selectedGame.status === "PAUSED") &&
-      currentPoints
+      currentPoints != null
     ) {
       return (
         <Typography
@@ -176,6 +179,7 @@ const GameDetails = () => {
       );
     }
   };
+
   return (
     <Card
       sx={{
@@ -237,8 +241,10 @@ const GameDetails = () => {
                   })
                 );
                 dispatch(setIsClicked());
+                e.target.value.length === 1 && e.target.blur();
               }}
               inputProps={{
+                inputMode: "numeric",
                 maxLength: 1,
                 style: {
                   fontSize: "250%",
@@ -273,8 +279,10 @@ const GameDetails = () => {
                   })
                 );
                 dispatch(setIsClicked());
+                e.target.value.length === 1 && e.target.blur();
               }}
               inputProps={{
+                inputMode: "numeric",
                 maxLength: 1,
                 style: {
                   fontSize: "250%",

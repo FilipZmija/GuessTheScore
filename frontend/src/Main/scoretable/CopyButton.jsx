@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import { IconButton, Snackbar } from "@mui/material";
 import ShareIcon from "@mui/icons-material/Share";
 import { useSelector } from "react-redux";
+import copy from "copy-to-clipboard";
 const CopyButton = () => {
   const code = useSelector((state) => state.scoreboard.code);
   const [open, setOpen] = useState(false);
-  const handleClick = () => {
+  const handleClick = async () => {
     setOpen(true);
-    navigator.clipboard.writeText(code);
+    copy(code);
   };
 
   return (

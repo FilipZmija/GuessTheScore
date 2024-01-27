@@ -1,7 +1,7 @@
 import React from "react";
 import { Typography, Card, CardContent, CardMedia, Grid } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
-import { selectEvent } from "../redux/eventsSlice";
+import { selectEvent, openDrawer } from "../redux/eventsSlice";
 const press = {
   "0%": {
     transform: "scale(1.05)",
@@ -71,6 +71,7 @@ const GameCard = ({ game, index }) => {
 
   const handleClick = () => {
     dispatch(selectEvent(index));
+    dispatch(openDrawer(false));
   };
 
   return (

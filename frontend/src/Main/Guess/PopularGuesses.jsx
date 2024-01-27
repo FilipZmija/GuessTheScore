@@ -56,7 +56,14 @@ export default function PopularGuesses({ hasChanged }) {
           "4:2",
           "4:3",
           "4:4",
+          "0:1",
+          "0:2",
+          "1:2",
+          "1:3",
+          "2:3",
+          "3:4",
         ];
+
         const popular = [];
         for (let i = 0; i < 3; i++) {
           const index = Math.floor(Math.random() * guesses.length);

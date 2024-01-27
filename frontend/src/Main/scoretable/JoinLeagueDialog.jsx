@@ -8,6 +8,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  useMediaQuery,
 } from "@mui/material";
 import axios from "axios";
 
@@ -15,6 +16,8 @@ export default function FormDialog({ setReload }) {
   const [open, setOpen] = useState(false);
   const token = useSelector((state) => state.auth.token);
   const [message, setMessage] = useState();
+  const isMobile = useMediaQuery((theme) => theme.breakpoints.down("sm"));
+
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -63,7 +66,7 @@ export default function FormDialog({ setReload }) {
           fontWeight: "bold",
         }}
       >
-        Join league
+        {isMobile ? "Join " : "Join league"}
       </Button>
       <Dialog
         open={open}
