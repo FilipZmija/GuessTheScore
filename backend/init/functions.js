@@ -26,8 +26,8 @@ const revaluateScoreboardPositions = async () => {
   );
 };
 
-const getHundredGames = async () => {
-  for (let i = -80; i <= 28; i += 8) {
+const getLotsOfGames = async (daysBack, daysForward) => {
+  for (let i = -daysBack; i <= daysForward; i += 8) {
     getEvents(i, i + 8);
   }
 };
@@ -36,5 +36,5 @@ module.exports = {
   initTable,
   asignUserToMainScoreboard,
   revaluateScoreboardPositions,
-  getHundredGames,
+  getLotsOfGames,
 };

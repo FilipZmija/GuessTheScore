@@ -23,12 +23,11 @@ module.exports = (sequelize, DataTypes) => {
         },
       ],
       hooks: {
-        beforeUpdate: async (event) => {
-          await editEvaluateScoreboardStat(event);
-          await evaluateScoreboardStats(event);
+        beforeUpdate: (event) => {
+          editEvaluateScoreboardStat(event);
         },
-        afterCreate: async (event, options) => {
-          await evaluateScoreboardStats(event);
+        afterCreate: (event) => {
+          evaluateScoreboardStats(event);
         },
       },
     }
@@ -62,15 +61,14 @@ module.exports = (sequelize, DataTypes) => {
     });
     await eventObj.increment();
     await eventObj.save();
-    for (const item of userScoretables) {
+    const promises = userScoretables.map(async (item) => {
       const guess = await sequelize.models.PopularGuesses.findOne({
         where: { ScoreboardId: item, score, EventId: event.EventId },
       });
 
-      if (!Object.is(guess, null)) {
+      if (guess) {
         await guess.increment();
         await guess.save();
-        break;
       } else {
         await sequelize.models.PopularGuesses.create({
           ScoreboardId: item,
@@ -78,34 +76,50 @@ module.exports = (sequelize, DataTypes) => {
           EventId: event.EventId,
         });
       }
-    }
+    });
+
+    Promise.all(promises);
   }
   const editEvaluateScoreboardStat = async (event) => {
-    const { score } = event._previousDataValues;
-    const { UserId, EventId } = event.dataValues;
+    const { score: prevScore } = event._previousDataValues;
+    const { UserId, EventId, score: curScore } = event.dataValues;
+    if (!prevScore && curScore && prevScore === curScore) {
+      return;
+    }
     const userScoretables = (
       await sequelize.models.ScoreboardUser.findAll({
         where: { UserId },
         attributes: ["ScoreboardId"],
       })
     ).map((item) => item.ScoreboardId);
-    for (const item of userScoretables) {
-      const eventObj = await sequelize.models.Event.findOne({
-        where: { id: event.EventId },
-      });
-      const guess = await sequelize.models.PopularGuesses.findOne({
-        where: { ScoreboardId: item, score, EventId },
-      });
-      await eventObj.decrement();
-      await eventObj.save();
 
-      if (!Object.is(guess, null)) {
-        doesExist = true;
+    const promisesSubstract = userScoretables.map(async (item) => {
+      const guess = await sequelize.models.PopularGuesses.findOne({
+        where: { ScoreboardId: item, score: prevScore, EventId },
+      });
+
+      if (guess) {
         await guess.decrement();
         await guess.save();
-        break;
       }
-    }
+    });
+    const promisesAdd = userScoretables.map(async (item) => {
+      const guess = await sequelize.models.PopularGuesses.findOne({
+        where: { ScoreboardId: item, score: curScore, EventId: event.EventId },
+      });
+      console.log(guess);
+      if (guess) {
+        await guess.increment();
+        await guess.save();
+      } else {
+        await sequelize.models.PopularGuesses.create({
+          ScoreboardId: item,
+          score: curScore,
+          EventId: event.EventId,
+        });
+      }
+    });
+    Promise.all([...promisesSubstract, ...promisesAdd]);
   };
 
   return Guess;
