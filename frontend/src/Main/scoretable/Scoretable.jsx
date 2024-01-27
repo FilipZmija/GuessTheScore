@@ -62,7 +62,7 @@ const generateRow = (row, username) => (
       align="right"
       sx={
         row.username === username
-          ? activeUserRowStyle
+          ? { ...activeUserRowStyle, display: { xs: "none", md: "table-cell" } }
           : {
               display: { xs: "none", md: "table-cell" },
             }
@@ -232,12 +232,7 @@ export default function Scoretable({ scoreboardId, active, index }) {
                 >
                   Guesses
                 </TableCell>
-                <TableCell
-                  align="right"
-                  sx={{ fontWeight: "bold", display: { md: "none" } }}
-                >
-                  Guesses
-                </TableCell>
+
                 <TableCell
                   align="right"
                   sx={{

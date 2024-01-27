@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { setScoreboardId } from "../../redux/scoreboardSlice";
 import { setOpen } from "../../redux/errorSlice";
 import axios from "axios";
+import { useMediaQuery } from "@mui/material";
 import Carousel from "react-material-ui-carousel";
 import Scoretable from "./Scoretable";
 
@@ -10,6 +11,8 @@ export default function Slides({ reload }) {
   const [scoreIds, setScoreIds] = useState();
   const [active, setActive] = useState();
   const token = useSelector((state) => state.auth.token);
+  const isMobile = useMediaQuery((theme) => theme.breakpoints.down("sm"));
+
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -42,7 +45,8 @@ export default function Slides({ reload }) {
           setActive(now);
         }}
         autoPlay={false}
-        fullHeightHover={false}
+        fullHeightHover={isMobile}
+        swipe={!isMobile}
         navButtonsWrapperProps={{
           style: {
             marginRight: "10px",
