@@ -7,7 +7,7 @@ router.use((req, res, next) => {
   next();
 });
 
-router.get("/all", async (req, res) => {
+router.get("/all", validateToken, async (req, res) => {
   const filterBy = req.query.filterBy?.split(",");
   const { date } = req.query;
   const filter = {
@@ -77,7 +77,7 @@ router.get("/all", async (req, res) => {
   }
 });
 
-router.get("/info/:EventId", async (req, res) => {
+router.get("/info/:EventId", validateToken, async (req, res) => {
   const { EventId } = req.params;
   try {
     const event = await Event.findAll({

@@ -184,9 +184,46 @@ const createOrUpdateTeam = async (team, TableId) => {
   }
 };
 
+const updateTeam = async (team, TableId) => {
+  const {
+    position,
+    playedGames,
+    form,
+    won,
+    draw,
+    lost,
+    points,
+    goalsFor,
+    goalsAgainst,
+    goalDifference,
+  } = team;
+  const { id } = team.team;
+  try {
+    await TableLogs.update(
+      {
+        position,
+        playedGames,
+        form,
+        won,
+        draw,
+        lost,
+        points,
+        goalsFor,
+        goalsAgainst,
+        goalDifference,
+      },
+      {
+        where: { TeamApiId: id, TableId },
+        individualHooks: true,
+      }
+    );
+  } catch (err) {
+    return err;
+  }
+};
+
 const getTeamsAndTables = async () => {
   const compId = "2021,2001,2000,2002,2003,2014,2015,2018,2019".split(",");
-
   try {
     await Promise.all(
       compId.map(async (item) => {
@@ -255,4 +292,44 @@ const getTeamsAndTables = async () => {
     console.error(e);
   }
 };
-module.exports = { getEvents, createOrUpdateEvent, getTeamsAndTables };
+
+const getTeamsUpdate = async () => {
+  const compId = "2021,2001,2000,2002,2003,2014,2015,2018,2019".split(",");
+  try {
+    await Promise.all(
+      compId.map(async (item) => {
+        const response = await axios.get(
+          `${process.env.API_URI}/v4/competitions/${item}/standings`,
+          {
+            headers: {
+              "X-Auth-Token": `${process.env.API_KEY}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const tables = await Promise.all(
+          response.data.standings.map(async (standingItem) => {
+            const table = await Tables.findOne({
+              where: { CompetitionApiId: item },
+            });
+            const TableId = table.id;
+            await Promise.all(
+              standingItem.table.map(async (tableItem) => {
+                await updateTeam(tableItem, TableId);
+              })
+            );
+          })
+        );
+      })
+    );
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+module.exports = {
+  getEvents,
+  createOrUpdateEvent,
+  getTeamsAndTables,
+  getTeamsUpdate,
+};

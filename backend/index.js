@@ -23,10 +23,10 @@ app.use("/scoreboards", scoreboards);
 app.use("/leaguetable", leaguetable);
 
 //init DB data
-initOutsourcedData();
+(async () => await initOutsourcedData())();
 // testLiveGame();
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 (async () => {
   try {
     await db.sequelize.sync();
