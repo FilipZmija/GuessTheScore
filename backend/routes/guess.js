@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { Event, Users, Guess } = require("../models");
+const { Event, Guess } = require("../models");
 const { validateToken } = require("../auth/JWT");
 
 router.use(express.json({ limit: "10mb" }));
