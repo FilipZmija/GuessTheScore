@@ -27,12 +27,12 @@ function Scoretables() {
     <>
       <Box sx={outterButtonContainer}>
         <Grid container>
-          <Grid item md={1}></Grid>
-          <Grid item md={10} sx={innerButtonContainer}>
+          <Grid item xs={1}></Grid>
+          <Grid item xs={10} sx={innerButtonContainer}>
             <JoinLeagueDialog setReload={setReload} />
             <CreateLeagueDialog setReload={setReload} />
           </Grid>
-          <Grid item md={1}>
+          <Grid item xs={1}>
             {scoreboardId !== 1 && <CopyButton />}
           </Grid>
         </Grid>

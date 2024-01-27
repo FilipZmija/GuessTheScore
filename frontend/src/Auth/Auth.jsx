@@ -20,7 +20,7 @@ export default function Auth() {
               headers: { Authorization: "Bearer " + token },
             }
           );
-          const { username } = userData.data?.users[0];
+          const username = userData.data?.users[0]?.username;
           dispatch(login({ username, token }));
         })();
       } catch (e) {
