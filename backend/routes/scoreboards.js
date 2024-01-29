@@ -106,8 +106,14 @@ router.get("/popular/:id", validateToken, async (req, res) => {
       ],
       order: [[PopularGuesses, "number", "DESC"]],
     });
+    const guesses = scoreboards?.PopularGuesses.reduce(
+      (acc, curr) => acc + curr.number,
+      0
+    );
     scoreboards?.PopularGuesses.splice(3);
-    res.status(200).json(scoreboards);
+    res
+      .status(200)
+      .json({ popularGuesses: scoreboards?.PopularGuesses, guesses });
   } catch (e) {
     console.error(e);
 

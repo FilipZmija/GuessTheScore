@@ -177,7 +177,7 @@ export default function LeagueScoretable() {
                                   "&:last-child td, &:last-child th": {
                                     border: 0,
                                   },
-                                  padding: "0.97%",
+                                  padding: "0.8%",
                                   height: "5%",
                                 }
                           }
@@ -191,6 +191,17 @@ export default function LeagueScoretable() {
           </TableBody>
         </Table>
       </Box>
+      <Typography
+        sx={{
+          textAlign: "center",
+          width: "100%",
+          fontWeight: "100",
+          fontSize: "10px",
+          marginBottom: "0px",
+        }}
+      >
+        Football data provided by the Football-Data.org API
+      </Typography>
     </TableContainer>
   );
 }

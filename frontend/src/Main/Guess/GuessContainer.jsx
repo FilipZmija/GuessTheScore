@@ -42,7 +42,7 @@ export default function GuessContainer() {
               },
             }
           );
-          dispatch(setPopularGuesses(popularGuesses.data?.PopularGuesses));
+          dispatch(setPopularGuesses(popularGuesses.data));
         })();
     } catch (e) {
       dispatch(setOpen(true));

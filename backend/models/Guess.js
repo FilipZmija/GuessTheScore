@@ -83,9 +83,13 @@ module.exports = (sequelize, DataTypes) => {
   const editEvaluateScoreboardStat = async (event) => {
     const { score: prevScore } = event._previousDataValues;
     const { UserId, EventId, score: curScore } = event.dataValues;
-    if (!prevScore && curScore && prevScore === curScore) {
+    if (
+      (!prevScore && curScore && prevScore === curScore) ||
+      prevScore === curScore
+    ) {
       return;
     }
+    console.log(prevScore === curScore);
     const userScoretables = (
       await sequelize.models.ScoreboardUser.findAll({
         where: { UserId },
@@ -103,6 +107,7 @@ module.exports = (sequelize, DataTypes) => {
         await guess.save();
       }
     });
+
     const promisesAdd = userScoretables.map(async (item) => {
       const guess = await sequelize.models.PopularGuesses.findOne({
         where: { ScoreboardId: item, score: curScore, EventId: event.EventId },

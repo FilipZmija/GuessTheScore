@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       hooks: {
         afterCreate: async function (scoreboard) {
-          const newHash = scoreboard.hash + scoreboard.id;
+          const newHash = scoreboard.hash + scoreboard.id + "";
           await scoreboard.setDataValue("hash", newHash);
           await scoreboard.save();
         },
