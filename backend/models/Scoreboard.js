@@ -18,6 +18,11 @@ module.exports = (sequelize, DataTypes) => {
         unique: false,
         defaultValue: 0,
       },
+      calculateBack: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
     },
     {
       hooks: {
@@ -32,6 +37,10 @@ module.exports = (sequelize, DataTypes) => {
 
   Scoreboard.associate = (models) => {
     Scoreboard.hasMany(models.PopularGuesses);
+    Scoreboard.hasMany(models.Score);
+    Scoreboard.belongsToMany(models.Competition, {
+      through: models.ScoreboardCompetitions,
+    });
     Scoreboard.belongsToMany(models.Users, { through: models.ScoreboardUser });
     Scoreboard.belongsToMany(models.Guess, { through: models.ScoreboardGuess });
   };

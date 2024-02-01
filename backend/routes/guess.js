@@ -1,6 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const { Event, Guess } = require("../models");
+const {
+  Event,
+  Guess,
+  Score,
+  ScoreboardCompetiton,
+  Competition,
+  Scoreboard,
+  Users,
+} = require("../models");
+const Sequelize = require("sequelize");
 const { validateToken } = require("../auth/JWT");
 
 router.use(express.json({ limit: "10mb" }));
@@ -51,6 +60,7 @@ router.put("/edit/:GuessId", validateToken, async (req, res) => {
   const { GuessId } = req.params;
   const { score, EventId } = req.body;
   const { id } = req.user;
+
   try {
     const guess = await Guess.findOne({
       where: { EventId, UserId: id, id: GuessId },

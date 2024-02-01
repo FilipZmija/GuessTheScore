@@ -1,3 +1,5 @@
+const Competition = require("./Competition");
+
 module.exports = (sequelize, DataTypes) => {
   const ScoreboardUser = sequelize.define(
     "ScoreboardUser",
@@ -32,6 +34,9 @@ module.exports = (sequelize, DataTypes) => {
       },
     }
   );
-
+  ScoreboardUser.associate = (models) => {
+    ScoreboardUser.belongsTo(models.Users);
+    ScoreboardUser.belongsTo(models.Scoreboard);
+  };
   return ScoreboardUser;
 };

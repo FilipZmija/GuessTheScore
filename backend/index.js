@@ -8,7 +8,7 @@ const guess = require("./routes/guess");
 const scoreboards = require("./routes/scoreboards");
 const leaguetable = require("./routes/leaguetable");
 const { initOutsourcedData } = require("./init/init");
-const { testLiveGame } = require("./test");
+const { testLiveGame, createUser } = require("./test");
 
 require("dotenv").config();
 const cookieParser = require("cookie-parser");
@@ -24,8 +24,8 @@ app.use("/leaguetable", leaguetable);
 
 //init DB data
 (async () => await initOutsourcedData())();
-// testLiveGame();
-
+// (async () => await testLiveGame(1, 819))();
+// createUser();
 const PORT = process.env.PORT || 3001;
 (async () => {
   try {

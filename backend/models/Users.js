@@ -31,6 +31,10 @@ module.exports = (sequelize, DataTypes) => {
             UserId: user.id,
             ScoreboardId: 1,
           });
+          const score = await sequelize.models.Score.create({
+            UserId: user.id,
+            ScoreboardId: 1,
+          });
         },
         afterUpdate: async (user) => {
           if (user.changed("points") || user.changed("guesses")) {
@@ -49,6 +53,7 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: "CASCADE",
     });
     Users.belongsToMany(models.Scoreboard, { through: models.ScoreboardUser });
+    Users.hasMany(models.Score);
   };
   return Users;
 };
