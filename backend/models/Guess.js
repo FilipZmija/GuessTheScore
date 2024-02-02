@@ -51,7 +51,7 @@ module.exports = (sequelize, DataTypes) => {
   async function evaluateScoreboardStats(event) {
     const { UserId, score } = event.dataValues;
     const userScoretables = (
-      await sequelize.models.ScoreboardUser.findAll({
+      await sequelize.models.Score.findAll({
         where: { UserId },
         attributes: ["ScoreboardId"],
       })
@@ -70,12 +70,6 @@ module.exports = (sequelize, DataTypes) => {
         if (guess) {
           await guess.increment();
           await guess.save();
-        } else {
-          await sequelize.models.PopularGuesses.create({
-            ScoreboardId: item,
-            score,
-            EventId: event.EventId,
-          });
         }
       })
     );
@@ -90,7 +84,7 @@ module.exports = (sequelize, DataTypes) => {
       return;
     }
     const userScoretables = (
-      await sequelize.models.ScoreboardUser.findAll({
+      await sequelize.models.Score.findAll({
         where: { UserId },
         attributes: ["ScoreboardId"],
       })

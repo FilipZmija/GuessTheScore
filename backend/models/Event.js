@@ -1,5 +1,4 @@
-const Competition = require("./Competition");
-
+const guessesData = require("../init/data");
 module.exports = (sequelize, DataTypes, Sequelize) => {
   const Event = sequelize.define(
     "Event",
@@ -61,35 +60,12 @@ module.exports = (sequelize, DataTypes, Sequelize) => {
           if (event.changed("status") && event.status === "FINISHED") {
             evaluatePoints(event, true);
             setTimeout(() => revaluateScorePositions(), 10000);
-            setTimeout(() => revaluateScoreboardPositions(), 10000);
           } else if (event.changed("score") && event.status === "IN_PLAY") {
             evaluatePoints(event, false);
           }
         },
-        afterCreate: async () => {
-          const guesses = [
-            "1:0",
-            "1:1",
-            "2:0",
-            "2:1",
-            "2:2",
-            "3:0",
-            "3:1",
-            "3:2",
-            "3:3",
-            "4:0",
-            "4:1",
-            "4:2",
-            "4:3",
-            "4:4",
-            "0:1",
-            "0:2",
-            "1:2",
-            "1:3",
-            "2:3",
-            "3:4",
-          ];
-          await addPopularGuesses(guesses);
+        afterCreate: async (event) => {
+          await addPopularGuesses(event);
         },
       },
     }
@@ -109,18 +85,6 @@ module.exports = (sequelize, DataTypes, Sequelize) => {
   Event.prototype.decrement = async function () {
     this.guesses--;
     await this.save();
-  };
-  const revaluateScoreboardPositions = async () => {
-    const allScoreboards = await sequelize.models.Scoreboard.findAll();
-
-    await Promise.all(
-      allScoreboards.map(async (scoreboard) => {
-        const users = await scoreboard.getUsers({ order: [["ratio", "DESC"]] });
-        users.map(async (user, index) => {
-          user.ScoreboardUser.update({ position: index + 1 });
-        });
-      })
-    );
   };
 
   const revaluateScorePositions = async () => {
@@ -226,15 +190,24 @@ module.exports = (sequelize, DataTypes, Sequelize) => {
   }
 
   async function addPopularGuesses(event) {
-    await Promise.all(
-      scores.map(async (score) => {
-        await sequelize.models.PopularGuesses.create({
-          ScoreboardId: item,
-          score,
-          EventId: event.id,
-        });
-      })
+    const scoreboards = await sequelize.models.Scoreboard.findAll();
+    const popularGuesses = guessesData
+      .map((item) =>
+        scoreboards.map((scoreboard) => {
+          return {
+            ScoreboardId: scoreboard.id,
+            score: item,
+            EventId: event.id,
+          };
+        })
+      )
+      .flat();
+    console.log(popularGuesses);
+
+    const guesses = await sequelize.models.PopularGuesses.bulkCreate(
+      popularGuesses
     );
+    console.log(guesses);
   }
 
   return Event;

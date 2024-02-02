@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const {
-  ScoreboardUser,
+  Score,
   Scoreboard,
   PopularGuesses,
   Users,
@@ -56,47 +56,6 @@ router.post("/assign", validateToken, async (req, res) => {
     res.status(404).json(e);
   }
 });
-
-router.get("/:scoreboardId", validateToken, async (req, res) => {
-  const { scoreboardId } = req.params;
-  const { page } = req.query;
-  const { id } = req.user;
-  const limit = 10;
-  try {
-    const offset = (page - 1) * limit || 0;
-    const scoreboard = await Scoreboard.findByPk(scoreboardId);
-    const users = await scoreboard.getUsers({
-      limit,
-      offset,
-      order: [["ratio", "DESC"]],
-    });
-    const sortedUsers = users.sort(
-      (a, b) => a.ScoreboardUser.position - b.ScoreboardUser.position
-    );
-    let loggedUser;
-    if (users.findIndex((user) => user.id === id) === -1) {
-      [loggedUser] = await scoreboard.getUsers({
-        where: { id },
-      });
-      if (loggedUser?.ScoreboardUser.position < page * 10) {
-        loggedUser = null;
-      }
-    } else {
-      loggedUser = null;
-    }
-    const response = {
-      ...scoreboard.dataValues,
-      loggedUser,
-      users: sortedUsers,
-    };
-    res.status(200).json({ scoreboard: response });
-  } catch (e) {
-    console.error(e);
-
-    res.status(404).json(e);
-  }
-});
-
 router.get("/new/:scoreboardId", validateToken, async (req, res) => {
   const { scoreboardId } = req.params;
   const { page } = req.query;
@@ -141,7 +100,7 @@ router.get("/new/:scoreboardId", validateToken, async (req, res) => {
 router.get("/users/all", validateToken, async (req, res) => {
   const { id } = req.user;
   try {
-    const scoreboards = await ScoreboardUser.findAll({
+    const scoreboards = await Score.findAll({
       where: { UserId: id },
       attributes: ["ScoreboardId"],
     });

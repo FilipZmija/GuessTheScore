@@ -24,7 +24,7 @@ app.use("/leaguetable", leaguetable);
 
 //init DB data
 (async () => await initOutsourcedData())();
-// (async () => await testLiveGame(1, 819))();
+// (async () => await testLiveGame(23, 833))();
 // createUser();
 const PORT = process.env.PORT || 3001;
 (async () => {

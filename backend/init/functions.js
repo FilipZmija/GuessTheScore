@@ -1,6 +1,5 @@
 const {
   Scoreboard,
-  ScoreboardUser,
   Users,
   Score,
   ScoreboardCompetitions,
@@ -20,29 +19,12 @@ const initTable = async () => {
   }
 };
 const asignUserToMainScoreboard = async (UserId, ScoreboardId = 1) => {
-  const association = await ScoreboardUser.create({
-    UserId,
-    ScoreboardId,
-  });
   const score = await Score.create({
     UserId,
     ScoreboardId,
   });
 
   return [association, score];
-};
-
-const revaluateScoreboardPositions = async () => {
-  const allScoreboards = await Scoreboard.findAll();
-
-  await Promise.all(
-    allScoreboards.map(async (scoreboard) => {
-      const users = await scoreboard.getUsers({ order: [["ratio", "DESC"]] });
-      users.map(async (user, index) => {
-        user.ScoreboardUser.update({ position: index + 1 });
-      });
-    })
-  );
 };
 
 const getLotsOfGames = async (daysBack, daysForward) => {
@@ -54,6 +36,5 @@ const getLotsOfGames = async (daysBack, daysForward) => {
 module.exports = {
   initTable,
   asignUserToMainScoreboard,
-  revaluateScoreboardPositions,
   getLotsOfGames,
 };

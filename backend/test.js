@@ -17,7 +17,7 @@ const testLiveGame = async (apiId, EventId) => {
     CompetitionApiId: 2021,
     competition: "TEST Primera Division",
     apiId: apiId,
-    utcDate: "2024-01-06T16:00:00.000Z",
+    utcDate: "2024-02-01T16:00:00.000Z",
     date: "2024-02-01",
     utcTime: "16:00:00",
     status: "TIMED",
@@ -31,7 +31,7 @@ const testLiveGame = async (apiId, EventId) => {
     // score: "0:0",
     // score: "2:0",
   });
-  await delay(1000);
+  await delay(2000);
   const users = await Users.findAll({ limit: 10 });
   const scores = [
     "1:0",

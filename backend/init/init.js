@@ -8,7 +8,7 @@ const delay = (time) => {
 const initOutsourcedData = async () => {
   //init data
   // await delay(1000 * 15);
-  // await getTeamsAndTables();
+  await getTeamsAndTables();
   // await delay(1000 * 30);
   // await initTable();
   // await delay(1000 * 10);

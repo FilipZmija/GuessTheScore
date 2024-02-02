@@ -41,7 +41,7 @@ module.exports = (sequelize, DataTypes) => {
     Scoreboard.belongsToMany(models.Competition, {
       through: models.ScoreboardCompetitions,
     });
-    Scoreboard.belongsToMany(models.Users, { through: models.ScoreboardUser });
+
     Scoreboard.belongsToMany(models.Guess, { through: models.ScoreboardGuess });
   };
   return Scoreboard;
