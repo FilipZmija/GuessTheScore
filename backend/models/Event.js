@@ -1,4 +1,3 @@
-const guessesData = require("../init/data");
 module.exports = (sequelize, DataTypes, Sequelize) => {
   const Event = sequelize.define(
     "Event",
@@ -64,8 +63,8 @@ module.exports = (sequelize, DataTypes, Sequelize) => {
             evaluatePoints(event, false);
           }
         },
-        afterCreate: async (event) => {
-          await addPopularGuesses(event);
+        afterBulkCreate: async (event) => {
+          // await addPopularGuesses(event);
         },
       },
     }
@@ -189,25 +188,27 @@ module.exports = (sequelize, DataTypes, Sequelize) => {
     );
   }
 
-  async function addPopularGuesses(event) {
+  async function addPopularGuesses(events) {
     const scoreboards = await sequelize.models.Scoreboard.findAll();
+    const eventIds = events.map((event) => event.id);
     const popularGuesses = guessesData
       .map((item) =>
-        scoreboards.map((scoreboard) => {
-          return {
-            ScoreboardId: scoreboard.id,
-            score: item,
-            EventId: event.id,
-          };
-        })
+        scoreboards
+          .map((scoreboard) =>
+            eventIds.map((id) => {
+              return {
+                ScoreboardId: scoreboard.id,
+                score: item,
+                EventId: id,
+              };
+            })
+          )
+          .flat()
       )
       .flat();
-    console.log(popularGuesses);
-
     const guesses = await sequelize.models.PopularGuesses.bulkCreate(
       popularGuesses
     );
-    console.log(guesses);
   }
 
   return Event;

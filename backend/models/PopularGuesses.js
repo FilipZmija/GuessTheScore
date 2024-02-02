@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       unique: false,
-      defaultValue: 1,
+      defaultValue: 0,
     },
   });
   PopularGuesses.prototype.increment = async function () {

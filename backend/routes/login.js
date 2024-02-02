@@ -8,7 +8,9 @@ router.use(express.json({ limit: "10mb" }));
 router.use((req, res, next) => {
   next();
 });
-
+router.get("/hi", async (req, res) => {
+  res.json({ message: "Hi!" });
+});
 //register user
 router.post("/register", async (req, res) => {
   const { username, password } = req.body;

@@ -1,4 +1,3 @@
-const { createOrUpdateEvent } = require("./outsource/calls");
 const { Guess, Users } = require("./models");
 const bcrypt = require("bcrypt");
 
@@ -13,7 +12,7 @@ const createUser = async () => {
   }
 };
 const testLiveGame = async (apiId, EventId) => {
-  const event = await createOrUpdateEvent({
+  const match = {
     CompetitionApiId: 2021,
     competition: "TEST Primera Division",
     apiId: apiId,
@@ -30,7 +29,8 @@ const testLiveGame = async (apiId, EventId) => {
     score: "-:-",
     // score: "0:0",
     // score: "2:0",
-  });
+  };
+
   await delay(2000);
   const users = await Users.findAll({ limit: 10 });
   const scores = [
@@ -73,24 +73,5 @@ const testLiveGame = async (apiId, EventId) => {
   );
 
   await delay(10000);
-
-  await createOrUpdateEvent({
-    CompetitionApiId: 2021,
-    competition: "TEST Primera Division",
-    apiId: apiId,
-    utcDate: "2024-01-06T16:00:00.000Z",
-    date: "2024-02-01",
-    utcTime: "16:00:00",
-    // status: "TIMED",
-    // status: "IN_PLAY",
-    status: "FINISHED",
-    homeTeam: "TEST_Osasuna",
-    homeTeamCrest: "https://crests.football-data.org/79.svg",
-    awayTeam: "TEST_Almería",
-    awayTeamCrest: "https://crests.football-data.org/267.png",
-    // score: "-:-",
-    // score: "0:0",
-    score: "2:0",
-  });
 };
 module.exports = { testLiveGame, createUser };
