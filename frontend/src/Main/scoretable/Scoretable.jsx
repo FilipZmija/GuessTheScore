@@ -40,28 +40,28 @@ const tableContainerStyle = {
 
 const generateRow = (row, username) => (
   <TableRow
-    key={row.username}
+    key={row.User.username}
     sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
   >
     <TableCell
       component="th"
       scope="row"
       align="center"
-      sx={row.username === username ? activeUserRowStyle : {}}
+      sx={row.User.username === username ? activeUserRowStyle : {}}
     >
-      {row.ScoreboardUser.position}
+      {row.position}
     </TableCell>
     <TableCell
       component="th"
       scope="row"
-      sx={row.username === username ? activeUserRowStyle : {}}
+      sx={row.User.username === username ? activeUserRowStyle : {}}
     >
-      {row.username}
+      {row.User.username}
     </TableCell>
     <TableCell
       align="right"
       sx={
-        row.username === username
+        row.User.username === username
           ? { ...activeUserRowStyle, display: { xs: "none", md: "table-cell" } }
           : {
               display: { xs: "none", md: "table-cell" },
@@ -72,7 +72,7 @@ const generateRow = (row, username) => (
     </TableCell>
     <TableCell
       align="right"
-      sx={row.username === username ? activeUserRowStyle : {}}
+      sx={row.User.username === username ? activeUserRowStyle : {}}
     >
       {row.points === 0 || row.guesses === 0 ? 0 : (row.ratio * 100).toFixed(2)}
     </TableCell>
@@ -103,7 +103,7 @@ export default function Scoretable({ scoreboardId, active, index }) {
     setLoading(true);
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/scoreboards/${scoreboardId}`,
+        `${process.env.REACT_APP_API_URL}/scoreboards/new/${scoreboardId}`,
         {
           headers: {
             Authorization: "Bearer " + token,
@@ -113,16 +113,16 @@ export default function Scoretable({ scoreboardId, active, index }) {
           },
         }
       );
-      const { users, loggedUser } = response.data.scoreboard;
-      if (users.length === 0) {
+      const { scores, loggedUser } = response.data.scoreboard;
+      if (scores.length === 0) {
         setIsMore(false);
         setLoading(false);
         return;
       }
       setData((prev) =>
         prev
-          ? { ...prev, loggedUser, users: [...prev.users, ...users] }
-          : { ...prev, loggedUser, users }
+          ? { ...prev, loggedUser, scores: [...prev.scores, ...scores] }
+          : { ...prev, loggedUser, scores }
       );
       setLoading(false);
       setPages(pages + 1);
@@ -150,7 +150,7 @@ export default function Scoretable({ scoreboardId, active, index }) {
     (async () => {
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/scoreboards/${scoreboardId}`,
+          `${process.env.REACT_APP_API_URL}/scoreboards/new/${scoreboardId}`,
           {
             headers: {
               Authorization: "Bearer " + token,
@@ -160,9 +160,9 @@ export default function Scoretable({ scoreboardId, active, index }) {
             },
           }
         );
-        const { users, name, loggedUser, hash } = response.data.scoreboard;
-        setData({ users, name, hash, loggedUser });
-        if (users.length === 0) setIsMore(false);
+        const { scores, name, loggedUser, hash } = response.data.scoreboard;
+        setData({ scores, name, hash, loggedUser });
+        if (scores.length === 0) setIsMore(false);
       } catch (e) {
         dispatch(setOpen(true));
         console.error(e);
@@ -251,7 +251,7 @@ export default function Scoretable({ scoreboardId, active, index }) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {data.users.map((row) => generateRow(row, username))}
+              {data.scores.map((row) => generateRow(row, username))}
               {data.loggedUser && generateRow(data.loggedUser, username)}
             </TableBody>
           </Table>

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import {
   Button,
@@ -10,14 +10,23 @@ import {
   DialogContentText,
   DialogTitle,
   useMediaQuery,
+  FormControlLabel,
+  Checkbox,
+  Typography,
+  Box,
+  Switch,
 } from "@mui/material";
 import axios from "axios";
 
 export default function FormDialog({ setReload }) {
   const [open, setOpen] = useState(false);
   const [leagueCode, setLeagueCode] = useState();
+  const [checked, setChecked] = useState();
+  const [switched, setSwitched] = useState();
   const token = useSelector((state) => state.auth.token);
   const isMobile = useMediaQuery((theme) => theme.breakpoints.down("sm"));
+  const competitions = "2021,2001,2002,2003,2014,2015,2018,2019".split(",");
+
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -26,19 +35,39 @@ export default function FormDialog({ setReload }) {
     setOpen(false);
     setTimeout(() => setLeagueCode(), 100);
   };
+  const handleCheck = (comp) => {
+    setChecked((prev) => {
+      return { ...prev, [comp]: !prev[comp] };
+    });
+  };
+
+  useEffect(() => {
+    setChecked(() => {
+      const obj = {};
+      competitions.map((name) => Object.assign(obj, { [name]: true }));
+      return obj;
+    });
+  }, []);
 
   const handleSubmit = (event) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const formJson = Object.fromEntries(formData.entries());
     const name = formJson.name;
+    const array = [];
+    for (const [key, value] of Object.entries(checked)) {
+      if (value) array.push(key);
+    }
 
+    console.log(name, array, switched);
     (async () => {
       try {
         const league = await axios.post(
           `${process.env.REACT_APP_API_URL}/scoreboards/create`,
           {
             name,
+            competitions: array,
+            calculateBack: switched,
           },
           {
             headers: {
@@ -91,10 +120,10 @@ export default function FormDialog({ setReload }) {
           </>
         ) : (
           <>
-            <DialogTitle>Create league</DialogTitle>
+            <DialogTitle sx={{ fontWeight: "bold" }}>Create league</DialogTitle>
             <DialogContent sx={{ maxWidth: "20rem" }}>
               <DialogContentText>
-                Please enter your league name.
+                Please enter your league name and choose settings.
               </DialogContentText>
               <TextField
                 autoFocus
@@ -105,6 +134,32 @@ export default function FormDialog({ setReload }) {
                 label="League name"
                 fullWidth
                 variant="standard"
+                sx={{ marginBottom: "15px" }}
+              />
+              <Typography variant="h7" sx={{ fontWeight: "bold" }}>
+                Leagues to include:
+              </Typography>
+              {checked && (
+                <Box>
+                  {competitions.map((comp) => (
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={checked[comp]}
+                          onChange={() => handleCheck(comp)}
+                        />
+                      }
+                      label={comp}
+                    />
+                  ))}
+                </Box>
+              )}
+              <FormControlLabel
+                control={
+                  <Switch onChange={(e) => setSwitched(e.target.checked)} />
+                }
+                label="Include previous points?"
+                sx={{ fontWeight: "bold" }}
               />
             </DialogContent>
             <DialogActions>

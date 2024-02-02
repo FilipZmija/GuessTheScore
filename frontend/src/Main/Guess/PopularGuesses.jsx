@@ -34,7 +34,6 @@ export default function PopularGuesses({ hasChanged }) {
   const {
     isClicked,
     popularGuesses: guesses,
-    selectedGame,
     guess,
   } = useSelector((state) => state.guess);
   const popularGuesses = guesses?.popularGuesses;
@@ -79,7 +78,9 @@ export default function PopularGuesses({ hasChanged }) {
         return popular;
       };
 
-      dispatch(setPopularGuesses(generateGuesses()));
+      dispatch(
+        setPopularGuesses({ popularGuesses: generateGuesses(), guesses: 0 })
+      );
     } else {
       popularGuesses.forEach((item, index) => {
         item.score === home + ":" + away && dispatch(setIsClicked(index));

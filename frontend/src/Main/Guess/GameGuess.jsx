@@ -118,6 +118,7 @@ const GameDetails = () => {
                 },
               }
             );
+            console.log(newGuess.data.scores);
             setAlertOpen(true);
             const { id } = newGuess.data.guess;
             dispatch(setGuessId(id));
