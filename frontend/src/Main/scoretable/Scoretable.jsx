@@ -22,62 +22,14 @@ import { setOpen } from "../../redux/errorSlice";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { setScoreboardCode } from "../../redux/scoreboardSlice";
-const activeUserRowStyle = {
-  fontWeight: "bold",
-  position: "sticky",
-  bottom: 0,
-  top: 0,
-  background: "white",
-  zIndex: 800,
-  backgroundColor: "#fdfdfd",
-};
+import ScoretableRow from "./ScoretableRow";
+
 const tableContainerStyle = {
   borderRadius: "10px",
   border: "1px solid rgba(0, 0, 0, 0.12)",
   maxHeight: { xs: "50vh", md: "35.5vh" },
   backgroundColor: "#faf8f5",
 };
-
-const generateRow = (row, username) => (
-  <TableRow
-    key={row.User.username}
-    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-  >
-    <TableCell
-      component="th"
-      scope="row"
-      align="center"
-      sx={row.User.username === username ? activeUserRowStyle : {}}
-    >
-      {row.position}
-    </TableCell>
-    <TableCell
-      component="th"
-      scope="row"
-      sx={row.User.username === username ? activeUserRowStyle : {}}
-    >
-      {row.User.username}
-    </TableCell>
-    <TableCell
-      align="right"
-      sx={
-        row.User.username === username
-          ? { ...activeUserRowStyle, display: { xs: "none", md: "table-cell" } }
-          : {
-              display: { xs: "none", md: "table-cell" },
-            }
-      }
-    >
-      {row.guesses}
-    </TableCell>
-    <TableCell
-      align="right"
-      sx={row.User.username === username ? activeUserRowStyle : {}}
-    >
-      {row.points === 0 || row.guesses === 0 ? 0 : (row.ratio * 100).toFixed(2)}
-    </TableCell>
-  </TableRow>
-);
 
 export default function Scoretable({ scoreboardId, active, index }) {
   const [pages, setPages] = useState(2);
@@ -251,8 +203,12 @@ export default function Scoretable({ scoreboardId, active, index }) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {data.scores.map((row) => generateRow(row, username))}
-              {data.loggedUser && generateRow(data.loggedUser, username)}
+              {data.scores.map((row) => (
+                <ScoretableRow row={row} username={username} />
+              ))}
+              {data.loggedUser && (
+                <ScoretableRow row={data.loggedUser} username={username} />
+              )}
             </TableBody>
           </Table>
         </Box>

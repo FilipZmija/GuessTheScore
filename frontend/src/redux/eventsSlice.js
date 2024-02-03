@@ -24,6 +24,9 @@ export const eventsSlice = createSlice({
     decrementIndex: (state) => {
       state.dateIndex--;
     },
+    resetSelections: (state) => {
+      state.selection = 0;
+    },
     selectEvent: (state, action) => {
       state.selection = action.payload;
       state.selectedGameInfo = state.gameList[state.selection];
@@ -37,5 +40,6 @@ export const {
   incrementIndex,
   decrementIndex,
   selectEvent,
+  resetSelections,
 } = eventsSlice.actions;
 export default eventsSlice.reducer;

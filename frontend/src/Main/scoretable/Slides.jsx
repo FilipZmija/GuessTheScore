@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setScoreboardId } from "../../redux/scoreboardSlice";
+import { setSelectedUserId } from "../../redux/scoreboardSlice";
 import { setOpen } from "../../redux/errorSlice";
 import axios from "axios";
 import { useMediaQuery } from "@mui/material";
@@ -10,12 +11,13 @@ import Scoretable from "./Scoretable";
 export default function Slides({ reload }) {
   const [scoreIds, setScoreIds] = useState();
   const [active, setActive] = useState();
-  const token = useSelector((state) => state.auth.token);
+  const { token, id } = useSelector((state) => state.auth);
   const isMobile = useMediaQuery((theme) => theme.breakpoints.down("sm"));
 
   const dispatch = useDispatch();
 
   useEffect(() => {
+    dispatch(setSelectedUserId(id));
     const getScoreData = async () => {
       try {
         const response = await axios.get(
@@ -34,7 +36,7 @@ export default function Slides({ reload }) {
       }
     };
     getScoreData();
-  }, [token, reload, dispatch]);
+  }, [token, reload, dispatch, id]);
 
   return (
     scoreIds && (

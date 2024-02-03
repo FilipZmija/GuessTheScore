@@ -61,14 +61,9 @@ const pulsateStyle = {
 
 const GameDetails = () => {
   const [alertOpen, setAlertOpen] = useState(false);
-  const {
-    guess,
-    selectedGame,
-    guessId,
-    points,
-    popularGuesses,
-    currentPoints,
-  } = useSelector((state) => state.guess);
+  const { guess, selectedGame, guessId, popularGuesses } = useSelector(
+    (state) => state.guess
+  );
   const eventId = selectedGame.id;
   const token = useSelector((state) => state.auth.token);
   const hasChanged = useRef(true);
@@ -135,51 +130,6 @@ const GameDetails = () => {
   const [homeScore, awayScore] = selectedGame
     ? selectedGame.score.split(":")
     : [];
-  const displayResultInfo = () => {
-    if (points != null) {
-      return (
-        <Typography
-          variant="h7"
-          sx={{
-            textAlign: "center",
-            fontWeight: "bold",
-            padding: "12px 0",
-          }}
-        >
-          You scored: {points} points!
-        </Typography>
-      );
-    } else if (
-      (selectedGame.status === "IN_PLAY" || selectedGame.status === "PAUSED") &&
-      currentPoints != null
-    ) {
-      return (
-        <Typography
-          variant="h7"
-          sx={{
-            textAlign: "center",
-            fontWeight: "bold",
-            padding: "12px 0",
-          }}
-        >
-          Game in progress! Your possible points {currentPoints}!
-        </Typography>
-      );
-    } else {
-      return (
-        <Typography
-          variant="h7"
-          sx={{
-            textAlign: "center",
-            fontWeight: "bold",
-            padding: "12px 0",
-          }}
-        >
-          You have not guessed this game :(
-        </Typography>
-      );
-    }
-  };
 
   return (
     <Card
@@ -220,10 +170,10 @@ const GameDetails = () => {
           <Grid item>
             <TextField
               disabled={selectedGame.status !== "TIMED"}
+              autoComplete="off"
               name="home"
               sx={{
                 ...scoreField,
-
                 backgroundColor:
                   selectedGame.status === "FINISHED"
                     ? homeScore === guess.home
@@ -259,6 +209,7 @@ const GameDetails = () => {
           <Grid item>
             <TextField
               disabled={selectedGame.status !== "TIMED"}
+              autoComplete="off"
               name="away"
               sx={{
                 ...scoreField,
@@ -311,14 +262,11 @@ const GameDetails = () => {
           </Grid>
           <Grid item></Grid>
         </Grid>
-        {selectedGame.status !== "TIMED" ? (
-          <>{displayResultInfo()}</>
-        ) : (
-          <PopularGuesses
-            popularGuesses={popularGuesses}
-            hasChanged={hasChanged}
-          />
-        )}
+
+        <PopularGuesses
+          popularGuesses={popularGuesses}
+          hasChanged={hasChanged}
+        />
       </CardContent>
     </Card>
   );
