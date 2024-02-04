@@ -108,7 +108,6 @@ const getLotsOfGames = async (daysBack = 0, daysForward = 0) => {
     exisitingMatches.push(...toUpdate);
     newMatches.push(...toCreate);
   }
-
   await updateEvents(exisitingMatches);
   const newEvents = await createEvents(newMatches);
   await addPopularGuesses(newEvents);

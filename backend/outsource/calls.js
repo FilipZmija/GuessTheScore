@@ -41,10 +41,6 @@ const getEvents = async (start = 0, end = 2) => {
           date,
           utcTime,
           status,
-          homeTeam: homeTeam.shortName || homeTeam.name,
-          homeTeamCrest: homeTeam.crest,
-          awayTeam: awayTeam.shortName || awayTeam,
-          awayTeamCrest: awayTeam.crest,
           score:
             score.fullTime.home === null
               ? "-:-"
@@ -193,7 +189,7 @@ const getTeamsAndTables = async () => {
           response.data.standings.map(async (standingItem) => {
             const { group, stage } = standingItem;
             const table = await Tables.findOne({
-              where: { CompetitionApiId: competitionId },
+              where: { CompetitionApiId: competitionId, group },
             });
             let TableId;
             if (!table) {

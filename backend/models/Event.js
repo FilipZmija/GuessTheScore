@@ -27,22 +27,6 @@ module.exports = (sequelize, DataTypes, Sequelize) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      homeTeam: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      homeTeamCrest: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      awayTeam: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      awayTeamCrest: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
       score: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -55,7 +39,7 @@ module.exports = (sequelize, DataTypes, Sequelize) => {
     },
     {
       hooks: {
-        beforeUpdate: (event, options) => {
+        beforeUpdate: (event) => {
           if (event.changed("status") && event.status === "FINISHED") {
             evaluatePoints(event, true);
             setTimeout(() => revaluateScorePositions(), 10000);

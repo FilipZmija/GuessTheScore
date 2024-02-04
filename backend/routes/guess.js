@@ -18,13 +18,14 @@ router.use((req, res, next) => {
 });
 
 router.get("/info/", validateToken, async (req, res) => {
-  const { EventId } = req.query;
-  const { id } = req.user;
+  const { EventId, UserId } = req.query;
   try {
-    const guess = await Guess.findOne({ where: { UserId: id, EventId } });
-    const allGuesses = await Guess.findAll({ where: { EventId } });
+    const user = await Users.findOne({
+      where: { id: UserId },
+    });
+    const [guess] = await user.getGuesses({ where: { EventId } });
 
-    res.status(200).json({ userGuess: guess, allGuesses: allGuesses });
+    res.status(200).json({ user, guess });
   } catch (e) {
     console.error(e);
     res.status(400).json(e);

@@ -42,7 +42,11 @@ router.post("/login", async (req, res) => {
 
   const accessToken = createTokens(user);
 
-  res.json({ message: "User logged in", accessToken: accessToken });
+  res.json({
+    message: "User logged in",
+    accessToken: accessToken,
+    id: user.id,
+  });
 });
 
 //Delete existing user
