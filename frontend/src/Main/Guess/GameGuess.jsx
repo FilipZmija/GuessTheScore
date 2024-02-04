@@ -64,6 +64,7 @@ const GameDetails = () => {
   const { guess, selectedGame, guessId, popularGuesses } = useSelector(
     (state) => state.guess
   );
+  const [teamHome, teamAway] = selectedGame.Teams;
   const eventId = selectedGame.id;
   const token = useSelector((state) => state.auth.token);
   const hasChanged = useRef(true);
@@ -154,8 +155,8 @@ const GameDetails = () => {
           <Grid item sx={teamName}>
             <CardMedia
               component="img"
-              image={selectedGame.homeTeamCrest}
-              alt={`${selectedGame.homeTeam} Crest`}
+              image={teamHome.crest}
+              alt={`${teamHome.shortName} Crest`}
               sx={teamLogoStyle}
             />
             <Typography
@@ -164,7 +165,7 @@ const GameDetails = () => {
                 textAlign: "center",
               }}
             >
-              {selectedGame.homeTeam}
+              {teamHome.shortName}
             </Typography>
           </Grid>
           <Grid item>
@@ -247,8 +248,8 @@ const GameDetails = () => {
           <Grid item sx={teamName}>
             <CardMedia
               component="img"
-              image={selectedGame.awayTeamCrest}
-              alt={`${selectedGame.awayTeam} Crest`}
+              image={teamAway.crest}
+              alt={`${teamAway.shortName} Crest`}
               sx={teamLogoStyle}
             />
             <Typography
@@ -257,7 +258,7 @@ const GameDetails = () => {
                 textAlign: "center",
               }}
             >
-              {selectedGame.awayTeam}
+              {teamAway.shortName}
             </Typography>
           </Grid>
           <Grid item></Grid>

@@ -71,11 +71,10 @@ export default function GameListSwitcher() {
                 params: { date: date },
               }
         );
-
+        dispatch(resetSelections(0));
         dispatch(
           updateGames(filters.length > 0 ? gamesList.data[0] : gamesList.data)
         );
-        dispatch(resetSelections(0));
       };
       date && getGames(filters, date);
     } catch (e) {

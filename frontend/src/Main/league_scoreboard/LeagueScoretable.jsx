@@ -62,8 +62,12 @@ export default function LeagueScoretable() {
                   "Content-Type": "application/json",
                   Authorization: "Bearer " + token,
                 },
+                params: {
+                  TeamsId: [homeId, awayId],
+                },
               }
             );
+            console.log(table.data);
             const { name, Tables: tables } = table.data.competitionTable;
             setScoretable({ name, tables });
           })()
@@ -72,7 +76,7 @@ export default function LeagueScoretable() {
       dispatch(setOpen(true));
       console.error(e);
     }
-  }, [CompetitionApiId, token, dispatch]);
+  }, [CompetitionApiId, token, dispatch, homeId, awayId]);
 
   const generateLoadingSkeletons = (rows, cell) => {
     const skeletons = [];
@@ -105,91 +109,111 @@ export default function LeagueScoretable() {
     return skeletons;
   };
 
+  const generateRows = (row) => (
+    <TableRow
+      key={row.Team.shortName}
+      sx={
+        row.TeamApiId === homeId || row.TeamApiId === awayId
+          ? {
+              backgroundColor: "#fdfdfd",
+              fontWeight: "bold",
+              "&:last-child td, &:last-child th": { border: 0 },
+            }
+          : { "&:last-child td, &:last-child th": { border: 0 } }
+      }
+    >
+      {rowDetails.map((item, index) => {
+        const { field } = item;
+        let text = "";
+        if (field === "team") {
+          text = row.Team.shortName;
+        } else if (field === "goals") {
+          text = row.goalsFor + ":" + row.goalsAgainst;
+        } else {
+          text = row[field];
+        }
+        return (
+          <TableCell
+            component="th"
+            scope="row"
+            align="center"
+            key={field + index}
+            sx={
+              row.TeamApiId === homeId || row.TeamApiId === awayId
+                ? {
+                    backgroundColor: "#fdfdfd",
+                    fontWeight: "bold",
+                    padding: "0.97%",
+                    height: "5%",
+                    "&:last-child td, &:last-child th": {
+                      border: 0,
+                    },
+                  }
+                : {
+                    "&:last-child td, &:last-child th": {
+                      border: 0,
+                    },
+                    padding: "0.8%",
+                    height: "5%",
+                  }
+            }
+          >
+            {text}
+          </TableCell>
+        );
+      })}
+    </TableRow>
+  );
+
+  const generateTable = (table) => (
+    <>
+      {table.group && (
+        <Typography
+          variant="h6"
+          gutterBottom
+          sx={{
+            ...tableTitleStyle,
+            borderTop: "1px solid rgba(0, 0, 0, 0.12)",
+          }}
+        >
+          {table.group}
+        </Typography>
+      )}
+      <Table
+        aria-label="simple table"
+        sx={{ borderTop: "1px solid rgba(0, 0, 0, 0.12);" }}
+      >
+        <TableHead>
+          <TableRow key="top-row">
+            {rowDetails.map((item, index) => {
+              return (
+                <TableCell
+                  key={item.head + index}
+                  align="center"
+                  sx={{ padding: "1.1%", fontWeight: "bold" }}
+                >
+                  {item.head}
+                </TableCell>
+              );
+            })}
+          </TableRow>
+        </TableHead>
+        <TableBody>{table.TableLogs.map((row) => generateRows(row))}</TableBody>
+      </Table>
+    </>
+  );
+
   return (
     <TableContainer component={Paper} sx={tableContainerStyle}>
       <Box sx={{ backgroundColor: "#faf8f5" }}>
         <Typography variant="h5" gutterBottom sx={tableTitleStyle}>
           {!scoretable ? <Skeleton sx={{ width: "40%" }} /> : scoretable?.name}
         </Typography>
-        <Table
-          aria-label="simple table"
-          sx={{ borderTop: "1px solid rgba(0, 0, 0, 0.12);" }}
-        >
-          <TableHead>
-            <TableRow key="top-row">
-              {rowDetails.map((item, index) => {
-                return (
-                  <TableCell
-                    key={item.head + index}
-                    align="center"
-                    sx={{ padding: "1.1%", fontWeight: "bold" }}
-                  >
-                    {item.head}
-                  </TableCell>
-                );
-              })}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {!scoretable
-              ? generateLoadingSkeletons(19, 8)
-              : scoretable.tables[0].TableLogs.map((row) => (
-                  <TableRow
-                    key={row.Team.shortName}
-                    sx={
-                      row.TeamApiId === homeId || row.TeamApiId === awayId
-                        ? {
-                            backgroundColor: "#fdfdfd",
-                            fontWeight: "bold",
-                            "&:last-child td, &:last-child th": { border: 0 },
-                          }
-                        : { "&:last-child td, &:last-child th": { border: 0 } }
-                    }
-                  >
-                    {rowDetails.map((item, index) => {
-                      const { field } = item;
-                      let text = "";
-                      if (field === "team") {
-                        text = row.Team.shortName;
-                      } else if (field === "goals") {
-                        text = row.goalsFor + ":" + row.goalsAgainst;
-                      } else {
-                        text = row[field];
-                      }
-                      return (
-                        <TableCell
-                          component="th"
-                          scope="row"
-                          align="center"
-                          key={field + index}
-                          sx={
-                            row.TeamApiId === homeId || row.TeamApiId === awayId
-                              ? {
-                                  backgroundColor: "#fdfdfd",
-                                  fontWeight: "bold",
-                                  padding: "0.97%",
-                                  height: "5%",
-                                  "&:last-child td, &:last-child th": {
-                                    border: 0,
-                                  },
-                                }
-                              : {
-                                  "&:last-child td, &:last-child th": {
-                                    border: 0,
-                                  },
-                                  padding: "0.8%",
-                                  height: "5%",
-                                }
-                          }
-                        >
-                          {text}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                ))}
-          </TableBody>
-        </Table>
+        {!scoretable ? (
+          generateLoadingSkeletons(19, 8)
+        ) : (
+          <>{scoretable.tables.map((table) => generateTable(table))}</>
+        )}
       </Box>
       <Typography
         sx={{

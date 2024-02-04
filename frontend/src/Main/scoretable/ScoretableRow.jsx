@@ -21,13 +21,13 @@ export default function ScoretableRow({ row, username }) {
   return (
     <TableRow
       onClick={() =>
-        selectedGame?.status === "FINISHED" &&
+        selectedGame?.status !== "TIMED" &&
         dispatch(setSelectedUserId(row.User.id))
       }
       selected={
-        selectedGame?.status === "FINISHED" && selectedUserId === row.User.id
+        selectedGame?.status !== "TIMED" && selectedUserId === row.User.id
       }
-      hover={selectedGame?.status === "FINISHED"}
+      hover={selectedGame?.status !== "TIMED"}
       key={row.User.username}
       sx={{
         "&:last-child td, &:last-child th": { border: 0 },
