@@ -107,6 +107,9 @@ router.get("/guesses/:EventId", validateToken, async (req, res) => {
           where: { UserId: id },
           required: false,
         },
+        {
+          model: Teams,
+        },
       ],
     });
     res.status(200).json({ event });

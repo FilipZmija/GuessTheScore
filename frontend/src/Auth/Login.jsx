@@ -57,7 +57,9 @@ const Login = () => {
         { username: username, password: password }
       );
       localStorage.setItem("token", status.data.accessToken);
-      dispatch(login({ username, token: status.data.accessToken }));
+      dispatch(
+        login({ username, token: status.data.accessToken, id: status.data.id })
+      );
     } catch (e) {
       console.error(e);
       setMessage(e.response.data.message);

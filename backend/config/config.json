@@ -16,11 +16,10 @@
     "storage": "db/guessser.db"
   },
   "production": {
-    "username": "root",
-    "password": null,
-    "database": "Guesser",
-    "host": "localhost",
-    "dialect": "sqlite",
-    "storage": "db/guessser.db"
+    "dialect": "mysql",
+    "host": "guess-the-score-server.mysql.database.azure.com",
+    "username": "FilipZmijewski",
+    "password": "XXXXXXXXXXXXX",
+    "database": "guess-the-score"
   }
 }

@@ -17,6 +17,9 @@ module.exports = (sequelize, DataTypes) => {
   Competition.associate = (models) => {
     Competition.hasMany(models.Tables);
     Competition.hasMany(models.Event);
+    Competition.belongsToMany(models.Scoreboard, {
+      through: models.ScoreboardCompetitions,
+    });
   };
   return Competition;
 };

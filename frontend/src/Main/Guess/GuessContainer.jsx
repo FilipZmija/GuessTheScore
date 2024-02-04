@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { setOpen } from "../../redux/errorSlice";
 import GuessSkeleton from "./GuessSkeleton";
 import GameGuess from "./GameGuess";
+import GameOverview from "./GameOverview";
 import axios from "axios";
 import {
   guessScore,
@@ -42,7 +43,7 @@ export default function GuessContainer() {
               },
             }
           );
-          dispatch(setPopularGuesses(popularGuesses.data?.PopularGuesses));
+          dispatch(setPopularGuesses(popularGuesses.data));
         })();
     } catch (e) {
       dispatch(setOpen(true));
@@ -87,5 +88,17 @@ export default function GuessContainer() {
         }
       })();
   }, [eventId, token, dispatch]);
-  return <>{selectedGame ? <GameGuess /> : <GuessSkeleton />}</>;
+  return (
+    <>
+      {selectedGame ? (
+        selectedGame.status !== "TIMED" ? (
+          <GameOverview />
+        ) : (
+          <GameGuess />
+        )
+      ) : (
+        <GuessSkeleton />
+      )}
+    </>
+  );
 }

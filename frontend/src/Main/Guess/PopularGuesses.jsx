@@ -31,9 +31,14 @@ const buttonsContainerStyle = {
   flexDirection: "row",
 };
 export default function PopularGuesses({ hasChanged }) {
-  const { isClicked, popularGuesses, selectedGame, guess } = useSelector(
-    (state) => state.guess
-  );
+  const {
+    isClicked,
+    popularGuesses: guesses,
+    guess,
+  } = useSelector((state) => state.guess);
+  const popularGuesses = guesses?.popularGuesses;
+  const numberOfGuesses = guesses?.guesses;
+
   const scoreboardId = useSelector((state) => state.scoreboard.scoreboardId);
   const dispatch = useDispatch();
 
@@ -73,7 +78,9 @@ export default function PopularGuesses({ hasChanged }) {
         return popular;
       };
 
-      dispatch(setPopularGuesses(generateGuesses()));
+      dispatch(
+        setPopularGuesses({ popularGuesses: generateGuesses(), guesses: 0 })
+      );
     } else {
       popularGuesses.forEach((item, index) => {
         item.score === home + ":" + away && dispatch(setIsClicked(index));
@@ -87,17 +94,14 @@ export default function PopularGuesses({ hasChanged }) {
     const [home, away] = score.split(":");
     dispatch(guessScore({ home, away }));
   };
-
   return (
     <>
       <Box key={"main-container"} sx={buttonsContainerStyle}>
         {popularGuesses?.map((popularGuess, index) => {
           const { number } = popularGuess;
-          const { guesses } = selectedGame;
-          const ratio =
-            number && guesses
-              ? Math.floor((number / guesses) * 100) + "%"
-              : 0 + "%";
+          const ratio = number
+            ? Math.floor((number / numberOfGuesses) * 100) + "%"
+            : 0 + "%";
 
           return (
             <Box sx={buttonContainerStyle} key={"popular-guess-box-" + index}>

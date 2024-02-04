@@ -56,16 +56,9 @@ const clickedCardStyle = {
 };
 
 const GameCard = ({ game, index }) => {
-  const {
-    competition,
-    utcTime,
-    homeTeam,
-    homeTeamCrest,
-    awayTeam,
-    awayTeamCrest,
-    score,
-    status,
-  } = game;
+  const { competition, utcTime, score, status } = game;
+  const [teamHome, teamAway] = game.Teams;
+
   const selectedIndex = useSelector((state) => state.events.selection);
   const dispatch = useDispatch();
 
@@ -92,12 +85,12 @@ const GameCard = ({ game, index }) => {
             <CardMedia
               component="img"
               width="2.5rem"
-              image={homeTeamCrest}
-              alt={`${homeTeam} Crest`}
+              image={teamHome.crest}
+              alt={`${teamHome.shortName} Crest`}
               sx={teamLogoStyle}
             />
             <Typography sx={{ fontWeight: "bold" }} variant="body2">
-              {homeTeam}
+              {teamHome.shortName}
             </Typography>
           </Grid>
           <Grid item sx={{ marginBottom: "15px" }}>
@@ -108,12 +101,12 @@ const GameCard = ({ game, index }) => {
             <CardMedia
               component="img"
               width="2.5rem"
-              image={awayTeamCrest}
-              alt={`${awayTeam} Crest`}
+              image={teamAway.crest}
+              alt={`${teamAway.shortName} Crest`}
               sx={teamLogoStyle}
             />
             <Typography sx={{ fontWeight: "bold" }} variant="body2">
-              {awayTeam}
+              {teamAway.shortName}
             </Typography>
           </Grid>
           <Grid item></Grid>

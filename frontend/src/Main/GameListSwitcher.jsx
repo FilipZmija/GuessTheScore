@@ -9,6 +9,7 @@ import {
   incrementIndex,
   decrementIndex,
   updateGames,
+  resetSelections,
 } from "../redux/eventsSlice";
 import { setOpen } from "../redux/errorSlice";
 import Toolbar from "@mui/material/Toolbar";
@@ -70,7 +71,7 @@ export default function GameListSwitcher() {
                 params: { date: date },
               }
         );
-
+        dispatch(resetSelections(0));
         dispatch(
           updateGames(filters.length > 0 ? gamesList.data[0] : gamesList.data)
         );
