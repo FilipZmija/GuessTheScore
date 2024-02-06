@@ -41,7 +41,6 @@ export default function PopularGuesses({ hasChanged }) {
 
   const scoreboardId = useSelector((state) => state.scoreboard.scoreboardId);
   const dispatch = useDispatch();
-
   useEffect(() => {
     const { home, away } = guess;
     if (!popularGuesses) {

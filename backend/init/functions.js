@@ -27,8 +27,7 @@ const asignUserToMainScoreboard = async (UserId, ScoreboardId = 1) => {
     UserId,
     ScoreboardId,
   });
-
-  return [association, score];
+  return [score];
 };
 
 const updateEvents = async (matches) => {
@@ -67,33 +66,29 @@ const createEvents = async (matches) => {
         EventId: event.id,
       };
     });
+
     await EventTeams.bulkCreate([...associationsHome, ...associationsAway]);
+
     return events;
   } catch (err) {
     console.error(err);
   }
 };
-const addPopularGuesses = async (events) => {
-  const scoreboards = await Scoreboard.findAll();
 
+const addPopularGuesses = async (events) => {
   const popularGuesses = guessesData
     .map((item) =>
-      scoreboards
-        .map((scoreboard) =>
-          events.map((event) => {
-            return {
-              ScoreboardId: scoreboard.id,
-              score: item,
-              EventId: event.id,
-            };
-          })
-        )
-        .flat()
+      events.map((event) => {
+        return {
+          score: item,
+          EventId: event.id,
+        };
+      })
     )
     .flat();
-
-  await PopularGuesses.bulkCreate(popularGuesses);
+  await PopularGuesses.bulkCreate(popularGuesses); //this blocks db for few seconds but it is like 1mln logs, for loop is way too small. This is performed once a day so chill
 };
+
 const getLotsOfGames = async (daysBack = 0, daysForward = 0) => {
   const exisitingMatches = [];
   const newMatches = [];

@@ -47,9 +47,6 @@ module.exports = (sequelize, DataTypes, Sequelize) => {
             evaluatePoints(event, false);
           }
         },
-        afterBulkCreate: async (event) => {
-          // await addPopularGuesses(event);
-        },
       },
     }
   );
@@ -72,127 +69,109 @@ module.exports = (sequelize, DataTypes, Sequelize) => {
 
   const revaluateScorePositions = async () => {
     const allScoreboards = await sequelize.models.Scoreboard.findAll();
-
-    await Promise.all(
-      allScoreboards.map(async (scoreboard) => {
-        const scores = await scoreboard.getScores({
-          order: [["ratio", "DESC"]],
+    for (let i = 0; i < allScoreboards.length; i++) {
+      const scoreboard = allScoreboards[i];
+      const scores = await scoreboard.getScores({
+        order: [["ratio", "DESC"]],
+      });
+      if (scores.length > 0) {
+        scores.map(async (score, index) => {
+          score.update({ position: index + 1 });
         });
-        if (scores.length > 0) {
-          scores.map(async (score, index) => {
-            score.update({ position: index + 1 });
-          });
-        }
-      })
-    );
+      }
+    }
   };
 
   async function evaluatePoints(event, finished) {
     const eventGuesses = await sequelize.models.Guess.findAll({
       where: { EventId: event.id },
     });
-    await Promise.all(
-      eventGuesses.map(async (guess) => {
-        const { UserId } = guess;
-        const guessedScore = guess.score.split(":").map((item) => Number(item));
-        const actualScore = event.score.split(":").map((item) => Number(item));
-        let points = 0;
-        guessedScore[0] === actualScore[0] && points++;
-        guessedScore[1] === actualScore[1] && points++;
-        guessedScore[0] - guessedScore[1] === actualScore[0] - actualScore[1] &&
-          points++;
-        if (
-          (guessedScore[0] - guessedScore[1]) *
-            (actualScore[0] - actualScore[1]) >
-            0 ||
-          (guessedScore[0] - guessedScore[1] === 0 &&
-            actualScore[0] - actualScore[1] === 0)
-        ) {
-          points += 2;
-        }
+    for (let i = 0; i < eventGuesses.length; i++) {
+      const guess = eventGuesses[i];
+      const { UserId } = guess;
+      const guessedScore = guess.score.split(":").map((item) => Number(item));
+      const actualScore = event.score.split(":").map((item) => Number(item));
+      let points = 0;
+      guessedScore[0] === actualScore[0] && points++;
+      guessedScore[1] === actualScore[1] && points++;
+      guessedScore[0] - guessedScore[1] === actualScore[0] - actualScore[1] &&
+        points++;
+      if (
+        (guessedScore[0] - guessedScore[1]) *
+          (actualScore[0] - actualScore[1]) >
+          0 ||
+        (guessedScore[0] - guessedScore[1] === 0 &&
+          actualScore[0] - actualScore[1] === 0)
+      ) {
+        points += 2;
+      }
 
-        if (finished) {
+      if (finished) {
+        if (guess.points == null) {
+          guess.points = points;
           await guess.save();
-          const user = await sequelize.models.Users.findOne({
-            where: { id: UserId },
-          });
 
-          if (guess.points == null) {
-            guess.points = points;
-            try {
-              user.guesses += 1;
-              user.points += guess.points;
-            } catch (err) {
-              console.error(err);
-              console.log(user);
-            }
+          const scores = await sequelize.models.Score.findAll({
+            include: [
+              {
+                model: sequelize.models.Scoreboard,
 
-            const scores = await sequelize.models.Score.findAll({
-              include: [
-                {
-                  model: sequelize.models.Scoreboard,
-
-                  include: [
-                    {
-                      model: sequelize.models.Competition,
-                      through: {
-                        model: sequelize.models.ScoreboardCompetiton,
-                      },
-                      where: { ApiId: event.CompetitionApiId },
+                include: [
+                  {
+                    model: sequelize.models.Competition,
+                    through: {
+                      model: sequelize.models.ScoreboardCompetiton,
                     },
-                  ],
-                },
-              ],
-              where: {
-                UserId,
-                "$Scoreboard.id$": { [Sequelize.Op.ne]: null },
+                    where: { ApiId: event.CompetitionApiId },
+                  },
+                ],
               },
-            });
-            console.log(scores);
-            await Promise.all(
-              scores.map(async (score) => {
-                score.guesses++;
-                score.score += guess.points;
-                await score.save();
-              })
-            );
-            await guess.save();
-            await user.save();
-          } else if (guess.points && points !== guess.points) {
-            guess.points = points;
-            user.points += guess.points - points;
-            await user.save();
-            await guess.save();
+            ],
+            where: {
+              UserId,
+              "$Scoreboard.id$": { [Sequelize.Op.ne]: null },
+            },
+          });
+          for (let i = 0; i < scores.length; i++) {
+            const score = scores[i];
+            score.guesses++;
+            score.score += guess.points;
+            await score.save();
           }
-        } else {
-          guess.currentPoints = points;
+        } else if (guess.points && points !== guess.points) {
+          guess.points = points;
           await guess.save();
+          const scores = await sequelize.models.Score.findAll({
+            include: [
+              {
+                model: sequelize.models.Scoreboard,
+                include: [
+                  {
+                    model: sequelize.models.Competition,
+                    through: {
+                      model: sequelize.models.ScoreboardCompetiton,
+                    },
+                    where: { ApiId: event.CompetitionApiId },
+                  },
+                ],
+              },
+            ],
+            where: {
+              UserId,
+              "$Scoreboard.id$": { [Sequelize.Op.ne]: null },
+            },
+          });
+          for (let i = 0; i < scores.length; i++) {
+            const score = scores[i];
+            score.score = guess.points;
+            await score.save();
+          }
         }
-      })
-    );
-  }
-
-  async function addPopularGuesses(events) {
-    const scoreboards = await sequelize.models.Scoreboard.findAll();
-    const eventIds = events.map((event) => event.id);
-    const popularGuesses = guessesData
-      .map((item) =>
-        scoreboards
-          .map((scoreboard) =>
-            eventIds.map((id) => {
-              return {
-                ScoreboardId: scoreboard.id,
-                score: item,
-                EventId: id,
-              };
-            })
-          )
-          .flat()
-      )
-      .flat();
-    const guesses = await sequelize.models.PopularGuesses.bulkCreate(
-      popularGuesses
-    );
+      } else {
+        guess.currentPoints = points;
+        await guess.save();
+      }
+    }
   }
 
   return Event;

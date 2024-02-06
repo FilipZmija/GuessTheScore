@@ -25,6 +25,7 @@ router.get("/all", validateToken, async (req, res) => {
               async (item) =>
                 await Event.findAll(
                   {
+                    order: [["utcDate", "ASC"]],
                     where: { status: filter[item], date: date },
                     include: [
                       {
@@ -38,6 +39,8 @@ router.get("/all", validateToken, async (req, res) => {
             )
           )
         : await Event.findAll({
+            order: [["utcDate", "ASC"]],
+
             where: { date: date },
             include: [
               {
@@ -52,6 +55,8 @@ router.get("/all", validateToken, async (req, res) => {
             filterBy.map(
               async (item) =>
                 await Event.findAll({
+                  order: [["utcDate", "ASC"]],
+
                   where: { status: filter[item] },
                   include: [
                     {
@@ -63,6 +68,7 @@ router.get("/all", validateToken, async (req, res) => {
             )
           )
         : await Event.findAll({
+            order: [["utcDate", "ASC"]],
             include: [
               {
                 model: Teams,
@@ -71,8 +77,15 @@ router.get("/all", validateToken, async (req, res) => {
             ],
           });
     }
-    res.status(200).json(event.sort((a, b) => a.utcDate - b.utcDate));
+    event.Teams = event.map((item) =>
+      item.Teams.sort((a, b) => {
+        return b.EventTeams.homeOrAway.localeCompare(a.EventTeams.homeOrAway);
+      })
+    );
+
+    res.status(200).json(event);
   } catch (e) {
+    console.error(e);
     res.status(400).json(e);
   }
 });
@@ -112,6 +125,10 @@ router.get("/guesses/:EventId", validateToken, async (req, res) => {
         },
       ],
     });
+    event.Teams = event.Teams.sort((a, b) => {
+      return b.EventTeams.homeOrAway.localeCompare(a.EventTeams.homeOrAway);
+    });
+
     res.status(200).json({ event });
   } catch (e) {
     res.status(400).json(e);
@@ -157,4 +174,21 @@ router.post("/create", validateToken, async (req, res) => {
   }
 });
 
+router.get("/dates", validateToken, async (req, res) => {
+  try {
+    const { date: firstDate } = await Event.findOne({
+      order: [["date", "ASC"]],
+      attributes: ["date"],
+    });
+
+    const { date: lastDate } = await Event.findOne({
+      order: [["date", "DESC"]],
+      attributes: ["date"],
+    });
+    res.status(200).json({ firstDate, lastDate });
+  } catch (e) {
+    console.error(e);
+    res.status(400).json(e);
+  }
+});
 module.exports = router;

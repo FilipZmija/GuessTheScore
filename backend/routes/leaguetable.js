@@ -40,9 +40,21 @@ router.get("/:ApiId", validateToken, async (req, res) => {
           log.TeamApiId === Number(homeId) || log.TeamApiId === Number(awayId)
       ) !== -1
   );
-  console.log(currentTables);
   res.status(200).json({
     competitionTable: { ...competitionTable.dataValues, Tables: currentTables },
   });
+});
+
+router.get("/competition/all", validateToken, async (req, res) => {
+  try {
+    const competitions = await Competition.findAll({
+      attributes: ["ApiId", "name"],
+    });
+
+    res.status(200).json({ competitions });
+  } catch (e) {
+    console.error(e);
+    res.status(400).json(e);
+  }
 });
 module.exports = router;

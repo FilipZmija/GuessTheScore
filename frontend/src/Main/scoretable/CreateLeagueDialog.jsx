@@ -25,29 +25,48 @@ export default function FormDialog({ setReload }) {
   const [switched, setSwitched] = useState();
   const token = useSelector((state) => state.auth.token);
   const isMobile = useMediaQuery((theme) => theme.breakpoints.down("sm"));
-  const competitions = "2021,2001,2002,2003,2014,2015,2018,2019".split(",");
-
+  const [competitions, setCompetitons] = useState();
   const handleClickOpen = () => {
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
+
     setTimeout(() => setLeagueCode(), 100);
   };
   const handleCheck = (comp) => {
     setChecked((prev) => {
-      return { ...prev, [comp]: !prev[comp] };
+      return { ...prev, [comp.ApiId]: !prev[comp.ApiId] };
     });
   };
 
   useEffect(() => {
-    setChecked(() => {
-      const obj = {};
-      competitions.map((name) => Object.assign(obj, { [name]: true }));
-      return obj;
-    });
-  }, []);
+    (async () => {
+      try {
+        const league = await axios.get(
+          `${process.env.REACT_APP_API_URL}/leaguetable/competition/all`,
+          {
+            headers: {
+              Authorization: "Bearer " + token,
+            },
+          }
+        );
+        setCompetitons(league.data.competitions);
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+  }, [token]);
+
+  useEffect(() => {
+    competitions &&
+      setChecked(() => {
+        const obj = {};
+        competitions.map((comp) => Object.assign(obj, { [comp.ApiId]: true }));
+        return obj;
+      });
+  }, [competitions]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -58,8 +77,6 @@ export default function FormDialog({ setReload }) {
     for (const [key, value] of Object.entries(checked)) {
       if (value) array.push(key);
     }
-
-    console.log(name, array, switched);
     (async () => {
       try {
         const league = await axios.post(
@@ -77,12 +94,13 @@ export default function FormDialog({ setReload }) {
         );
         setLeagueCode(league.data.hash);
         setReload((prev) => !prev);
+        setSwitched();
+        setChecked();
       } catch (e) {
         console.error(e);
       }
     })();
   };
-
   return (
     <React.Fragment>
       <Button
@@ -139,17 +157,18 @@ export default function FormDialog({ setReload }) {
               <Typography variant="h7" sx={{ fontWeight: "bold" }}>
                 Leagues to include:
               </Typography>
-              {checked && (
+              {checked && competitions && (
                 <Box>
-                  {competitions.map((comp) => (
+                  {competitions.map((comp, index) => (
                     <FormControlLabel
+                      key={`checkbox-${index}`}
                       control={
                         <Checkbox
-                          checked={checked[comp]}
+                          checked={checked[comp.ApiId]}
                           onChange={() => handleCheck(comp)}
                         />
                       }
-                      label={comp}
+                      label={comp.name}
                     />
                   ))}
                 </Box>

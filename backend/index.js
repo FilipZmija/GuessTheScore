@@ -8,13 +8,16 @@ const guess = require("./routes/guess");
 const scoreboards = require("./routes/scoreboards");
 const leaguetable = require("./routes/leaguetable");
 const { initOutsourcedData } = require("./init/init");
-const { testLiveGame, createUser } = require("./test");
 
 require("dotenv").config();
 const cookieParser = require("cookie-parser");
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.ORIGIN,
+  })
+);
 
 app.use("/user", user);
 app.use("/event", events);
@@ -24,8 +27,6 @@ app.use("/leaguetable", leaguetable);
 
 //init DB data
 (async () => await initOutsourcedData())();
-// (async () => await testLiveGame(23, 833))();
-// createUser();
 const PORT = process.env.PORT || 3001;
 (async () => {
   try {

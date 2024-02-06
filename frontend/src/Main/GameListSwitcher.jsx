@@ -1,5 +1,5 @@
 import React from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import GameList from "./GameList";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
@@ -40,6 +40,11 @@ const noGameContainer = {
 };
 
 export default function GameListSwitcher() {
+  const [dates, setDates] = useState({
+    firstDate: undefined,
+    lastDate: undefined,
+  });
+
   const dispatch = useDispatch();
   const dateIndex = useSelector((state) => state.events.dateIndex);
   const token = useSelector((state) => state.auth.token);
@@ -54,43 +59,65 @@ export default function GameListSwitcher() {
 
   useEffect(() => {
     try {
-      const getGames = async (filters, date) => {
+      (async () => {
         const gamesList = await axios.get(
-          `${process.env.REACT_APP_API_URL}/event/all`,
-          filters.length > 0
-            ? {
-                headers: {
-                  Authorization: "Bearer " + token,
-                },
-                params: { filterBy: `${filters.join(",")}`, date: date },
-              }
-            : {
-                headers: {
-                  Authorization: "Bearer " + token,
-                },
-                params: { date: date },
-              }
+          `${process.env.REACT_APP_API_URL}/event/dates`,
+          {
+            headers: {
+              Authorization: "Bearer " + token,
+            },
+          }
         );
-        dispatch(resetSelections(0));
-        dispatch(
-          updateGames(filters.length > 0 ? gamesList.data[0] : gamesList.data)
-        );
-      };
-      date && getGames(filters, date);
+        setDates(gamesList.data);
+      })();
+    } catch (e) {
+      dispatch(setOpen(true));
+      console.error(e);
+    }
+  }, [dispatch, token, setDates]);
+
+  useEffect(() => {
+    try {
+      date &&
+        (async () => {
+          const gamesList = await axios.get(
+            `${process.env.REACT_APP_API_URL}/event/all`,
+            filters.length > 0
+              ? {
+                  headers: {
+                    Authorization: "Bearer " + token,
+                  },
+                  params: { filterBy: `${filters.join(",")}`, date: date },
+                }
+              : {
+                  headers: {
+                    Authorization: "Bearer " + token,
+                  },
+                  params: { date: date },
+                }
+          );
+          dispatch(resetSelections(0));
+          dispatch(
+            updateGames(filters.length > 0 ? gamesList.data[0] : gamesList.data)
+          );
+        })();
     } catch (e) {
       console.error(e);
       dispatch(setOpen(true));
     }
   }, [date, token, dispatch]);
-
   return (
     <>
       <Toolbar />
       <Box sx={switchContainer}>
         <Box sx={buttonsContainer}>
-          <Button onClick={decrement}>Prev</Button>
+          <Button onClick={decrement} disabled={date === dates.firstDate}>
+            Prev
+          </Button>
           {date}
-          <Button onClick={increment}>Next</Button>
+          <Button onClick={increment} disabled={date === dates.lastDate}>
+            Next
+          </Button>
         </Box>
         {games?.length ? (
           <GameList games={games} />
