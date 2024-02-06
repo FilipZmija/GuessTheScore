@@ -66,7 +66,6 @@ const GameCard = ({ game, index }) => {
     dispatch(selectEvent(index));
     dispatch(openDrawer(false));
   };
-
   return (
     <Card
       onClick={handleClick}

@@ -28,12 +28,12 @@ export default function GuessContainer() {
   }, [event, dispatch]);
 
   useEffect(() => {
-    try {
-      scoreboardId &&
-        eventId &&
-        (async () => {
-          const popularGuesses = await axios.get(
-            `${process.env.REACT_APP_API_URL}/scoreboards/popular/${scoreboardId}`,
+    scoreboardId &&
+      eventId &&
+      (async () => {
+        try {
+          const newPopularGuesses = await axios.get(
+            `${process.env.REACT_APP_API_URL}/scoreboards/popular`,
             {
               headers: {
                 Authorization: "Bearer " + token,
@@ -43,12 +43,12 @@ export default function GuessContainer() {
               },
             }
           );
-          dispatch(setPopularGuesses(popularGuesses.data));
-        })();
-    } catch (e) {
-      dispatch(setOpen(true));
-      console.error(e);
-    }
+          dispatch(setPopularGuesses(newPopularGuesses.data));
+        } catch (e) {
+          dispatch(setOpen(true));
+          console.error(e);
+        }
+      })();
   }, [scoreboardId, eventId, dispatch, token]);
 
   useEffect(() => {
@@ -63,7 +63,6 @@ export default function GuessContainer() {
               },
             }
           );
-
           const userGuess = response.data?.event.Guesses[0];
           dispatch(setSelectedGame(response.data.event));
           const [home, away] = userGuess

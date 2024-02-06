@@ -49,6 +49,7 @@ router.post("/add", validateToken, async (req, res) => {
           individualHooks: true,
         }
       );
+
       res.status(200).json({ guess });
     } catch (e) {
       console.error(e);

@@ -60,7 +60,6 @@ module.exports = (sequelize, DataTypes, Sequelize) => {
   };
   const calculatePointsBack = async (event) => {
     const { UserId, ScoreboardId } = event;
-    console.log(UserId, ScoreboardId);
 
     const scoreboard = await sequelize.models.Scoreboard.findOne({
       where: { id: ScoreboardId },

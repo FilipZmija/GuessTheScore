@@ -77,7 +77,6 @@ router.get("/new/:scoreboardId", validateToken, async (req, res) => {
         where: { UserId: id },
         include: [{ model: Users }],
       });
-      console.log(id);
       if (loggedUser?.position < page * 10) {
         loggedUser = null;
       }
@@ -112,31 +111,18 @@ router.get("/users/all", validateToken, async (req, res) => {
   }
 });
 
-router.get("/popular/:id", validateToken, async (req, res) => {
-  const { id } = req.params;
+router.get("/popular", validateToken, async (req, res) => {
   const { EventId } = req.query;
   try {
-    const scoreboards = await Scoreboard.findOne({
-      where: { id },
-      include: [
-        {
-          model: PopularGuesses,
-          where: { EventId },
-        },
-      ],
-      order: [[PopularGuesses, "number", "DESC"]],
+    const popularGuesses = await PopularGuesses.findAll({
+      where: { EventId },
+      order: [["number", "DESC"]],
     });
-    const guesses = scoreboards?.PopularGuesses.reduce(
-      (acc, curr) => acc + curr.number,
-      0
-    );
-    scoreboards?.PopularGuesses.splice(3);
-    res
-      .status(200)
-      .json({ popularGuesses: scoreboards?.PopularGuesses, guesses });
+    const guesses = popularGuesses.reduce((acc, curr) => acc + curr.number, 0);
+    popularGuesses.splice(3);
+    res.status(200).json({ popularGuesses: popularGuesses, guesses });
   } catch (e) {
     console.error(e);
-
     res.status(404).json(e);
   }
 });

@@ -67,7 +67,6 @@ export default function LeagueScoretable() {
                 },
               }
             );
-            console.log(table.data);
             const { name, Tables: tables } = table.data.competitionTable;
             setScoretable({ name, tables });
           })()
@@ -109,9 +108,9 @@ export default function LeagueScoretable() {
     return skeletons;
   };
 
-  const generateRows = (row) => (
+  const generateRows = (row, index) => (
     <TableRow
-      key={row.Team.shortName}
+      key={row.Team.shortName + index}
       sx={
         row.TeamApiId === homeId || row.TeamApiId === awayId
           ? {
@@ -165,10 +164,11 @@ export default function LeagueScoretable() {
     </TableRow>
   );
 
-  const generateTable = (table) => (
-    <>
+  const generateTable = (table, ix) => (
+    <div key={`table-${ix}`}>
       {table.group && (
         <Typography
+          key={`${table.group}+${ix}`}
           variant="h6"
           gutterBottom
           sx={{
@@ -184,7 +184,7 @@ export default function LeagueScoretable() {
         sx={{ borderTop: "1px solid rgba(0, 0, 0, 0.12);" }}
       >
         <TableHead>
-          <TableRow key="top-row">
+          <TableRow key={`top-row-${ix}`}>
             {rowDetails.map((item, index) => {
               return (
                 <TableCell
@@ -200,19 +200,33 @@ export default function LeagueScoretable() {
         </TableHead>
         <TableBody>{table.TableLogs.map((row) => generateRows(row))}</TableBody>
       </Table>
-    </>
+    </div>
   );
 
   return (
     <TableContainer component={Paper} sx={tableContainerStyle}>
       <Box sx={{ backgroundColor: "#faf8f5" }}>
         <Typography variant="h5" gutterBottom sx={tableTitleStyle}>
-          {!scoretable ? <Skeleton sx={{ width: "40%" }} /> : scoretable?.name}
+          {!scoretable ? <Skeleton sx={{ width: "60%" }} /> : scoretable?.name}
         </Typography>
         {!scoretable ? (
-          generateLoadingSkeletons(19, 8)
+          <>
+            <Typography variant="h5" gutterBottom sx={tableTitleStyle}>
+              <Skeleton width="40%" />
+            </Typography>
+            <Table
+              aria-label="simple table"
+              sx={{ borderTop: "1px solid rgba(0, 0, 0, 0.12);" }}
+            >
+              <TableBody>{generateLoadingSkeletons(19, 8)}</TableBody>
+            </Table>
+          </>
         ) : (
-          <>{scoretable.tables.map((table) => generateTable(table))}</>
+          <>
+            {scoretable.tables.map((table, index) =>
+              generateTable(table, index)
+            )}
+          </>
         )}
       </Box>
       <Typography

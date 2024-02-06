@@ -21,7 +21,6 @@ module.exports = (sequelize, DataTypes) => {
     await this.save();
   };
   PopularGuesses.associate = (models) => {
-    PopularGuesses.belongsTo(models.Scoreboard);
     PopularGuesses.belongsTo(models.Event);
   };
   return PopularGuesses;

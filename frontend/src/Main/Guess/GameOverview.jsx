@@ -98,9 +98,6 @@ const GameDetails = () => {
           }
         );
 
-        console.log(data.guess);
-        console.log(data.user);
-
         if (data.guess) {
           const { points, score, currentPoints, id } = data.guess;
           const [home, away] = score.split(":");
@@ -112,7 +109,6 @@ const GameDetails = () => {
       })();
     }
   }, [selectedUserId, selectedGame.id, token, dispatch]);
-
   const displayResultInfo = () => {
     if (points != null) {
       return (

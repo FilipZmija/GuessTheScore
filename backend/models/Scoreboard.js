@@ -36,7 +36,6 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   Scoreboard.associate = (models) => {
-    Scoreboard.hasMany(models.PopularGuesses);
     Scoreboard.hasMany(models.Score);
     Scoreboard.belongsToMany(models.Competition, {
       through: models.ScoreboardCompetitions,

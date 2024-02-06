@@ -43,7 +43,6 @@ export default function Scoretable({ scoreboardId, active, index }) {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    console.log(active, index);
     if (data) {
       if (active === index) {
         dispatch(setScoreboardCode(data.hash));
@@ -204,10 +203,18 @@ export default function Scoretable({ scoreboardId, active, index }) {
             </TableHead>
             <TableBody>
               {data.scores.map((row) => (
-                <ScoretableRow row={row} username={username} />
+                <ScoretableRow
+                  key={row.User.username}
+                  row={row}
+                  username={username}
+                />
               ))}
               {data.loggedUser && (
-                <ScoretableRow row={data.loggedUser} username={username} />
+                <ScoretableRow
+                  key={data.loggedUser.User.username}
+                  row={data.loggedUser}
+                  username={username}
+                />
               )}
             </TableBody>
           </Table>
