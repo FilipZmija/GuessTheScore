@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       unique: false,
-      defaultValue: 1,
+      defaultValue: 0,
     },
   });
   PopularGuesses.prototype.increment = async function () {
@@ -21,7 +21,6 @@ module.exports = (sequelize, DataTypes) => {
     await this.save();
   };
   PopularGuesses.associate = (models) => {
-    PopularGuesses.belongsTo(models.Scoreboard);
     PopularGuesses.belongsTo(models.Event);
   };
   return PopularGuesses;

@@ -1,40 +1,115 @@
-const { Scoreboard, ScoreboardUser, Users } = require("../models");
+const {
+  Scoreboard,
+  EventTeams,
+  Score,
+  ScoreboardCompetitions,
+  Event,
+  PopularGuesses,
+} = require("../models");
 const { getEvents } = require("../outsource/calls");
+const guessesData = require("../init/data");
+
 const initTable = async () => {
+  const competitions = "2021,2001,2000,2002,2003,2014,2015,2018,2019".split(
+    ","
+  );
   const exists = await Scoreboard.findOne({ where: { name: "All players" } });
   if (!exists) {
-    const mainTable = await Scoreboard.create({ name: "All players" });
+    await Scoreboard.create({ name: "All players" });
+    const association = competitions.map((comp) => {
+      return { CompetitionApiId: comp, ScoreboardId: 1 };
+    });
+    await ScoreboardCompetitions.bulkCreate(association);
   }
 };
-const asignUserToMainScoreboard = async (userId, scoreboardId = 1) => {
-  return await ScoreboardUser.create({
-    UserId: userId,
-    ScoreboardId: scoreboardId,
+const asignUserToMainScoreboard = async (UserId, ScoreboardId = 1) => {
+  const score = await Score.create({
+    UserId,
+    ScoreboardId,
   });
+  return [score];
 };
 
-const revaluateScoreboardPositions = async () => {
-  const allScoreboards = await Scoreboard.findAll();
-
-  await Promise.all(
-    allScoreboards.map(async (scoreboard) => {
-      const users = await scoreboard.getUsers({ order: [["ratio", "DESC"]] });
-      users.map(async (user, index) => {
-        user.ScoreboardUser.update({ position: index + 1 });
-      });
-    })
-  );
-};
-
-const getLotsOfGames = async (daysBack, daysForward) => {
-  for (let i = -daysBack; i <= daysForward; i += 8) {
-    getEvents(i, i + 8);
+const updateEvents = async (matches) => {
+  try {
+    await Promise.all(
+      matches.map(async (match) => {
+        const { utcDate, date, utcTime, status, score } = match;
+        await Event.update(
+          { utcDate, date, utcTime, status, score },
+          {
+            where: { apiId: match.apiId },
+            individualHooks: true,
+          }
+        );
+      })
+    );
+  } catch (err) {
+    console.error(err);
   }
+};
+
+const createEvents = async (matches) => {
+  try {
+    const events = await Event.bulkCreate(matches);
+    const associationsHome = events.map((event, index) => {
+      return {
+        homeOrAway: "home",
+        TeamApiId: matches[index].homeId,
+        EventId: event.id,
+      };
+    });
+    const associationsAway = events.map((event, index) => {
+      return {
+        homeOrAway: "away",
+        TeamApiId: matches[index].awayId,
+        EventId: event.id,
+      };
+    });
+
+    await EventTeams.bulkCreate([...associationsHome, ...associationsAway]);
+
+    return events;
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const addPopularGuesses = async (events) => {
+  const popularGuesses = guessesData
+    .map((item) =>
+      events.map((event) => {
+        return {
+          score: item,
+          EventId: event.id,
+        };
+      })
+    )
+    .flat();
+  await PopularGuesses.bulkCreate(popularGuesses); //this blocks db for few seconds but it is like 1mln logs, for loop is way too small. This is performed once a day so chill
+};
+
+const getLotsOfGames = async (daysBack = 0, daysForward = 0) => {
+  const exisitingMatches = [];
+  const newMatches = [];
+  if (Math.abs(daysForward - daysBack) > 0) {
+    for (let i = daysBack; i <= daysForward; i += 8) {
+      const [toUpdate, toCreate] = await getEvents(i, i + 8);
+      exisitingMatches.push(...toUpdate);
+      newMatches.push(...toCreate);
+    }
+  } else {
+    const [toUpdate, toCreate] = await getEvents(0, 2);
+    exisitingMatches.push(...toUpdate);
+    newMatches.push(...toCreate);
+  }
+  await updateEvents(exisitingMatches);
+  const newEvents = await createEvents(newMatches);
+  await addPopularGuesses(newEvents);
 };
 
 module.exports = {
   initTable,
   asignUserToMainScoreboard,
-  revaluateScoreboardPositions,
   getLotsOfGames,
 };

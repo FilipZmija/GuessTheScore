@@ -1,4 +1,4 @@
-module.exports = (sequelize, DataTypes) => {
+module.exports = (sequelize, DataTypes, Sequelize) => {
   const Event = sequelize.define(
     "Event",
     {
@@ -27,22 +27,6 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      homeTeam: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      homeTeamCrest: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      awayTeam: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      awayTeamCrest: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
       score: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -55,10 +39,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       hooks: {
-        beforeUpdate: (event, options) => {
+        beforeUpdate: (event) => {
           if (event.changed("status") && event.status === "FINISHED") {
             evaluatePoints(event, true);
-            setTimeout(() => revaluateScoreboardPositions(), 10000);
+            setTimeout(() => revaluateScorePositions(), 10000);
           } else if (event.changed("score") && event.status === "IN_PLAY") {
             evaluatePoints(event, false);
           }
@@ -82,65 +66,113 @@ module.exports = (sequelize, DataTypes) => {
     this.guesses--;
     await this.save();
   };
-  const revaluateScoreboardPositions = async () => {
-    const allScoreboards = await sequelize.models.Scoreboard.findAll();
 
-    await Promise.all(
-      allScoreboards.map(async (scoreboard) => {
-        const users = await scoreboard.getUsers({ order: [["ratio", "DESC"]] });
-        users.map(async (user, index) => {
-          user.ScoreboardUser.update({ position: index + 1 });
+  const revaluateScorePositions = async () => {
+    const allScoreboards = await sequelize.models.Scoreboard.findAll();
+    for (let i = 0; i < allScoreboards.length; i++) {
+      const scoreboard = allScoreboards[i];
+      const scores = await scoreboard.getScores({
+        order: [["ratio", "DESC"]],
+      });
+      if (scores.length > 0) {
+        scores.map(async (score, index) => {
+          score.update({ position: index + 1 });
         });
-      })
-    );
+      }
+    }
   };
 
   async function evaluatePoints(event, finished) {
     const eventGuesses = await sequelize.models.Guess.findAll({
       where: { EventId: event.id },
     });
-    await Promise.all(
-      eventGuesses.map(async (guess) => {
-        const guessedScore = guess.score.split(":").map((item) => Number(item));
-        const actualScore = event.score.split(":").map((item) => Number(item));
-        let points = 0;
-        guessedScore[0] === actualScore[0] && points++;
-        guessedScore[1] === actualScore[1] && points++;
-        guessedScore[0] - guessedScore[1] === actualScore[0] - actualScore[1] &&
-          points++;
-        if (
-          (guessedScore[0] - guessedScore[1]) *
-            (actualScore[0] - actualScore[1]) >
-            0 ||
-          (guessedScore[0] - guessedScore[1] === 0 &&
-            actualScore[0] - actualScore[1] === 0)
-        ) {
-          points += 2;
-        }
+    for (let i = 0; i < eventGuesses.length; i++) {
+      const guess = eventGuesses[i];
+      const { UserId } = guess;
+      const guessedScore = guess.score.split(":").map((item) => Number(item));
+      const actualScore = event.score.split(":").map((item) => Number(item));
+      let points = 0;
+      guessedScore[0] === actualScore[0] && points++;
+      guessedScore[1] === actualScore[1] && points++;
+      guessedScore[0] - guessedScore[1] === actualScore[0] - actualScore[1] &&
+        points++;
+      if (
+        (guessedScore[0] - guessedScore[1]) *
+          (actualScore[0] - actualScore[1]) >
+          0 ||
+        (guessedScore[0] - guessedScore[1] === 0 &&
+          actualScore[0] - actualScore[1] === 0)
+      ) {
+        points += 2;
+      }
 
-        if (finished) {
+      if (finished) {
+        if (guess.points == null) {
+          guess.points = points;
           await guess.save();
-          const user = await sequelize.models.Users.findOne({
-            where: { id: guess.UserId },
+
+          const scores = await sequelize.models.Score.findAll({
+            include: [
+              {
+                model: sequelize.models.Scoreboard,
+
+                include: [
+                  {
+                    model: sequelize.models.Competition,
+                    through: {
+                      model: sequelize.models.ScoreboardCompetiton,
+                    },
+                    where: { ApiId: event.CompetitionApiId },
+                  },
+                ],
+              },
+            ],
+            where: {
+              UserId,
+              "$Scoreboard.id$": { [Sequelize.Op.ne]: null },
+            },
           });
-          if (!guess.points) {
-            guess.points = points;
-            user.guesses += 1;
-            user.points += guess.points;
-            await guess.save();
-            await user.save();
-          } else if (guess.points && points !== guess.points) {
-            guess.points = points;
-            user.points += guess.points - points;
-            await user.save();
-            await guess.save();
+          for (let i = 0; i < scores.length; i++) {
+            const score = scores[i];
+            score.guesses++;
+            score.score += guess.points;
+            await score.save();
           }
-        } else {
-          guess.currentPoints = points;
+        } else if (guess.points && points !== guess.points) {
+          guess.points = points;
           await guess.save();
+          const scores = await sequelize.models.Score.findAll({
+            include: [
+              {
+                model: sequelize.models.Scoreboard,
+                include: [
+                  {
+                    model: sequelize.models.Competition,
+                    through: {
+                      model: sequelize.models.ScoreboardCompetiton,
+                    },
+                    where: { ApiId: event.CompetitionApiId },
+                  },
+                ],
+              },
+            ],
+            where: {
+              UserId,
+              "$Scoreboard.id$": { [Sequelize.Op.ne]: null },
+            },
+          });
+          for (let i = 0; i < scores.length; i++) {
+            const score = scores[i];
+            score.score = guess.points;
+            await score.save();
+          }
         }
-      })
-    );
+      } else {
+        guess.currentPoints = points;
+        await guess.save();
+      }
+    }
   }
+
   return Event;
 };

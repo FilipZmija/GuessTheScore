@@ -27,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       hooks: {
         afterCreate: async (user) => {
-          await sequelize.models.ScoreboardUser.create({
+          const score = await sequelize.models.Score.create({
             UserId: user.id,
             ScoreboardId: 1,
           });
@@ -48,7 +48,7 @@ module.exports = (sequelize, DataTypes) => {
     Users.hasMany(models.Guess, {
       onDelete: "CASCADE",
     });
-    Users.belongsToMany(models.Scoreboard, { through: models.ScoreboardUser });
+    Users.hasMany(models.Score);
   };
   return Users;
 };

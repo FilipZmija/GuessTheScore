@@ -9,60 +9,6 @@ const {
 } = require("../models");
 const { getDate } = require("../date");
 
-const createOrUpdateEvent = async (match) => {
-  try {
-    const existingEvent = await Event.findOne({
-      where: { apiId: match.apiId },
-    });
-    const { homeId, awayId } = match;
-    const associationData = [
-      { id: homeId, homeOrAway: "home" },
-      { id: awayId, homeOrAway: "away" },
-    ];
-    if (existingEvent) {
-      const { utcDate, date, utcTime, status, score } = match;
-
-      const [, event] = await Event.update(
-        { utcDate, date, utcTime, status, score },
-        {
-          where: { apiId: match.apiId },
-          individualHooks: true,
-        }
-      );
-
-      const association = await Promise.all(
-        associationData.map(async (item) => {
-          await EventTeams.update(
-            {
-              TeamApiId: item.id,
-            },
-            {
-              where: {
-                homeOrAway: item.homeOrAway,
-                EventId: event[0].id,
-              },
-            }
-          );
-        })
-      );
-
-      return [event, association];
-    } else {
-      const event = await Event.create(match);
-
-      const association = await Promise.all(
-        associationData.map(async (item) => {
-          await EventTeams.create({
-            homeOrAway: item.homeOrAway,
-            TeamApiId: item.id,
-            EventId: event.id,
-          });
-        })
-      );
-      return [event, association];
-    }
-  } catch (err) {}
-};
 const getEvents = async (start = 0, end = 2) => {
   const compId = "2021,2001,2000,2002,2003,2014,2015,2018,2019";
   const dateFrom = getDate(start);
@@ -78,90 +24,48 @@ const getEvents = async (start = 0, end = 2) => {
         },
       }
     );
-
-    const matches = response.data.matches.map((match) => {
-      const { competition, id, utcDate, status, homeTeam, awayTeam, score } =
-        match;
-      const homeId = match.homeTeam.id;
-      const awayId = match.awayTeam.id;
-      const date = utcDate.split("T")[0];
-      const utcTime = utcDate.split("T")[1].split("Z")[0] + "";
-      return {
-        competition: competition.name,
-        apiId: id,
-        utcDate,
-        date,
-        utcTime,
-        status,
-        homeTeam: homeTeam.shortName || homeTeam.name,
-        homeTeamCrest: homeTeam.crest,
-        awayTeam: awayTeam.shortName || awayTeam,
-        awayTeamCrest: awayTeam.crest,
-        score:
-          score.fullTime.home === null
-            ? "-:-"
-            : score.fullTime.home + ":" + score.fullTime.away,
-        homeId,
-        awayId,
-        CompetitionApiId: competition.id,
-      };
-    });
+    const existingMatches = [];
+    const newMatches = [];
     await Promise.all(
-      matches.map(async (match) => await createOrUpdateEvent(match))
+      response.data.matches.map(async (match) => {
+        const { competition, id, utcDate, status, score } = match;
+        const homeId = match.homeTeam.id;
+        const awayId = match.awayTeam.id;
+        const date = utcDate.split("T")[0];
+        const utcTime = utcDate.split("T")[1].split("Z")[0] + "";
+        const matchData = {
+          competition: competition.name,
+          apiId: id,
+          utcDate,
+          date,
+          utcTime,
+          status,
+          score:
+            score.fullTime.home === null
+              ? "-:-"
+              : score.fullTime.home + ":" + score.fullTime.away,
+          homeId,
+          awayId,
+          CompetitionApiId: competition.id,
+        };
+        const event = await Event.findOne({ where: { apiId: id } });
+        event ? existingMatches.push(matchData) : newMatches.push(matchData);
+      })
     );
+    return [existingMatches, newMatches];
   } catch (err) {
     console.error(err);
+    return [[], []];
   }
 };
 
-const createOrUpdateTeam = async (team, TableId) => {
-  const {
-    position,
-    playedGames,
-    form,
-    won,
-    draw,
-    lost,
-    points,
-    goalsFor,
-    goalsAgainst,
-    goalDifference,
-  } = team;
-  const { id, name, shortName, crest } = team.team;
+const createTeamsAndLogs = async (teams, TableId) => {
   try {
-    const teamModel = await Teams.findOne({ where: { ApiId: id } });
-
-    const tableLogModel = await TableLogs.findOne({
-      where: { TeamApiId: id, TableId },
-    });
-
-    if (!teamModel) {
-      await Teams.create({
-        ApiId: id,
-        name,
-        shortName,
-        crest,
-      });
-    }
-
-    if (!tableLogModel) {
-      await TableLogs.create({
-        position,
-        playedGames,
-        form,
-        won,
-        draw,
-        lost,
-        points,
-        goalsFor,
-        goalsAgainst,
-        goalDifference,
-        TableId,
-        TeamApiId: id,
-      });
-    } else {
-      await TableLogs.update(
-        {
+    const teamModels = [];
+    const tableLogModels = [];
+    await Promise.all(
+      teams.map(async (tableItem) => {
+        const {
           position,
           playedGames,
           form,
@@ -172,13 +76,41 @@ const createOrUpdateTeam = async (team, TableId) => {
           goalsFor,
           goalsAgainst,
           goalDifference,
-        },
-        {
-          where: { TeamApiId: id, TableId },
-          individualHooks: true,
+        } = tableItem;
+        const { id, name, shortName, crest } = tableItem.team;
+
+        const teamModel = await Teams.findOne({ where: { ApiId: id } });
+        if (!teamModel) {
+          teamModels.push({
+            ApiId: id,
+            name,
+            shortName,
+            crest,
+          });
         }
-      );
-    }
+        const tableLogModel = await TableLogs.findOne({
+          where: { TeamApiId: id, TableId },
+        });
+        if (!tableLogModel) {
+          tableLogModels.push({
+            position,
+            playedGames,
+            form,
+            won,
+            draw,
+            lost,
+            points,
+            goalsFor,
+            goalsAgainst,
+            goalDifference,
+            TableId,
+            TeamApiId: id,
+          });
+        }
+      })
+    );
+    await Teams.bulkCreate(teamModels);
+    await TableLogs.bulkCreate(tableLogModels);
   } catch (err) {
     return err;
   }
@@ -222,70 +154,51 @@ const updateTeam = async (team, TableId) => {
   }
 };
 
-const getTeamsAndTables = async () => {
-  const compId = "2021,2001,2000,2002,2003,2014,2015,2018,2019".split(",");
+const getTeamsAndTables = async (item) => {
   try {
+    const response = await axios.get(
+      `${process.env.API_URI}/v4/competitions/${item}/standings`,
+      {
+        headers: {
+          "X-Auth-Token": `${process.env.API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    const { name, emblem, id } = response.data.competition;
+    let competitionId;
+    const competition = await Competition.findOne({
+      where: { ApiId: id },
+    });
+    competitionId = competition?.ApiId || undefined;
+
+    if (!competition) {
+      const competition = await Competition.create({
+        name,
+        emblem,
+        ApiId: id,
+      });
+      competitionId = competition.ApiId;
+    }
+
     await Promise.all(
-      compId.map(async (item) => {
-        const response = await axios.get(
-          `${process.env.API_URI}/v4/competitions/${item}/standings`,
-          {
-            headers: {
-              "X-Auth-Token": `${process.env.API_KEY}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        const { name, emblem, id } = response.data.competition;
-        let competitionId;
-        const competition = await Competition.findOne({
-          where: { ApiId: id },
+      response.data.standings.map(async (standingItem) => {
+        const { group, stage } = standingItem;
+        const table = await Tables.findOne({
+          where: { CompetitionApiId: competitionId, group },
         });
-        competitionId = competition?.ApiId || undefined;
-
-        if (!competition) {
-          const competition = await Competition.create({
-            name,
-            emblem,
-            ApiId: id,
+        let TableId;
+        if (!table) {
+          const newTable = await Tables.create({
+            group,
+            stage,
+            CompetitionApiId: competitionId,
           });
-          competitionId = competition.ApiId;
+          TableId = newTable.id;
+        } else {
+          TableId = table.id;
         }
-
-        const tables = await Promise.all(
-          response.data.standings.map(async (standingItem) => {
-            const { group, stage } = standingItem;
-            const table = await Tables.findOne({
-              where: { CompetitionApiId: competitionId },
-            });
-            let TableId;
-            if (!table) {
-              const table = await Tables.create({
-                group,
-                stage,
-                CompetitionApiId: competitionId,
-              });
-              TableId = table.id;
-            } else {
-              const [_, table] = await Tables.update(
-                {
-                  group,
-                  stage,
-                },
-                {
-                  where: { CompetitionApiId: competitionId, group },
-                  individualHooks: true,
-                }
-              );
-              TableId = table[0].id;
-            }
-            await Promise.all(
-              standingItem.table.map(async (tableItem) => {
-                await createOrUpdateTeam(tableItem, TableId);
-              })
-            );
-          })
-        );
+        await createTeamsAndLogs(standingItem.table, TableId);
       })
     );
   } catch (e) {
@@ -296,32 +209,31 @@ const getTeamsAndTables = async () => {
 const getTeamsUpdate = async () => {
   const compId = "2021,2001,2000,2002,2003,2014,2015,2018,2019".split(",");
   try {
-    await Promise.all(
-      compId.map(async (item) => {
-        const response = await axios.get(
-          `${process.env.API_URI}/v4/competitions/${item}/standings`,
-          {
-            headers: {
-              "X-Auth-Token": `${process.env.API_KEY}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        const tables = await Promise.all(
-          response.data.standings.map(async (standingItem) => {
-            const table = await Tables.findOne({
-              where: { CompetitionApiId: item },
-            });
-            const TableId = table.id;
-            await Promise.all(
-              standingItem.table.map(async (tableItem) => {
-                await updateTeam(tableItem, TableId);
-              })
-            );
-          })
-        );
-      })
-    );
+    for (let i = 0; i < compId.length; i++) {
+      const item = compId[i];
+      const response = await axios.get(
+        `${process.env.API_URI}/v4/competitions/${item}/standings`,
+        {
+          headers: {
+            "X-Auth-Token": `${process.env.API_KEY}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      await Promise.all(
+        response.data.standings.map(async (standingItem) => {
+          const table = await Tables.findOne({
+            where: { CompetitionApiId: item },
+          });
+          const TableId = table.id;
+          await Promise.all(
+            standingItem.table.map(async (tableItem) => {
+              await updateTeam(tableItem, TableId);
+            })
+          );
+        })
+      );
+    }
   } catch (e) {
     console.error(e);
   }
@@ -329,7 +241,6 @@ const getTeamsUpdate = async () => {
 
 module.exports = {
   getEvents,
-  createOrUpdateEvent,
   getTeamsAndTables,
   getTeamsUpdate,
 };

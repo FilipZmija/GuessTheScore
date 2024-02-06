@@ -18,11 +18,16 @@ module.exports = (sequelize, DataTypes) => {
         unique: false,
         defaultValue: 0,
       },
+      calculateBack: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
     },
     {
       hooks: {
         afterCreate: async function (scoreboard) {
-          const newHash = scoreboard.hash + scoreboard.id;
+          const newHash = scoreboard.hash + scoreboard.id + "";
           await scoreboard.setDataValue("hash", newHash);
           await scoreboard.save();
         },
@@ -31,8 +36,11 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   Scoreboard.associate = (models) => {
-    Scoreboard.hasMany(models.PopularGuesses);
-    Scoreboard.belongsToMany(models.Users, { through: models.ScoreboardUser });
+    Scoreboard.hasMany(models.Score);
+    Scoreboard.belongsToMany(models.Competition, {
+      through: models.ScoreboardCompetitions,
+    });
+
     Scoreboard.belongsToMany(models.Guess, { through: models.ScoreboardGuess });
   };
   return Scoreboard;

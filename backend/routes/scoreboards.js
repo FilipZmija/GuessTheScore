@@ -1,6 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const { ScoreboardUser, Scoreboard, PopularGuesses } = require("../models");
+const {
+  Score,
+  Scoreboard,
+  PopularGuesses,
+  Users,
+  ScoreboardCompetitions,
+} = require("../models");
 const { validateToken } = require("../auth/JWT");
 const { asignUserToMainScoreboard } = require("../init/functions");
 router.use(express.json({ limit: "10mb" }));
@@ -9,7 +15,7 @@ router.use((req, res, next) => {
 });
 
 router.post("/create", validateToken, async (req, res) => {
-  const { name } = req.body;
+  const { name, competitions, calculateBack } = req.body;
   const { id } = req.user;
   let hash = "";
   const alphanumericSymbols =
@@ -21,30 +27,36 @@ router.post("/create", validateToken, async (req, res) => {
       ];
   }
   try {
-    const scoreboard = await Scoreboard.create({ name, hash });
+    const scoreboard = await Scoreboard.create({ name, calculateBack, hash });
+    const association = competitions.map((comp) => {
+      return { CompetitionApiId: comp, ScoreboardId: scoreboard.id };
+    });
+    const scoreboardAssociation = await ScoreboardCompetitions.bulkCreate(
+      association
+    );
     await asignUserToMainScoreboard(id, scoreboard.id);
     res.status(200).json(scoreboard);
   } catch (e) {
     res.status(404).send(e);
+    console.error(e);
   }
 });
 
 router.post("/assign", validateToken, async (req, res) => {
-  const userId = req.user.id;
+  const UserId = req.user.id;
   const { hash } = req.body;
   try {
     const scoreboard = await Scoreboard.findOne({ where: { hash } });
-    const association = await ScoreboardUser.create({
-      UserId: userId,
-      ScoreboardId: scoreboard.id,
-    });
+    const [association, score] = await asignUserToMainScoreboard(
+      UserId,
+      scoreboard.id
+    );
     res.status(200).json(association);
   } catch (e) {
     res.status(404).json(e);
   }
 });
-
-router.get("/:scoreboardId", validateToken, async (req, res) => {
+router.get("/new/:scoreboardId", validateToken, async (req, res) => {
   const { scoreboardId } = req.params;
   const { page } = req.query;
   const { id } = req.user;
@@ -52,23 +64,30 @@ router.get("/:scoreboardId", validateToken, async (req, res) => {
   try {
     const offset = (page - 1) * limit || 0;
     const scoreboard = await Scoreboard.findByPk(scoreboardId);
-    const users = await scoreboard.getUsers({
+    const scores = await scoreboard.getScores({
       limit,
       offset,
-      order: [["ratio", "DESC"]],
+      order: [["position", "ASC"]],
+      include: [{ model: Users }],
     });
+
     let loggedUser;
-    if (users.findIndex((user) => user.id === id) === -1) {
-      [loggedUser] = await scoreboard.getUsers({
-        where: { id },
+    if (scores.findIndex((score) => score.UserId === id) === -1) {
+      [loggedUser] = await scoreboard.getScores({
+        where: { UserId: id },
+        include: [{ model: Users }],
       });
-      if (loggedUser?.ScoreboardUser.position < page * 10) {
+      if (loggedUser?.position < page * 10) {
         loggedUser = null;
       }
     } else {
       loggedUser = null;
     }
-    const response = { ...scoreboard.dataValues, loggedUser, users };
+    const response = {
+      ...scoreboard.dataValues,
+      loggedUser,
+      scores,
+    };
     res.status(200).json({ scoreboard: response });
   } catch (e) {
     console.error(e);
@@ -80,7 +99,7 @@ router.get("/:scoreboardId", validateToken, async (req, res) => {
 router.get("/users/all", validateToken, async (req, res) => {
   const { id } = req.user;
   try {
-    const scoreboards = await ScoreboardUser.findAll({
+    const scoreboards = await Score.findAll({
       where: { UserId: id },
       attributes: ["ScoreboardId"],
     });
@@ -92,25 +111,18 @@ router.get("/users/all", validateToken, async (req, res) => {
   }
 });
 
-router.get("/popular/:id", validateToken, async (req, res) => {
-  const { id } = req.params;
+router.get("/popular", validateToken, async (req, res) => {
   const { EventId } = req.query;
   try {
-    const scoreboards = await Scoreboard.findOne({
-      where: { id },
-      include: [
-        {
-          model: PopularGuesses,
-          where: { EventId },
-        },
-      ],
-      order: [[PopularGuesses, "number", "DESC"]],
+    const popularGuesses = await PopularGuesses.findAll({
+      where: { EventId },
+      order: [["number", "DESC"]],
     });
-    scoreboards?.PopularGuesses.splice(3);
-    res.status(200).json(scoreboards);
+    const guesses = popularGuesses.reduce((acc, curr) => acc + curr.number, 0);
+    popularGuesses.splice(3);
+    res.status(200).json({ popularGuesses: popularGuesses, guesses });
   } catch (e) {
     console.error(e);
-
     res.status(404).json(e);
   }
 });

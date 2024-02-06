@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   scoreboardId: null,
   code: null,
+  selectedUserId: null,
 };
 
 export const scoreboardSlice = createSlice({
@@ -15,8 +16,12 @@ export const scoreboardSlice = createSlice({
     setScoreboardCode: (state, action) => {
       state.code = action.payload;
     },
+    setSelectedUserId: (state, action) => {
+      state.selectedUserId = action.payload;
+    },
   },
 });
 
-export const { setScoreboardId, setScoreboardCode } = scoreboardSlice.actions;
+export const { setScoreboardId, setScoreboardCode, setSelectedUserId } =
+  scoreboardSlice.actions;
 export default scoreboardSlice.reducer;
