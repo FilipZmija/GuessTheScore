@@ -62,7 +62,7 @@ Once reached the page you can either try the app with test user or creating your
 
 #### API
 Data in the app is passed via API between backend and frontend. I created multiple routes that provide data for actual events, user scores, current games score, scoretable, league scoreboard and also the ones to create new leagues or guess the score. Frontend by sending multiple requests reaches that data and displays it. User can interact with the data and frontend takes care of the rest by sending PUT or POST requests. 
-### External data
+#### External data
 Football data is fully provided by the Football-Data.org API. Multiple functions create requests to reach that data and save it in my own database. At the init run of the app all teams, competitions and events are fetched from external API and saved to my database. All live scores are updated every minute also by sending requests and data is updated in my DB. This assures that limit for calls to external API is never reached and multiple users can interact with the data. This solution is also much safer, if anything wrong happens with external API then it can be changed to another one without using any previous data.
 #### DB
 For storing data this project uses database as previously mentioned. Localy using SQLite, in production server I decided to switch to MySQL. To communicate with DB from the server I decided to use Sequelize ORM which allows to write clean, SQL free code. Created tables store data such as User's data, events, competitions, scores, league tabels, scoreboard and much more. DB diagram can be seen below.
