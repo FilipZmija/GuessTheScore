@@ -1,44 +1,66 @@
-# Chat app
+# Guess the score app
 
-This repository is part of chatting app project containing frontend and backend implementation. Here you can find fully implemeneted backend application that is ready to be run with corresponding frontend with it. 
+This repository is part of score guessing app project containing frontend and backend implementation. Here you can find fully implemented backend an frontend implementation that is ready to be cloned and used. 
 You can try the app here: https://main--jolly-lolly-a515d1.netlify.app/
 
-You have a choice of trying test user or creating your own account and logging in. Once logged in user sees main screen, on the left side there is list of exisitng conversations that can be choosen, on the right there is a list of active and unactive users that can be searched via textfield that is placed on top of it. Once conversation or user is choosen a conversation view is displayed with previous messages, info about conversation and possibility of sending a message.
+Once reached the page you can either try the app with test user or creating your own account. Once logged in user is displayed the app with today's games, one selected game, scoreboard and laegue scoreboard.
 
 ## 1. Features
-- User authentication: Users can create an account and log in safely.
-- Real-time messaging: App allows real-time messaging
-- Message history: Previous messages are stored in DB and can be displayed via UI
-- Backend hosts all active users and exchanges information between them with usage of sockets
-- Backend shares some data via API
+- Guessing game - The app has top 6 leagues games (La Liga, Premier League, Bundesliga, Serie A, Eredivisie and Ligue 1) and also includes events such as UEFA Champions League, UEFA European Championship and FIFA World Cup) which user is allowed to guess the score and compete with other players
+- League table - for each selected game user is provided with league scoretable to be able to analize each teams form and have better chance of guessing the correct score
+- Live score - each games score is upadted once a minute which allows user to see the actual score and calculated possible points to be recived (Future update here is websockets that will update the score)
+- Creating leagues - user is able to create league to compete with friends, league can count only certain leagues and have different scoring rules
+- Browsing games - the app provides user with up to 30 days forward games and these can be easily browsed by switch the date
+- Browsing other users guesses - once the game is started user is able to check what score another user had guessed and how many points will or has recived
+- Virtual oponents - In the app there are 100 virtual players that are guessing the score for the games everyday, try to beat them!
 
 ## 2. Tech stack
-- Node.js with TypeScript
-- socket.io for real-time communication with frontend client
-- express.js for API implementation
-- Sequelize ORM to communicate with DB
-Backend application was created with usage of Node.js iwth TypeScript. Server is split into two instances. One is repsponsible for communication over sockets that allows real-time data exchange between client-server and second one that takes care of API requestes. Application data is stored in DB that makes sure everything is stored safely and server has easy access to it. Backend communicated with DB via Sequelize ORM that allows using dedicated interface and creates types for TypeScript use.
+### Backend
+1. Node.js
+2. Sequelize ORM
+3. express.js
+4. Faker library for tests and init data
+
+### Frontend
+1. React.js
+2. React redux
+3. Material UI + inline css
 
 ## 3. How does it work
-### Sockets
-Messaging on the backend side was implemented with usage of socket.io library that was used to create socket class which later on creates server that esatbilishes communication with frontend over sockets and is able to communicate in real-time. When user logs in authentication is passed through socket middleware that checks if user is eliable for access. Events such as messaging, user acitvity change or creating new rooms are socket based and server is emitting them anytime it is needed. 
-### API
+
+### Backend 
+#### API
 Some of data is ready to be passed via API, such as older messages, conversations or users. This happend whenever client sends a request. In this case, similar as in sockets, authentication data is passed though middleware that checks if user is eliable for access.
-### DB
+#### DB
 For storing data this project uses DB. Localy using SQLite, in production server I decided to switch to MySQL. To communicate with DB from the server I decided to use Sequelize ORM which allows to write clean, SQL free code. Created tables store data such as User's data, converations, messages etc. DB diagram can be seen below.
-![image](https://github.com/FilipZmija/ChatApp-backend/assets/94125339/635d85e3-c189-4a2a-b047-23c7e7a33588)
+![image](https://github.com/FilipZmija/GuessTheScore/assets/94125339/a439845e-40ad-44e7-977f-6d408600a6b5)
+
+### Frontend
 
 ### 4. How to run
 Clone repo
 ```
    git clone https://github.com/FilipZmija/ChatApp-backend.git
 ```
+### Backend
 Install dependencies
 ```
 cd ChatApp-backend
+cd backend
 npm install
 ```
 Start development server
 ```
-npm run dev //runs index.js files and listens for changes in .ts files, when that happens it reloads the server
+node index.js
+```
+### Frontend
+
+```
+cd ChatApp-backend
+cd frontend
+npm install
+```
+Start development server
+```
+npm start
 ```
