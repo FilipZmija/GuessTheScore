@@ -1,7 +1,7 @@
 # Guess the score app
 
 This repository is part of score guessing app project containing frontend and backend implementation. Here you can find fully implemented backend an frontend implementation that is ready to be cloned and used. 
-You can try the app here: https://main--jolly-lolly-a515d1.netlify.app/
+You can try the app here: https://guess-the-score.netlify.app/
 
 Once reached the page you can either try the app with test user or creating your own account. Once logged in user is displayed the app with today's games, one selected game, scoreboard and laegue scoreboard.
 
